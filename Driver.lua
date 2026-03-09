@@ -5,7 +5,16 @@ local addonName, Private = ...
 local TargetedSpellsDriver = {}
 
 function TargetedSpellsDriver:Init()
-	self.framePool = CreateFramePool("Frame", UIParent, "TargetedSpellsFrameTemplate")
+	self.framePool = CreateFramePool(
+		"Frame",
+		UIParent,
+		"TargetedSpellsFrameTemplate",
+		---@param pool FramePool
+		---@param frame TargetedSpellsMixin
+		function(pool, frame)
+			frame:Reset()
+		end
+	)
 	self.delay = 0.2
 	self.frames = {}
 	self.role = Private.Enum.Role.Damager
@@ -148,11 +157,6 @@ do
 
 		return frames
 	end
-end
-
-function TargetedSpellsDriver:ReleaseFrame(frame)
-	frame:Reset()
-	self.framePool:Release(frame)
 end
 
 -- this is where 3rd party unit frames would need addition
@@ -304,7 +308,7 @@ function TargetedSpellsDriver:ReleaseFrameForUnit(unit, removeUnit, id)
 
 	for i, frame in pairs(frames) do
 		if frame:CanBeHidden(id) then
-			self:ReleaseFrame(frame)
+			self.framePool:Release(frame)
 			frames[i] = nil
 			cleanedSomethingUp = true
 		else
@@ -623,7 +627,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 
 		for i, frame in pairs(frames) do
 			if delayInfo.kinds[frame:GetKind()] and frame:GetId() == delayInfo.id then
-				self:ReleaseFrame(frame)
+				self.framePool:Release(frame)
 				frames[i] = nil
 				cleanedSomethingUp = true
 			end

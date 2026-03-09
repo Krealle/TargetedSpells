@@ -201,7 +201,6 @@
 ---@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string)
 ---@field AppendSettings fun(self: TargetedSpellsEditModeMixin)
 ---@field AcquireFrame fun(self: TargetedSpellsEditModeMixin): TargetedSpellsMixin
----@field ReleaseFrame fun(self: TargetedSpellsEditModeMixin, frame: TargetedSpellsMixin)
 ---@field OnEditModePositionChanged fun(self: TargetedSpellsEditModeMixin, frame: Frame, layoutName: string, point: FramePoint, x: number, y: number)
 ---@field RepositionPreviewFrames fun(self: TargetedSpellsEditModeMixin)
 ---@field LoopFrame fun(self: TargetedSpellsEditModeMixin, frame: TargetedSpellsMixin, index: number)
