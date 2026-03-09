@@ -63,7 +63,7 @@ Private.Enum.SortOrder = {
 
 ---@enum Grow
 Private.Enum.Grow = {
-	Center = 1,
+	-- Center = 1, -- deprecated
 	Start = 2,
 	End = 3,
 }

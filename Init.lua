@@ -40,6 +40,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		then
 			TargetedSpellsSaved.Settings.Self[key] = value
 		end
+
+		if key == "Grow" and TargetedSpellsSaved.Settings.Self[key] == 1 then
+			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.Grow.Start
+		end
 	end
 
 	for key, value in pairs(Private.Settings.GetPartyDefaultSettings()) do
@@ -48,6 +52,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 			or type(value) ~= type(TargetedSpellsSaved.Settings.Party[key])
 		then
 			TargetedSpellsSaved.Settings.Party[key] = value
+		end
+
+		if key == "Grow" and TargetedSpellsSaved.Settings.Party[key] == 1 then
+			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.Grow.Start
 		end
 	end
 

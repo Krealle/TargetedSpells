@@ -211,7 +211,7 @@ function Private.Settings.GetSelfDefaultSettings()
 			[Private.Enum.Role.Damager] = true,
 		},
 		SortOrder = Private.Enum.SortOrder.Ascending,
-		Grow = Private.Enum.Grow.Center,
+		Grow = Private.Enum.Grow.Start,
 		ShowDuration = true,
 		ShowDurationFractions = true,
 		FontSize = 20,

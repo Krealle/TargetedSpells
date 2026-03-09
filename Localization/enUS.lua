@@ -90,7 +90,6 @@ L.Settings.FrameSortOrderDescending = "Descending"
 L.Settings.FrameGrowLabel = "Grow"
 L.Settings.FrameGrowTooltip = nil
 L.Settings.FrameGrowLabels = {
-	[Private.Enum.Grow.Center] = "Center",
 	[Private.Enum.Grow.Start] = "Start",
 	[Private.Enum.Grow.End] = "End",
 }

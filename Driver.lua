@@ -40,12 +40,10 @@ function TargetedSpellsDriver:PositionSelfFrame()
 		local GrowTarget = {
 			[Private.Enum.Direction.Horizontal] = {
 				[Private.Enum.Grow.Start] = { x = -1, y = 0 },
-				[Private.Enum.Grow.Center] = { x = 0, y = 0 },
 				[Private.Enum.Grow.End] = { x = 1, y = 0 },
 			},
 			[Private.Enum.Direction.Vertical] = {
 				[Private.Enum.Grow.Start] = { x = 0, y = -1 },
-				[Private.Enum.Grow.Center] = { x = 0, y = 0 },
 				[Private.Enum.Grow.End] = { x = 0, y = 1 },
 			},
 		}
@@ -236,7 +234,7 @@ function TargetedSpellsDriver:RepositionFrames()
 			local width, height, gap, sortOrder, direction, grow =
 				tableRef.Width, tableRef.Height, tableRef.Gap, tableRef.SortOrder, tableRef.Direction, tableRef.Grow
 			local isHorizontal = direction == Private.Enum.Direction.Horizontal
-			local point = grow == Private.Enum.Grow.Center and "CENTER" or isHorizontal and "LEFT" or "BOTTOM"
+			local point = isHorizontal and "LEFT" or "BOTTOM"
 			local total = (#frames * (isHorizontal and width or height)) + (#frames - 1) * gap
 			local parentDimension = isHorizontal and self.frame:GetWidth() or self.frame:GetHeight()
 

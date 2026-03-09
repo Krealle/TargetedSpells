@@ -1446,7 +1446,7 @@ function SelfEditModeMixin:RepositionPreviewFrames()
 
 	local isHorizontal = direction == Private.Enum.Direction.Horizontal
 
-	local point = grow == Private.Enum.Grow.Center and "CENTER" or isHorizontal and "LEFT" or "BOTTOM"
+	local point = isHorizontal and "LEFT" or "BOTTOM"
 	local total = (activeFrameCount * (isHorizontal and width or height)) + (activeFrameCount - 1) * gap
 	local parentDimension = isHorizontal and self.editModeFrame:GetWidth() or self.editModeFrame:GetHeight()
 

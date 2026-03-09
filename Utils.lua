@@ -9,8 +9,6 @@ function Private.Utils.CalculateCoordinate(index, dimension, gap, parentDimensio
 
 	if grow == Private.Enum.Grow.Start then
 		return (index - 1) * step - parentDimension / 2 + offset
-	elseif grow == Private.Enum.Grow.Center then
-		return (index - 1) * step - total / 2 + dimension / 2 + offset
 	elseif grow == Private.Enum.Grow.End then
 		return parentDimension / 2 - index * step + offset
 	end
