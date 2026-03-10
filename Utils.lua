@@ -4,6 +4,27 @@ local addonName, Private = ...
 ---@class TargetedSpellsUtils
 Private.Utils = {}
 
+Private.Utils.Pools.Bar = CreateFramePool("StatusBar", UIParent, nil, nil, nil, function(bar, parent)
+	bar:SetMinMaxValues(0, 1)
+	bar:SetIgnoreParentAlpha(true)
+end)
+
+Private.Utils.Pools.Frame = CreateFramePool(
+	"Frame",
+	UIParent,
+	"TargetedSpellsFrameTemplate",
+	---@param pool FramePool
+	---@param frame TargetedSpellsMixin
+	function(pool, frame)
+		frame:Reset()
+
+		if frame.bar ~= nil then
+			Private.Utils.Pools.Bar:Release(frame.bar)
+			frame.bar = nil
+		end
+	end
+)
+
 function Private.Utils.CalculateCoordinate(index, dimension, gap, parentDimension, total, offset, grow)
 	local step = dimension + gap
 

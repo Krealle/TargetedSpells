@@ -24,6 +24,11 @@
 ---@field MaybeApplyElvUISkin fun(frame: TargetedSpellsMixin)
 ---@field CreateEditablePopup fun(title: string, text: string, button1: string): StaticPopupDialogsArgs
 ---@field HasThirdPartyCandidates fun(): boolean
+---@field Pools TargetedSpellsPools
+
+---@class TargetedSpellsPools
+---@field Bar FramePool<StatusBar>
+---@field Frame FramePool<TargetedSpellsMixin>
 
 ---@class StaticPopupDialogsArgs
 ---@field text string
@@ -155,6 +160,7 @@
 ---@field private InterruptIcon Texture
 ---@field private InterruptSource FontString
 ---@field private elapsed number
+---@field bar StatusBar?
 ---@field OnLoad fun(self: TargetedSpellsMixin)
 ---@field SetId fun(self: TargetedSpellsMixin, id: number?)
 ---@field GetId fun(self: TargetedSpellsMixin): number?
@@ -175,12 +181,12 @@
 ---@field SetSpellId fun(self: TargetedSpellsMixin, spellId: number?)
 ---@field ShouldBeShown fun(self: TargetedSpellsMixin): boolean
 ---@field ClearStartTime fun(self: TargetedSpellsMixin)
----@field Reposition fun(self: TargetedSpellsMixin, point: FramePoint, relativeTo: Frame, relativePoint: FramePoint, offsetX: number, offsetY: number)
+---@field Reposition fun(self: TargetedSpellsMixin, point: FramePoint, relativeTo: Frame|TextureBase, relativePoint: FramePoint, offsetX: number, offsetY: number)
 ---@field SetUnit fun(self: TargetedSpellsMixin, unit: string)
 ---@field SetKind fun(self: TargetedSpellsMixin, kind: FrameKind)
 ---@field GetKind fun(self: TargetedSpellsMixin): FrameKind?
 ---@field GetUnit fun(self: TargetedSpellsMixin): string
----@field PostCreate fun(self: TargetedSpellsMixin, unit: string, kind: FrameKind, castingUnit: string?)
+---@field PostCreate fun(self: TargetedSpellsMixin, unit: string, kind: FrameKind, castingUnit: string?, bar: StatusBar?)
 ---@field Reset fun(self: TargetedSpellsMixin)
 ---@field SetFontSize fun(self: TargetedSpellsMixin)
 ---@field SetFont fun(self: TargetedSpellsMixin)
@@ -191,7 +197,7 @@
 ---@class TargetedSpellsEditModeMixin : Frame
 ---@field protected editModeFrame EditModeFrame
 ---@field private demoPlaying boolean
----@field private framePool FramePool
+---@field private framePool FramePool<TargetedSpellsMixin>
 ---@field private frames table<number, TargetedSpellsMixin[]> | TargetedSpellsMixin[]
 ---@field protected demoTimers { tickers: table<number, FunctionContainer>, timers: table<number, FunctionContainer> }
 ---@field private buildingFrames true|nil
@@ -241,7 +247,7 @@
 ---@field ReleaseAllFrames fun(self: TargetedSpellsEditModeMixin)
 
 ---@class TargetedSpellsDriver
----@field private framePool FramePool
+---@field private framePool FramePool<TargetedSpellsMixin>
 ---@field private frame Frame
 ---@field private role Role
 ---@field private contentType ContentType
@@ -254,7 +260,6 @@
 ---@field UnitIsIrrelevant fun(self: TargetedSpellsDriver, unit: string, skipTargetCheck?: boolean): boolean
 ---@field OnFrameEvent fun(self: TargetedSpellsDriver, listenerFrame: Frame, event: WowEvent, ...)
 ---@field OnSettingsChanged fun(self: TargetedSpellsDriver, key: string, value: number|string|table)
----@field ReleaseFrame fun(self: TargetedSpellsDriver, frame: TargetedSpellsMixin)
 ---@field DetermineSpellDelayRequirement fun(self: TargetedSpellsDriver): boolean
 ---@field MaybeMarkAsInterruptedAndDelay fun(self: TargetedSpellsDriver, unit: string, id: number|string|nil, interruptedBy: string?): boolean
 
@@ -268,9 +273,27 @@
 ---@class IconDataProviderMixin
 ---@field GetRandomIcon fun(self: IconDataProviderMixin): number
 
----@class FramePool
----@field Acquire fun(self: FramePool): TargetedSpellsMixin
----@field Release fun(self: FramePool, frame: TargetedSpellsMixin)
+---@class FramePool<T>
+---@field Acquire fun(self: FramePool<T>): T, boolean
+---@field Release fun(self: FramePool<T>, frame: T, canFailToFindObject: boolean?)
+---@field ReleaseAll fun(self: FramePool<T>)
+---@field EnumerateActive fun(self: FramePool<T>): fun(): T
+---@field GetNextActive fun(self: FramePool<T>, current: T?): T?
+---@field IsActive fun(self: FramePool<T>, frame: T): boolean
+---@field GetNumActive fun(self: FramePool<T>): number
+---@field DoesObjectBelongToPool fun(self: FramePool<T>, frame: T): boolean
+---@field GetTemplate fun(self: FramePool<T>): string
+
+---@generic T: Frame
+---@param frameType string
+---@param parent Frame?
+---@param template string?
+---@param resetFunc (fun(pool: FramePool<T>, frame: T, new: boolean?))?
+---@param forbidden boolean?
+---@param postCreate (fun(frame: T))?
+---@param capacity number?
+---@return FramePool<T>
+function CreateFramePool(frameType, parent, template, resetFunc, forbidden, postCreate, capacity) end
 
 ---@class LibEditModeSetting
 ---@field name string

@@ -123,9 +123,12 @@ function TargetedSpellsMixin:SetShowBorder(bool)
 end
 
 --- shamelessly ~~stolen~~ repurposed from WeakAuras2
----@param width number
----@param height number
-function TargetedSpellsMixin:OnSizeChanged(width, height)
+function TargetedSpellsMixin:OnSizeChanged()
+	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+	local width = tableRef.Width
+	local height = tableRef.Height
+
 	local coordinates = { 0, 0, 0, 1, 1, 0, 1, 1 }
 	local aspectRatio = width / height
 
@@ -437,7 +440,7 @@ function TargetedSpellsMixin:GetUnit()
 	return self.unit
 end
 
-function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit)
+function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit, bar)
 	self:SetUnit(unit)
 	self:SetKind(kind)
 
@@ -449,6 +452,14 @@ function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit)
 		self:SetAlphaFromBoolean(PlayerIsSpellTarget(castingUnit, unit))
 	else
 		self:SetAlphaFromBoolean(UnitIsUnit(string.format("%starget", castingUnit), unit))
+	end
+
+	if bar ~= nil then
+		self.bar = bar
+		bar:SetSize(self:GetWidth(), self:GetHeight())
+		bar:SetValue(self:GetAlpha())
+		self:ClearAllPoints()
+		self:SetPoint("CENTER", bar:GetStatusBarTexture(), "CENTER")
 	end
 end
 

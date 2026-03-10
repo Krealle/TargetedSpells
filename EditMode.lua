@@ -8,7 +8,6 @@ local TargetedSpellsEditModeMixin = {}
 function TargetedSpellsEditModeMixin:Init(displayName, frameKind)
 	self.frameKind = frameKind
 	self.demoPlaying = false
-	self.framePool = CreateFramePool("Frame", UIParent, "TargetedSpellsFrameTemplate")
 	self.frames = {}
 	self.demoTimers = {
 		tickers = {},
@@ -1255,16 +1254,11 @@ function TargetedSpellsEditModeMixin:AppendSettings()
 end
 
 function TargetedSpellsEditModeMixin:AcquireFrame()
-	local frame = self.framePool:Acquire()
+	local frame = Private.Utils.Pools.Frame:Acquire()
 
 	frame:PostCreate("preview", self.frameKind, nil)
 
 	return frame
-end
-
-function TargetedSpellsEditModeMixin:ReleaseFrame(frame)
-	frame:Reset()
-	self.framePool:Release(frame)
 end
 
 function TargetedSpellsEditModeMixin:OnEditModePositionChanged(frame, layoutName, point, x, y)
@@ -1362,7 +1356,7 @@ end
 
 function SelfEditModeMixin:ReleaseAllFrames()
 	for index, frame in ipairs(self.frames) do
-		self:ReleaseFrame(frame)
+		Private.Utils.Pools.Frame:Release(frame)
 		self.frames[index] = nil
 	end
 end
@@ -1871,7 +1865,7 @@ function PartyEditModeMixin:ReleaseAllFrames()
 			local frame = self.frames[unit][index]
 
 			if frame then
-				self:ReleaseFrame(frame)
+				Private.Utils.Pools.Frame:Release(frame)
 				self.frames[unit][index] = nil
 			end
 		end

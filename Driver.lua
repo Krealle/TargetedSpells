@@ -5,16 +5,6 @@ local addonName, Private = ...
 local TargetedSpellsDriver = {}
 
 function TargetedSpellsDriver:Init()
-	self.framePool = CreateFramePool(
-		"Frame",
-		UIParent,
-		"TargetedSpellsFrameTemplate",
-		---@param pool FramePool
-		---@param frame TargetedSpellsMixin
-		function(pool, frame)
-			frame:Reset()
-		end
-	)
 	self.delay = 0.2
 	self.frames = {}
 	self.role = Private.Enum.Role.Damager
@@ -131,9 +121,10 @@ do
 			TargetedSpellsSaved.Settings.Self.Enabled
 			and not self:LoadConditionsProhibitExecution(Private.Enum.FrameKind.Self)
 		then
-			local selfTargetingFrame = self.framePool:Acquire()
-			selfTargetingFrame:SetParent(self.frame)
-			selfTargetingFrame:PostCreate("player", Private.Enum.FrameKind.Self, castingUnit)
+			local selfTargetingFrame = Private.Utils.Pools.Frame:Acquire()
+			local bar = Private.Utils.Pools.Bar:Acquire()
+			bar:SetParent(self.frame)
+			selfTargetingFrame:PostCreate("player", Private.Enum.FrameKind.Self, castingUnit, bar)
 			table.insert(frames, selfTargetingFrame)
 		end
 
@@ -148,8 +139,9 @@ do
 				local unit = i == partyMemberCount and "player" or "party" .. i
 
 				if (unit == "player" and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty) or unit ~= "player" then
-					local frame = self.framePool:Acquire()
-					frame:PostCreate(unit, Private.Enum.FrameKind.Party, castingUnit)
+					local frame = Private.Utils.Pools.Frame:Acquire()
+					local bar = Private.Utils.Pools.Bar:Acquire()
+					frame:PostCreate(unit, Private.Enum.FrameKind.Party, castingUnit, bar)
 					table.insert(frames, frame)
 				end
 			end
@@ -159,7 +151,6 @@ do
 	end
 end
 
--- this is where 3rd party unit frames would need addition
 ---@param unit string
 ---@return Frame?
 local function FindParentFrameForPartyMember(unit)
@@ -308,7 +299,7 @@ function TargetedSpellsDriver:ReleaseFrameForUnit(unit, removeUnit, id)
 
 	for i, frame in pairs(frames) do
 		if frame:CanBeHidden(id) then
-			self.framePool:Release(frame)
+			Private.Utils.Pools.Frame:Release(frame)
 			frames[i] = nil
 			cleanedSomethingUp = true
 		else
@@ -627,7 +618,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 
 		for i, frame in pairs(frames) do
 			if delayInfo.kinds[frame:GetKind()] and frame:GetId() == delayInfo.id then
-				self.framePool:Release(frame)
+				Private.Utils.Pools:Release(frame)
 				frames[i] = nil
 				cleanedSomethingUp = true
 			end
