@@ -441,9 +441,11 @@ do
 	---@param self Frame
 	---@param elapsed number
 	local function AutoCastGlowOnUpdate(self, elapsed)
-		local width, height = self:GetSize()
+		local width = self.info.width
+		local height = self.info.height
 
-		if width ~= self.info.width or height ~= self.info.height then
+		if self.info.needsUpdate then
+			self.info.needsUpdate = nil
 			if width * height == 0 then
 				return
 			end
@@ -498,8 +500,11 @@ do
 		GlowFrame.info = GlowFrame.info or {}
 		GlowFrame.info.N = count
 		GlowFrame.info.period = 8
-		GlowFrame.info.width = width
-		GlowFrame.info.height = height
+		if GlowFrame.info.width ~= width or GlowFrame.info.height ~= height then
+			GlowFrame.info.width = width
+			GlowFrame.info.height = height
+			GlowFrame.info.needsUpdate = true
+		end
 		GlowFrame.info.perimeter = 2 * (width + height)
 		GlowFrame.info.bottomlim = height * 2 + width
 		GlowFrame.info.rightlim = height + width
@@ -568,17 +573,18 @@ end
 local function AnimInOnPlay(group)
 	---@type ButtonGlowFrame
 	local GlowFrame = group:GetParent()
-	local FrameWidth, FrameHeight = GlowFrame:GetSize()
+	local width = GlowFrame.width * 1.4
+	local height = GlowFrame.height * 1.4
 
-	GlowFrame.Spark:SetSize(FrameWidth, FrameHeight)
+	PixelUtil.SetSize(GlowFrame.Spark, width, height)
 	GlowFrame.Spark:SetAlpha(not GlowFrame.color and 1.0 or 0.3 * GlowFrame.color[4])
-	GlowFrame.InnerGlow:SetSize(FrameWidth / 2, FrameHeight / 2)
+	PixelUtil.SetSize(GlowFrame.InnerGlow, width / 2, height / 2)
 	GlowFrame.InnerGlow:SetAlpha(not GlowFrame.color and 1.0 or GlowFrame.color[4])
 	GlowFrame.InnerGlowOver:SetAlpha(not GlowFrame.color and 1.0 or GlowFrame.color[4])
-	GlowFrame.OuterGlow:SetSize(FrameWidth * 2, FrameHeight * 2)
+	PixelUtil.SetSize(GlowFrame.OuterGlow, width * 2, height * 2)
 	GlowFrame.OuterGlow:SetAlpha(not GlowFrame.color and 1.0 or GlowFrame.color[4])
 	GlowFrame.OuterGlowOver:SetAlpha(not GlowFrame.color and 1.0 or GlowFrame.color[4])
-	GlowFrame.Ants:SetSize(FrameWidth * 0.85, FrameHeight * 0.85)
+	PixelUtil.SetSize(GlowFrame.Ants, width * 0.85, height * 0.85)
 	GlowFrame.Ants:SetAlpha(0)
 
 	GlowFrame:Show()
@@ -588,15 +594,16 @@ end
 local function AnimInOnFinished(group)
 	---@type ButtonGlowFrame
 	local GlowFrame = group:GetParent()
-	local FrameWidth, FrameHeight = GlowFrame:GetSize()
+	local width = GlowFrame.width * 1.4
+	local height = GlowFrame.height * 1.4
 
 	GlowFrame.Spark:SetAlpha(0)
 	GlowFrame.InnerGlow:SetAlpha(0)
-	GlowFrame.InnerGlow:SetSize(FrameWidth, FrameHeight)
+	PixelUtil.SetSize(GlowFrame.InnerGlow, width, height)
 	GlowFrame.InnerGlowOver:SetAlpha(0.0)
-	GlowFrame.OuterGlow:SetSize(FrameWidth, FrameHeight)
+	PixelUtil.SetSize(GlowFrame.OuterGlow, width, height)
 	GlowFrame.OuterGlowOver:SetAlpha(0.0)
-	GlowFrame.OuterGlowOver:SetSize(FrameWidth, FrameHeight)
+	PixelUtil.SetSize(GlowFrame.OuterGlowOver, width, height)
 	GlowFrame.Ants:SetAlpha(not GlowFrame.color and 1.0 or GlowFrame.color[4])
 end
 
@@ -778,12 +785,14 @@ function Private.Glows.ButtonGlow_Start(frame, width, height)
 	if frame._ButtonGlow then
 		---@type ButtonGlowFrame
 		local GlowFrame = frame._ButtonGlow
+		GlowFrame.width = width
+		GlowFrame.height = height
 
 		GlowFrame:SetFrameLevel(frame:GetFrameLevel() + frameLevel)
-		GlowFrame:SetSize(width * 1.4, height * 1.4)
+		PixelUtil.SetSize(GlowFrame, width * 1.4, height * 1.4)
 		GlowFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -width * 0.2, height * 0.2)
 		GlowFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", width * 0.2, -height * 0.2)
-		GlowFrame.Ants:SetSize(width * 1.4 * 0.85, height * 1.4 * 0.85)
+		PixelUtil.SetSize(GlowFrame.Ants, width * 1.4 * 0.85, height * 1.4 * 0.85)
 
 		AnimInOnFinished(GlowFrame.AnimIn)
 
@@ -813,10 +822,12 @@ function Private.Glows.ButtonGlow_Start(frame, width, height)
 			UpdateAlphaAnim(GlowFrame, 1)
 		end
 
+		GlowFrame.width = width
+		GlowFrame.height = height
 		frame._ButtonGlow = GlowFrame
 		GlowFrame:SetParent(frame)
 		GlowFrame:SetFrameLevel(frame:GetFrameLevel() + frameLevel)
-		GlowFrame:SetSize(width * 1.4, height * 1.4)
+		PixelUtil.SetSize(GlowFrame, width * 1.4, height * 1.4)
 		GlowFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -width * 0.2, height * 0.2)
 		GlowFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", width * 0.2, -height * 0.2)
 
