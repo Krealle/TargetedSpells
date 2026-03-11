@@ -1,16 +1,6 @@
 ---@type string, TargetedSpells
-local addonName, Private = ...
-local LibCustomGlow = LibStub("LibCustomGlow-1.0")
+local _, Private = ...
 local LibEditMode = LibStub("LibEditMode")
-
-TARGETED_SPELLS_BACKDROP = {
-	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-	tile = true,
-	tileEdge = true,
-	tileSize = 8,
-	edgeSize = 8,
-	insets = { left = 1, right = 1, top = 1, bottom = 1 },
-}
 
 local PreviewIconDataProvider = nil
 
@@ -24,6 +14,31 @@ local function GetRandomIcon()
 	return PreviewIconDataProvider:GetRandomIcon()
 end
 
+---@param border Frame
+local function CreateBorderStrips(border)
+	---@param p1 string
+	---@param p2 string
+	---@param dimension string
+	local function Strip(p1, p2, dimension)
+		local texture = border:CreateTexture(nil, "BACKGROUND")
+
+		texture:SetColorTexture(1, 1, 1, 0.8)
+		texture:SetPoint(p1, border, p1)
+		texture:SetPoint(p2, border, p2)
+
+		if dimension == "h" then
+			texture:SetHeight(1)
+		else
+			texture:SetWidth(1)
+		end
+	end
+
+	Strip("TOPLEFT", "TOPRIGHT", "h")
+	Strip("BOTTOMLEFT", "BOTTOMRIGHT", "h")
+	Strip("TOPLEFT", "BOTTOMLEFT", "w")
+	Strip("TOPRIGHT", "BOTTOMRIGHT", "w")
+end
+
 ---@class TargetedSpellsMixin
 TargetedSpellsMixin = {}
 
@@ -35,6 +50,7 @@ function TargetedSpellsMixin:OnLoad()
 	self.doNotHideBefore = nil
 	self.elapsed = 0
 	Private.Utils.MaybeApplyElvUISkin(self)
+	CreateBorderStrips(self.Border)
 end
 
 function TargetedSpellsMixin:SetId(id)
@@ -262,8 +278,9 @@ function TargetedSpellsMixin:GetStartTime()
 end
 
 ---@param parent Frame
-local function CreateStar4Glow(parent)
-	local width, height = parent:GetSize()
+---@param width number
+---@param height number
+local function CreateStar4Glow(parent, width, height)
 	local innerFactor = 1.9
 	local outerFactor = 2.2
 
@@ -304,12 +321,13 @@ local function CreateStar4Glow(parent)
 end
 
 function TargetedSpellsMixin:ShowGlow(isImportant)
-	local glowType = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self.GlowType
-		or TargetedSpellsSaved.Settings.Party.GlowType
+	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+	local glowType = tableRef.GlowType
 
 	if glowType == Private.Enum.GlowType.Star4 then
 		if self._Star4 == nil then
-			self._Star4 = CreateStar4Glow(self)
+			self._Star4 = CreateStar4Glow(self, tableRef.Width, tableRef.Height)
 		end
 
 		self._Star4:Show()
@@ -319,15 +337,15 @@ function TargetedSpellsMixin:ShowGlow(isImportant)
 
 		self._Star4:SetAlphaFromBoolean(isImportant)
 	elseif glowType == Private.Enum.GlowType.PixelGlow then
-		LibCustomGlow.PixelGlow_Start(self)
+		Private.Glows.PixelGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._PixelGlow:SetAlphaFromBoolean(isImportant)
 	elseif glowType == Private.Enum.GlowType.AutoCastGlow then
-		LibCustomGlow.AutoCastGlow_Start(self)
+		Private.Glows.AutoCastGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._AutoCastGlow:SetAlphaFromBoolean(isImportant)
 	elseif glowType == Private.Enum.GlowType.ButtonGlow then
-		LibCustomGlow.ButtonGlow_Start(self)
+		Private.Glows.ButtonGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._ButtonGlow:SetAlphaFromBoolean(isImportant)
 
@@ -335,16 +353,18 @@ function TargetedSpellsMixin:ShowGlow(isImportant)
 			region:SetAlphaFromBoolean(isImportant)
 		end
 
-		if self._ButtonGlow.animIn:IsPlaying() then
-			local orig = self._ButtonGlow.animIn:GetScript("OnFinished")
-			self._ButtonGlow.animIn:SetScript("OnFinished", function(anim)
+		---@type ButtonGlowFrame
+		local ButtonGlow = self._ButtonGlow
+		if ButtonGlow.AnimIn:IsPlaying() then
+			local orig = ButtonGlow.AnimIn:GetScript("OnFinished")
+			ButtonGlow.AnimIn:SetScript("OnFinished", function(anim)
 				orig(anim)
-				anim:GetParent().ants:SetAlphaFromBoolean(isImportant)
+				anim:GetParent().Ants:SetAlphaFromBoolean(isImportant)
 				anim:SetScript("OnFinished", orig)
 			end)
 		end
 	elseif glowType == Private.Enum.GlowType.ProcGlow then
-		LibCustomGlow.ProcGlow_Start(self)
+		Private.Glows.ProcGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._ProcGlow:SetAlphaFromBoolean(isImportant)
 	end
@@ -358,10 +378,10 @@ function TargetedSpellsMixin:HideGlow()
 		self._Star4.Animation:Stop()
 	end
 
-	LibCustomGlow.PixelGlow_Stop(self)
-	LibCustomGlow.AutoCastGlow_Stop(self)
-	LibCustomGlow.ButtonGlow_Stop(self)
-	LibCustomGlow.ProcGlow_Stop(self)
+	Private.Glows.PixelGlow_Stop(self)
+	Private.Glows.AutoCastGlow_Stop(self)
+	Private.Glows.ButtonGlow_Stop(self)
+	Private.Glows.ProcGlow_Stop(self)
 end
 
 function TargetedSpellsMixin:IsSpellImportant(boolOverride)
@@ -444,22 +464,17 @@ function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit, bar)
 	self:SetUnit(unit)
 	self:SetKind(kind)
 
-	if castingUnit == nil then
-		return
-	end
-
-	if kind == Private.Enum.FrameKind.Self then
-		self:SetAlphaFromBoolean(PlayerIsSpellTarget(castingUnit, unit))
-	else
-		self:SetAlphaFromBoolean(UnitIsUnit(string.format("%starget", castingUnit), unit))
+	if castingUnit ~= nil then
+		if kind == Private.Enum.FrameKind.Self then
+			self:SetAlphaFromBoolean(PlayerIsSpellTarget(castingUnit, unit))
+		else
+			self:SetAlphaFromBoolean(UnitIsUnit(string.format("%starget", castingUnit), unit))
+		end
 	end
 
 	if bar ~= nil then
 		self.bar = bar
-		bar:SetSize(self:GetWidth(), self:GetHeight())
 		bar:SetValue(self:GetAlpha())
-		self:ClearAllPoints()
-		self:SetPoint("CENTER", bar:GetStatusBarTexture(), "CENTER")
 	end
 end
 

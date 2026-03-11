@@ -1255,8 +1255,9 @@ end
 
 function TargetedSpellsEditModeMixin:AcquireFrame()
 	local frame = Private.Utils.Pools.Frame:Acquire()
+	local bar = Private.Utils.Pools.Bar:Acquire()
 
-	frame:PostCreate("preview", self.frameKind, nil)
+	frame:PostCreate("preview", self.frameKind, nil, bar)
 
 	return frame
 end
@@ -1422,9 +1423,7 @@ function SelfEditModeMixin:RepositionPreviewFrames()
 		end
 	end
 
-	local activeFrameCount = #activeFrames
-
-	if activeFrameCount == 0 then
+	if #activeFrames == 0 then
 		return
 	end
 
@@ -1439,22 +1438,47 @@ function SelfEditModeMixin:RepositionPreviewFrames()
 	Private.Utils.SortFrames(activeFrames, sortOrder)
 
 	local isHorizontal = direction == Private.Enum.Direction.Horizontal
+	local isGrowEnd = grow == Private.Enum.Grow.End
+	local orientation = isHorizontal and "HORIZONTAL" or "VERTICAL"
+	local growAxisDim = (isHorizontal and width or height) + gap
+	local crossAxisDim = isHorizontal and height or width
+	local originEdge = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM")
+	local farEdge = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP")
 
-	local point = isHorizontal and "LEFT" or "BOTTOM"
-	local total = (activeFrameCount * (isHorizontal and width or height)) + (activeFrameCount - 1) * gap
-	local parentDimension = isHorizontal and self.editModeFrame:GetWidth() or self.editModeFrame:GetHeight()
+	---@type StatusBar?
+	local prevBar = nil
 
-	for i, frame in ipairs(activeFrames) do
-		local x = 0
-		local y = 0
+	for _, frame in ipairs(activeFrames) do
+		if frame.bar ~= nil then
+			if isHorizontal then
+				frame.bar:SetSize(growAxisDim, crossAxisDim)
+			else
+				frame.bar:SetSize(crossAxisDim, growAxisDim)
+			end
 
-		if isHorizontal then
-			x = Private.Utils.CalculateCoordinate(i, width, gap, parentDimension, total, 0, grow)
-		else
-			y = Private.Utils.CalculateCoordinate(i, height, gap, parentDimension, total, 0, grow)
+			frame:ClearAllPoints()
+			frame:SetPoint(originEdge, frame.bar:GetStatusBarTexture(), originEdge)
+
+			frame.bar:SetOrientation(orientation)
+			frame.bar:SetReverseFill(isGrowEnd)
+			frame.bar:SetParent(self.editModeFrame)
+			frame.bar:SetValue(secretwrap(1))
+			frame.bar:ClearAllPoints()
+			if prevBar == nil then
+				local parentDimension = isHorizontal and self.editModeFrame:GetWidth() or self.editModeFrame:GetHeight()
+				local offset = isGrowEnd and (parentDimension / 2 - gap) or (-parentDimension / 2)
+				local offsetX = isHorizontal and offset or 0
+				local offsetY = (not isHorizontal) and offset or 0
+
+				frame.bar:SetPoint(originEdge, self.editModeFrame, "CENTER", offsetX, offsetY)
+			else
+				frame.bar:SetPoint(originEdge, prevBar:GetStatusBarTexture(), farEdge, 0, 0)
+			end
+
+			frame.bar:Show()
+
+			prevBar = frame.bar
 		end
-
-		frame:Reposition(point, self.editModeFrame, "CENTER", x, y)
 	end
 end
 
@@ -1746,7 +1770,7 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 		return
 	end
 
-	local width, height, gap, direction, offsetX, offsetY, sortOrder, sourceAnchor, targetAnchor, grow =
+	local width, height, gap, direction, offsetX, offsetY, sortOrder, targetAnchor, grow =
 		TargetedSpellsSaved.Settings.Party.Width,
 		TargetedSpellsSaved.Settings.Party.Height,
 		TargetedSpellsSaved.Settings.Party.Gap,
@@ -1754,11 +1778,16 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 		TargetedSpellsSaved.Settings.Party.OffsetX,
 		TargetedSpellsSaved.Settings.Party.OffsetY,
 		TargetedSpellsSaved.Settings.Party.SortOrder,
-		TargetedSpellsSaved.Settings.Party.SourceAnchor,
 		TargetedSpellsSaved.Settings.Party.TargetAnchor,
 		TargetedSpellsSaved.Settings.Party.Grow
 
 	local isHorizontal = direction == Private.Enum.Direction.Horizontal
+	local isGrowEnd = grow == Private.Enum.Grow.End
+	local orientation = isHorizontal and "HORIZONTAL" or "VERTICAL"
+	local growAxisDim = (isHorizontal and width or height) + gap
+	local crossAxisDim = isHorizontal and height or width
+	local originEdge = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM")
+	local farEdge = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP")
 
 	for i = 1, self.maxUnitCount do
 		if i == self.maxUnitCount and not self.useRaidStylePartyFrames then
@@ -1776,12 +1805,10 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 			end
 		end
 
-		local activeFrameCount = #activeFrames
-
-		if activeFrameCount > 0 then
+		if #activeFrames > 0 then
 			local token = i == 5 and "player" or string.format("party%d", i)
 
-			if i < 5 and true or i == 5 and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty then
+			if i < 5 or (i == 5 and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty) then
 				Private.Utils.SortFrames(activeFrames, sortOrder)
 
 				local parentFrame = Private.Utils.FindThirdPartyGroupFrameForUnit(token)
@@ -1800,20 +1827,34 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 				end
 
 				if parentFrame ~= nil then
-					local total = (activeFrameCount * (isHorizontal and width or height)) + (activeFrameCount - 1) * gap
-					local parentDimension = isHorizontal and parentFrame:GetWidth() or parentFrame:GetHeight()
+					---@type StatusBar?
+					local prevBar = nil
 
-					for j, frame in ipairs(activeFrames) do
-						local x = offsetX
-						local y = offsetY
+					for _, frame in ipairs(activeFrames) do
+						if frame.bar ~= nil then
+							if isHorizontal then
+								frame.bar:SetSize(growAxisDim, crossAxisDim)
+							else
+								frame.bar:SetSize(crossAxisDim, growAxisDim)
+							end
 
-						if isHorizontal then
-							x = Private.Utils.CalculateCoordinate(j, width, gap, parentDimension, total, offsetX, grow)
-						else
-							y = Private.Utils.CalculateCoordinate(j, width, gap, parentDimension, total, offsetY, grow)
+							frame:ClearAllPoints()
+							frame:SetPoint(originEdge, frame.bar:GetStatusBarTexture(), originEdge)
+							frame:SetFrameLevel(frame.bar:GetFrameLevel() + 10)
+
+							frame.bar:SetOrientation(orientation)
+							frame.bar:SetReverseFill(isGrowEnd)
+							frame.bar:SetParent(parentFrame)
+							frame.bar:SetValue(1)
+							frame.bar:ClearAllPoints()
+							if prevBar == nil then
+								frame.bar:SetPoint(originEdge, parentFrame, targetAnchor, offsetX, offsetY)
+							else
+								frame.bar:SetPoint(originEdge, prevBar:GetStatusBarTexture(), farEdge, 0, 0)
+							end
+
+							prevBar = frame.bar
 						end
-
-						frame:Reposition(sourceAnchor, parentFrame, targetAnchor, x, y)
 					end
 				end
 			end

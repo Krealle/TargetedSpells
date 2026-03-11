@@ -8,6 +8,7 @@
 ---@field LoginFnQueue table<string, function>
 ---@field L table<string, table<string, string|nil>>
 ---@field Utils TargetedSpellsUtils
+---@field Glows GlowFunctions
 
 ---@class TargetedSpellsUtils
 ---@field CalculateCoordinate fun(index: number, dimension: number, gap: number, parentDimension: number, total: number, offset: number, grow: Grow): number
@@ -29,6 +30,86 @@
 ---@class TargetedSpellsPools
 ---@field Bar FramePool<StatusBar>
 ---@field Frame FramePool<TargetedSpellsMixin>
+
+---@class GlowFunctions
+---@field PixelGlow_Start fun(frame: Frame, width: number, height: number)
+---@field PixelGlow_Stop fun(frame: Frame)
+---@field AutoCastGlow_Start fun(frame: Frame, width: number, height: number)
+---@field AutoCastGlow_Stop fun(frame: Frame)
+---@field ButtonGlow_Start fun(frame: Frame, width: number, height: number)
+---@field ButtonGlow_Stop fun(frame: Frame)
+---@field ProcGlow_Start fun(frame: Frame, width: number, height: number)
+---@field ProcGlow_Stop fun(frame: Frame)
+
+---@class GlowFrameInfo
+---@field step number?
+---@field period number?
+---@field th number?
+---@field length number?
+---@field width number?
+---@field height number?
+---@field pTLx table?
+---@field pTLy table?
+---@field pBRx table?
+---@field pBRy table?
+---@field N number?
+---@field perimeter number?
+---@field bottomlim number?
+---@field rightlim number?
+---@field space number?
+
+---@class GlowFrame : Frame
+---@field name string?
+---@field textures Texture[]
+---@field info GlowFrameInfo
+---@field timer number | number[]
+---@field masks MaskTexture[]?
+---@field bg Texture?
+
+---@class AlphaAnimation : Animation
+---@field SetToAlpha fun(self: AlphaAnimation, alpha: number)
+---@field SetFromAlpha fun(self: AlphaAnimation, alpha: number)
+---@field GetToAlpha fun(self: AlphaAnimation): number
+---@field GetFromAlpha fun(self: AlphaAnimation): number
+
+---@class ButtonGlowAnimGroup : AnimationGroup
+---@field Appear AlphaAnimation[]
+---@field Fade AlphaAnimation[]
+
+---@class ButtonGlowFrame : Frame
+---@field Spark Texture
+---@field InnerGlow Texture
+---@field InnerGlowOver Texture
+---@field OuterGlow Texture
+---@field OuterGlowOver Texture
+---@field Ants Texture
+---@field AnimIn ButtonGlowAnimGroup
+---@field AnimOut ButtonGlowAnimGroup
+---@field color number[] | false | nil
+---@field throttle number
+
+---@class ProcGlowAnimGroup : AnimationGroup
+---@field AlphaRepeat Animation
+---@field FlipbookRepeat Animation
+
+---@class ProcGlowFrame : Frame
+---@field ProcStart Texture
+---@field ProcLoop Texture
+---@field ProcLoopAnim ProcGlowAnimGroup
+---@field ProcStartAnim AnimationGroup
+---@field key string?
+---@field StartAnim boolean?
+
+---@class ProcGlowOptions
+---@field width number
+---@field height number
+---@field frameLevel number?
+---@field color number[]?
+---@field startAnim boolean?
+---@field xOffset number?
+---@field yOffset number?
+---@field duration number?
+---@field key string?
 
 ---@class StaticPopupDialogsArgs
 ---@field text string
@@ -156,7 +237,7 @@
 ---@field private _ProcGlow Frame?
 ---@field private _Star4 Star4Glow?
 ---@field private DurationText FontString
----@field private Border Frame | BackdropTemplate
+---@field private Border Frame
 ---@field private InterruptIcon Texture
 ---@field private InterruptSource FontString
 ---@field private elapsed number

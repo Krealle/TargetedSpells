@@ -618,7 +618,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 
 		for i, frame in pairs(frames) do
 			if delayInfo.kinds[frame:GetKind()] and frame:GetId() == delayInfo.id then
-				Private.Utils.Pools:Release(frame)
+				Private.Utils.Pools.Frame:Release(frame)
 				frames[i] = nil
 				cleanedSomethingUp = true
 			end

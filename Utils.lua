@@ -8,6 +8,7 @@ Private.Utils.Pools = {
 	Bar = CreateFramePool("StatusBar", UIParent, nil, nil, nil, function(bar)
 		bar:SetMinMaxValues(0, 1)
 		bar:SetIgnoreParentAlpha(true)
+		bar:SetStatusBarTexture("")
 	end),
 	Frame = CreateFramePool(
 		"Frame",
