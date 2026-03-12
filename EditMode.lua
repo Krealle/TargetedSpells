@@ -1358,8 +1358,9 @@ end
 function SelfEditModeMixin:ReleaseAllFrames()
 	for index, frame in ipairs(self.frames) do
 		Private.Utils.Pools.Frame:Release(frame)
-		self.frames[index] = nil
 	end
+
+	table.wipe(self.frames)
 end
 
 function SelfEditModeMixin:AppendSettings()

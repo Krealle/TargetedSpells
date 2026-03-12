@@ -102,7 +102,6 @@ L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "픽셀 반짝임",
 	[Private.Enum.GlowType.AutoCastGlow] = "자동시전 반짝임",
-	[Private.Enum.GlowType.ButtonGlow] = "동작 버튼 반짝임",
 	[Private.Enum.GlowType.ProcGlow] = "스킬 발동 반짝임",
 	[Private.Enum.GlowType.Star4] = "별 4",
 }

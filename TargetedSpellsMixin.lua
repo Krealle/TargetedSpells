@@ -14,31 +14,6 @@ local function GetRandomIcon()
 	return PreviewIconDataProvider:GetRandomIcon()
 end
 
----@param border Frame
-local function CreateBorderStrips(border)
-	---@param p1 string
-	---@param p2 string
-	---@param dimension string
-	local function Strip(p1, p2, dimension)
-		local texture = border:CreateTexture(nil, "BACKGROUND")
-
-		texture:SetColorTexture(1, 1, 1, 0.8)
-		texture:SetPoint(p1, border, p1)
-		texture:SetPoint(p2, border, p2)
-
-		if dimension == "h" then
-			texture:SetHeight(1)
-		else
-			texture:SetWidth(1)
-		end
-	end
-
-	Strip("TOPLEFT", "TOPRIGHT", "h")
-	Strip("BOTTOMLEFT", "BOTTOMRIGHT", "h")
-	Strip("TOPLEFT", "BOTTOMLEFT", "w")
-	Strip("TOPRIGHT", "BOTTOMRIGHT", "w")
-end
-
 ---@class TargetedSpellsMixin
 TargetedSpellsMixin = {}
 
@@ -50,7 +25,28 @@ function TargetedSpellsMixin:OnLoad()
 	self.doNotHideBefore = nil
 	self.elapsed = 0
 	Private.Utils.MaybeApplyElvUISkin(self)
-	CreateBorderStrips(self.Border)
+
+	---@param firstPoint string
+	---@param secondPoint string
+	---@param dimension string
+	local function AddStrip(firstPoint, secondPoint, dimension)
+		local texture = self.Border:CreateTexture(nil, "BACKGROUND")
+
+		texture:SetColorTexture(1, 1, 1, 0.8)
+		texture:SetPoint(firstPoint, self.Border, firstPoint)
+		texture:SetPoint(secondPoint, self.Border, secondPoint)
+
+		if dimension == "h" then
+			texture:SetHeight(1)
+		else
+			texture:SetWidth(1)
+		end
+	end
+
+	AddStrip("TOPLEFT", "TOPRIGHT", "h")
+	AddStrip("BOTTOMLEFT", "BOTTOMRIGHT", "h")
+	AddStrip("TOPLEFT", "BOTTOMLEFT", "w")
+	AddStrip("TOPRIGHT", "BOTTOMRIGHT", "w")
 end
 
 function TargetedSpellsMixin:SetId(id)
@@ -344,25 +340,6 @@ function TargetedSpellsMixin:ShowGlow(isImportant)
 		Private.Glows.AutoCastGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._AutoCastGlow:SetAlphaFromBoolean(isImportant)
-	elseif glowType == Private.Enum.GlowType.ButtonGlow then
-		Private.Glows.ButtonGlow_Start(self, tableRef.Width, tableRef.Height)
-
-		self._ButtonGlow:SetAlphaFromBoolean(isImportant)
-
-		for _, region in pairs({ self._ButtonGlow:GetRegions() }) do
-			region:SetAlphaFromBoolean(isImportant)
-		end
-
-		---@type ButtonGlowFrame
-		local ButtonGlow = self._ButtonGlow
-		if ButtonGlow.AnimIn:IsPlaying() then
-			local orig = ButtonGlow.AnimIn:GetScript("OnFinished")
-			ButtonGlow.AnimIn:SetScript("OnFinished", function(anim)
-				orig(anim)
-				anim:GetParent().Ants:SetAlphaFromBoolean(isImportant)
-				anim:SetScript("OnFinished", orig)
-			end)
-		end
 	elseif glowType == Private.Enum.GlowType.ProcGlow then
 		Private.Glows.ProcGlow_Start(self, tableRef.Width, tableRef.Height)
 
@@ -380,7 +357,6 @@ function TargetedSpellsMixin:HideGlow()
 
 	Private.Glows.PixelGlow_Stop(self)
 	Private.Glows.AutoCastGlow_Stop(self)
-	Private.Glows.ButtonGlow_Stop(self)
 	Private.Glows.ProcGlow_Stop(self)
 end
 
@@ -506,14 +482,6 @@ function TargetedSpellsMixin:Reset()
 		elseif glowType == Private.Enum.GlowType.AutoCastGlow then
 			if self._AutoCastGlow ~= nil then
 				self._AutoCastGlow:SetAlpha(1)
-			end
-		elseif glowType == Private.Enum.GlowType.ButtonGlow then
-			if self._ButtonGlow ~= nil then
-				self._ButtonGlow:SetAlpha(1)
-
-				for _, region in pairs({ self._ButtonGlow:GetRegions() }) do
-					region:SetAlpha(1)
-				end
 			end
 		elseif glowType == Private.Enum.GlowType.ProcGlow then
 			if self._ProcGlow ~= nil then

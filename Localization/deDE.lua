@@ -100,7 +100,6 @@ L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "Pixel Glow",
 	[Private.Enum.GlowType.AutoCastGlow] = "Auto Cast Glow",
-	[Private.Enum.GlowType.ButtonGlow] = "Button Glow",
 	[Private.Enum.GlowType.ProcGlow] = "Proc Glow",
 	[Private.Enum.GlowType.Star4] = "Star 4",
 }

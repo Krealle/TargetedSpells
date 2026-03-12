@@ -1,3 +1,12 @@
+## Version 2.0.0
+
+- deprecated Glow Type > Button Glow option
+  - this glow type was effectively incompatible with secrets which I unfortunately noticed too late
+  - users of this option were automatically migrated to Glow Type > Pixel Glow
+- deprecated Grow > Center option
+  - no longer possible due to the layouting workarounds
+  - users of this option were automatically migrated to Grow > Start
+
 ## Version 1.1.18
 
 - added support for KR locale, thanks to 007bbb

@@ -102,7 +102,6 @@ L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "Resplandor de píxeles",
 	[Private.Enum.GlowType.AutoCastGlow] = "Resplandor de lanzamiento automático",
-	[Private.Enum.GlowType.ButtonGlow] = "Resplandor de botón",
 	[Private.Enum.GlowType.ProcGlow] = "Resplandor de proc",
 	[Private.Enum.GlowType.Star4] = "Estrella 4",
 }

@@ -36,8 +36,6 @@
 ---@field PixelGlow_Stop fun(frame: Frame)
 ---@field AutoCastGlow_Start fun(frame: Frame, width: number, height: number)
 ---@field AutoCastGlow_Stop fun(frame: Frame)
----@field ButtonGlow_Start fun(frame: Frame, width: number, height: number)
----@field ButtonGlow_Stop fun(frame: Frame)
 ---@field ProcGlow_Start fun(frame: Frame, width: number, height: number)
 ---@field ProcGlow_Stop fun(frame: Frame)
 
@@ -65,28 +63,6 @@
 ---@field timer number | number[]
 ---@field masks MaskTexture[]?
 ---@field bg Texture?
-
----@class AlphaAnimation : Animation
----@field SetToAlpha fun(self: AlphaAnimation, alpha: number)
----@field SetFromAlpha fun(self: AlphaAnimation, alpha: number)
----@field GetToAlpha fun(self: AlphaAnimation): number
----@field GetFromAlpha fun(self: AlphaAnimation): number
-
----@class ButtonGlowAnimGroup : AnimationGroup
----@field Appear AlphaAnimation[]
----@field Fade AlphaAnimation[]
-
----@class ButtonGlowFrame : Frame
----@field Spark Texture
----@field InnerGlow Texture
----@field InnerGlowOver Texture
----@field OuterGlow Texture
----@field OuterGlowOver Texture
----@field Ants Texture
----@field AnimIn ButtonGlowAnimGroup
----@field AnimOut ButtonGlowAnimGroup
----@field color number[] | false | nil
----@field throttle number
 
 ---@class ProcGlowAnimGroup : AnimationGroup
 ---@field AlphaRepeat Animation
@@ -232,7 +208,6 @@
 ---@field private spellId number? -- secret
 ---@field private id number? -- secret
 ---@field private _AutoCastGlow Frame?
----@field private _ButtonGlow Frame?
 ---@field private _PixelGlow Frame?
 ---@field private _ProcGlow Frame?
 ---@field private _Star4 Star4Glow?

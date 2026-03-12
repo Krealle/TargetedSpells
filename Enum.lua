@@ -72,7 +72,7 @@ Private.Enum.Grow = {
 Private.Enum.GlowType = {
 	PixelGlow = 1,
 	AutoCastGlow = 2,
-	ButtonGlow = 3,
+	-- ButtonGlow = 3, -- deprecated
 	ProcGlow = 4,
 	Star4 = 5,
 }

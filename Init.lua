@@ -44,6 +44,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		if key == "Grow" and TargetedSpellsSaved.Settings.Self[key] == 1 then
 			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.Grow.Start
 		end
+
+		if key == "GlowType" and TargetedSpellsSaved.Settings.Self[key] == 3 then
+			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.GlowType.PixelGlow
+		end
 	end
 
 	for key, value in pairs(Private.Settings.GetPartyDefaultSettings()) do
@@ -56,6 +60,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 
 		if key == "Grow" and TargetedSpellsSaved.Settings.Party[key] == 1 then
 			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.Grow.Start
+		end
+
+		if key == "GlowType" and TargetedSpellsSaved.Settings.Party[key] == 3 then
+			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.GlowType.PixelGlow
 		end
 	end
 
