@@ -1626,7 +1626,6 @@ function PartyEditModeMixin:AppendSettings()
 	)
 	self.editModeFrame:SetScript("OnDragStart", nil)
 	self.editModeFrame:SetScript("OnDragStop", nil)
-	-- e.g. DandersPartyGroupContainer is created lazily but we want to anchor to it
 	LibEditMode:RegisterCallback("enter", GenerateClosure(self.RepositionEditModeFrame, self))
 
 	local settingsOrder = Private.Settings.GetSettingsDisplayOrder(Private.Enum.FrameKind.Party)
@@ -1661,6 +1660,7 @@ local function GetEditModePartyParentFrame(useRaidStylePartyFrames)
 		and ElvUI[1].db ~= nil
 		and ElvUI[1].db.unitframe.units.party.enable ~= nil
 		and ElvUF_Party ~= nil
+		and ElvUF_Party:IsShown()
 	then
 		return ElvUF_Party, ElvUF_Party:GetWidth()
 	end
