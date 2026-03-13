@@ -228,59 +228,102 @@ function TargetedSpellsDriver:RepositionFrames()
 			local tableRef = TargetedSpellsSaved.Settings.Self
 			local width, height, gap, sortOrder, direction, grow =
 				tableRef.Width, tableRef.Height, tableRef.Gap, tableRef.SortOrder, tableRef.Direction, tableRef.Grow
-			local isHorizontal = direction == Private.Enum.Direction.Horizontal
-			local point = isHorizontal and "LEFT" or "BOTTOM"
-			local total = (#frames * (isHorizontal and width or height)) + (#frames - 1) * gap
-			local parentDimension = isHorizontal and self.frame:GetWidth() or self.frame:GetHeight()
 
+			local isHorizontal = direction == Private.Enum.Direction.Horizontal
+			local isGrowEnd = grow == Private.Enum.Grow.End
+			local orientation = isHorizontal and "HORIZONTAL" or "VERTICAL"
+			local growAxisDim = (isHorizontal and width or height) + gap
+			local crossAxisDim = isHorizontal and height or width
+			local originEdge = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM")
+			local farEdge = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP")
 			Private.Utils.SortFrames(frames, sortOrder)
 
-			for i, frame in ipairs(frames) do
-				local x = 0
-				local y = 0
+			---@type StatusBar?
+			local prevBar = nil
 
-				if isHorizontal then
-					x = Private.Utils.CalculateCoordinate(i, width, gap, parentDimension, total, 0, grow)
-				else
-					y = Private.Utils.CalculateCoordinate(i, height, gap, parentDimension, total, 0, grow)
+			for _, frame in ipairs(frames) do
+				if frame.bar ~= nil then
+					if isHorizontal then
+						frame.bar:SetSize(growAxisDim, crossAxisDim)
+					else
+						frame.bar:SetSize(crossAxisDim, growAxisDim)
+					end
+
+					frame:ClearAllPoints()
+					frame:SetPoint(originEdge, frame.bar:GetStatusBarTexture(), originEdge)
+					frame:SetFrameLevel(frame.bar:GetFrameLevel() + 10)
+
+					frame.bar:SetOrientation(orientation)
+					frame.bar:SetReverseFill(isGrowEnd)
+					frame.bar:SetParent(self.frame)
+					frame.bar:ClearAllPoints()
+					if prevBar == nil then
+						frame.bar:SetPoint(originEdge, self.frame, "CENTER", 0, 0)
+					else
+						frame.bar:SetPoint(originEdge, prevBar:GetStatusBarTexture(), farEdge, 0, 0)
+					end
+					frame.bar:Show()
+					frame:Show()
+
+					prevBar = frame.bar
 				end
-
-				frame:Reposition(point, self.frame, "CENTER", x, y)
 			end
 		else
 			local parentFrame = FindParentFrameForPartyMember(targetUnit)
 
 			if parentFrame ~= nil then
 				local tableRef = TargetedSpellsSaved.Settings.Party
-				local width, height, gap, sortOrder, sourceAnchor, targetAnchor, direction, grow, offsetX, offsetY =
+				local width, height, gap, sortOrder, targetAnchor, direction, grow, offsetX, offsetY =
 					tableRef.Width,
 					tableRef.Height,
 					tableRef.Gap,
 					tableRef.SortOrder,
-					tableRef.SourceAnchor,
 					tableRef.TargetAnchor,
 					tableRef.Direction,
 					tableRef.Grow,
 					tableRef.OffsetX,
 					tableRef.OffsetY
 
+				local isHorizontal = direction == Private.Enum.Direction.Horizontal
+				local isGrowEnd = grow == Private.Enum.Grow.End
+				local orientation = isHorizontal and "HORIZONTAL" or "VERTICAL"
+				local growAxisDim = (isHorizontal and width or height) + gap
+				local crossAxisDim = isHorizontal and height or width
+				local originEdge = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT")
+					or (isGrowEnd and "TOP" or "BOTTOM")
+				local farEdge = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP")
+
 				Private.Utils.SortFrames(frames, sortOrder)
 
-				local isHorizontal = direction == Private.Enum.Direction.Horizontal
-				local total = (#frames * (isHorizontal and width or height)) + (#frames - 1) * gap
-				local parentDimension = isHorizontal and parentFrame:GetWidth() or parentFrame:GetHeight()
+				---@type StatusBar?
+				local prevBar = nil
 
-				for j, frame in ipairs(frames) do
-					local x = offsetX
-					local y = offsetY
+				for _, frame in ipairs(frames) do
+					if frame.bar ~= nil then
+						if isHorizontal then
+							frame.bar:SetSize(growAxisDim, crossAxisDim)
+						else
+							frame.bar:SetSize(crossAxisDim, growAxisDim)
+						end
 
-					if isHorizontal then
-						x = Private.Utils.CalculateCoordinate(j, width, gap, parentDimension, total, offsetX, grow)
-					else
-						y = Private.Utils.CalculateCoordinate(j, width, gap, parentDimension, total, offsetY, grow)
+						frame:ClearAllPoints()
+						frame:SetPoint(originEdge, frame.bar:GetStatusBarTexture(), originEdge)
+						frame:SetFrameLevel(frame.bar:GetFrameLevel() + 10)
+
+						frame.bar:SetOrientation(orientation)
+						frame.bar:SetReverseFill(isGrowEnd)
+						frame.bar:SetParent(parentFrame)
+						frame.bar:ClearAllPoints()
+						if prevBar == nil then
+							frame.bar:SetPoint(originEdge, parentFrame, targetAnchor, offsetX, offsetY)
+						else
+							frame.bar:SetPoint(originEdge, prevBar:GetStatusBarTexture(), farEdge, 0, 0)
+						end
+						frame.bar:Show()
+						frame:Show()
+
+						prevBar = frame.bar
 					end
-
-					frame:Reposition(sourceAnchor, parentFrame, targetAnchor, x, y)
 				end
 			end
 		end

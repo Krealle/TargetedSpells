@@ -27,17 +27,6 @@ Private.Utils.Pools = {
 	),
 }
 
-function Private.Utils.CalculateCoordinate(index, dimension, gap, parentDimension, total, offset, grow)
-	local step = dimension + gap
-
-	if grow == Private.Enum.Grow.Start then
-		return (index - 1) * step - parentDimension / 2 + offset
-	elseif grow == Private.Enum.Grow.End then
-		return parentDimension / 2 - index * step + offset
-	end
-
-	return 0
-end
 
 do
 	local function sortAsc(a, b)

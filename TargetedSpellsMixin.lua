@@ -396,13 +396,6 @@ function TargetedSpellsMixin:ClearStartTime()
 	self.startTime = nil
 end
 
-function TargetedSpellsMixin:Reposition(point, relativeTo, relativePoint, offsetX, offsetY)
-	self:SetParent(relativeTo)
-	self:ClearAllPoints()
-	self:SetFrameLevel(relativeTo:GetFrameLevel() + 10)
-	PixelUtil.SetPoint(self, point, relativeTo, relativePoint, offsetX, offsetY)
-	self:Show()
-end
 
 function TargetedSpellsMixin:SetUnit(unit)
 	self.unit = unit
