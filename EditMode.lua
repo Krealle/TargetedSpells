@@ -1689,7 +1689,7 @@ local function GetEditModePartyParentFrame(useRaidStylePartyFrames)
 	end
 
 	if Private.Utils.HasThirdPartyCandidates() or Grid2 ~= nil then
-		local maybeFrame = Private.Utils.FindThirdPartyGroupFrameForUnit("party1")
+		local maybeFrame = Private.Utils.FindThirdPartyGroupFrameForUnit("player")
 
 		if maybeFrame then
 			local maybeParent = maybeFrame:GetParent()
