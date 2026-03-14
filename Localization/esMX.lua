@@ -97,6 +97,9 @@ L.Settings.FrameGrowLabels = {
 L.Settings.GlowImportantLabel = "Resaltar hechizos importantes"
 L.Settings.GlowImportantTooltip = "Lo que es importante y lo que no lo es lo declara el juego."
 
+L.Settings.OnlyImportantLabel = "Only Show Important Spells"
+L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+
 L.Settings.GlowTypeLabel = "Tipo de resplandor"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {

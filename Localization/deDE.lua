@@ -95,6 +95,9 @@ L.Settings.GlowImportantLabel = "Wichtige Zauber hervorheben"
 L.Settings.GlowImportantTooltip =
 	"Was wichtig und was nicht wichtig ist wird ausschließlich vom Spiel selbst kommuniziert."
 
+L.Settings.OnlyImportantLabel = "Nur wichtige Zauber anzeigen"
+L.Settings.OnlyImportantTooltip = "Beachte dass nur das Spiel festlegen kann was wichtig ist - mit Vorsicht genießen."
+
 L.Settings.GlowTypeLabel = "Hervorhebungsanimation"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {

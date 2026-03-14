@@ -97,6 +97,9 @@ L.Settings.FrameGrowLabels = {
 L.Settings.GlowImportantLabel = "Glow Important Spells"
 L.Settings.GlowImportantTooltip = "What's important and what isn't is declared by the game."
 
+L.Settings.OnlyImportantLabel = "Only Show Important Spells"
+L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+
 L.Settings.GlowTypeLabel = "Glow Type"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {

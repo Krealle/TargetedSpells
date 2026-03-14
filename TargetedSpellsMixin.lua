@@ -115,10 +115,7 @@ function TargetedSpellsMixin:OnUpdate(elapsed)
 		return
 	end
 
-	local remainingDuration = type(self.duration) == "number" and self.startTime + self.duration - GetTime()
-		or self.duration:GetRemainingDuration()
-
-	self.Cooldown.DurationText:SetFormattedText("%.1f", remainingDuration)
+	self.Cooldown.DurationText:SetFormattedText("%.1f", self.duration:GetRemainingDuration())
 end
 
 function TargetedSpellsMixin:SetShowDuration(showDuration, showFractions)
@@ -255,11 +252,7 @@ end
 function TargetedSpellsMixin:SetDuration(duration)
 	self.duration = duration
 
-	if type(duration) == "number" then
-		self.Cooldown:SetCooldown(self.startTime, duration)
-	else
-		self.Cooldown:SetCooldownFromDurationObject(duration)
-	end
+	self.Cooldown:SetCooldownFromDurationObject(duration)
 end
 
 function TargetedSpellsMixin:GetDuration()
@@ -378,14 +371,23 @@ function TargetedSpellsMixin:SetSpellId(spellId)
 	local texture = spellId and C_Spell.GetSpellTexture(spellId) or GetRandomIcon()
 	self.Icon:SetTexture(texture)
 
-	if
-		spellId ~= nil
-		and (
-			(self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self.GlowImportant)
-			or (self.kind == Private.Enum.FrameKind.Party and TargetedSpellsSaved.Settings.Party.GlowImportant)
-		)
-	then
-		self:ShowGlow(self:IsSpellImportant())
+	if spellId == nil then
+		return
+	end
+
+	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+
+	if not tableRef.GlowImportant then
+		return
+	end
+
+	local isImportant = self:IsSpellImportant()
+
+	self:ShowGlow(isImportant)
+
+	if tableRef.OnlyImportant then
+		self:SetAlpha(C_CurveUtil.EvaluateColorValueFromBoolean(isImportant, 1, 0))
 	end
 end
 

@@ -17,6 +17,7 @@ Private.Settings.Keys = {
 		Direction = "GROW_DIRECTION_SELF",
 		SortOrder = "FRAME_SORT_ORDER_SELF",
 		GlowImportant = "GLOW_IMPORTANT_SELF",
+		OnlyImportant = "ONLY_IMPORTANT_SELF",
 		GlowType = "GLOW_TYPE_SELF",
 		Grow = "FRAME_GROW_SELF",
 		ShowDuration = "SHOW_DURATION_SELF",
@@ -47,6 +48,7 @@ Private.Settings.Keys = {
 		SortOrder = "FRAME_SORT_ORDER_PARTY",
 		Grow = "FRAME_GROW_PARTY",
 		GlowImportant = "GLOW_IMPORTANT_PARTY",
+		OnlyImportant = "ONLY_IMPORTANT_PARTY",
 		GlowType = "GLOW_TYPE_PARTY",
 		IncludeSelfInParty = "INCLUDE_SELF_IN_PARTY_PARTY",
 		ShowDuration = "SHOW_DURATION_PARTY",
@@ -76,6 +78,7 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 			Private.Settings.Keys.Self.SortOrder,
 			Private.Settings.Keys.Self.Grow,
 			Private.Settings.Keys.Self.GlowImportant,
+			Private.Settings.Keys.Self.OnlyImportant,
 			Private.Settings.Keys.Self.GlowType,
 			Private.Settings.Keys.Self.ShowDuration,
 			Private.Settings.Keys.Self.ShowDurationFractions,
@@ -106,6 +109,7 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.OffsetY,
 		Private.Settings.Keys.Party.SortOrder,
 		Private.Settings.Keys.Party.GlowImportant,
+		Private.Settings.Keys.Party.OnlyImportant,
 		Private.Settings.Keys.Party.GlowType,
 		Private.Settings.Keys.Party.ShowDuration,
 		Private.Settings.Keys.Party.ShowDurationFractions,
@@ -219,6 +223,7 @@ function Private.Settings.GetSelfDefaultSettings()
 		Opacity = 1,
 		ShowBorder = true,
 		GlowImportant = true,
+		OnlyImportant = false,
 		GlowType = Private.Enum.GlowType.PixelGlow,
 		IndicateInterrupts = false,
 		RenderInterruptSourceName = false,
@@ -265,6 +270,7 @@ function Private.Settings.GetPartyDefaultSettings()
 		Opacity = 1,
 		ShowBorder = true,
 		GlowImportant = true,
+		OnlyImportant = false,
 		GlowType = Private.Enum.GlowType.PixelGlow,
 		IndicateInterrupts = true,
 		RenderInterruptSourceName = true,
@@ -406,9 +412,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Font = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.Font then
+					tableRef.Font = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -449,8 +456,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.ShowSwipe = not tableRef.ShowSwipe
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowSwipe)
+				if value ~= tableRef.ShowSwipe then
+					tableRef.ShowSwipe = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowSwipe)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -484,12 +493,14 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.IndicateInterrupts = not tableRef.IndicateInterrupts
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					tableRef.IndicateInterrupts
-				)
+				if value ~= tableRef.IndicateInterrupts then
+					tableRef.IndicateInterrupts = value
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						tableRef.IndicateInterrupts
+					)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -524,12 +535,14 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.RenderInterruptSourceName = not tableRef.RenderInterruptSourceName
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					tableRef.RenderInterruptSourceName
-				)
+				if value ~= tableRef.RenderInterruptSourceName then
+					tableRef.RenderInterruptSourceName = value
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						tableRef.RenderInterruptSourceName
+					)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -564,12 +577,14 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.ShowDurationFractions = not tableRef.ShowDurationFractions
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					tableRef.ShowDurationFractions
-				)
+				if value ~= tableRef.ShowDurationFractions then
+					tableRef.ShowDurationFractions = value
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						tableRef.ShowDurationFractions
+					)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -600,8 +615,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Enabled = not tableRef.Enabled
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.Enabled)
+				if value ~= tableRef.Enabled then
+					tableRef.Enabled = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.Enabled)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -629,13 +646,14 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				TargetedSpellsSaved.Settings.Party.IncludeSelfInParty =
-					not TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-				)
+				if value ~= TargetedSpellsSaved.Settings.Party.IncludeSelfInParty then
+					TargetedSpellsSaved.Settings.Party.IncludeSelfInParty = value
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
+					)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -663,9 +681,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				TargetedSpellsSaved.Settings.Party.TargetAnchor = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= TargetedSpellsSaved.Settings.Party.TargetAnchor then
+					TargetedSpellsSaved.Settings.Party.TargetAnchor = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -703,9 +722,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				TargetedSpellsSaved.Settings.Party.SourceAnchor = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= TargetedSpellsSaved.Settings.Party.SourceAnchor then
+					TargetedSpellsSaved.Settings.Party.SourceAnchor = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -855,8 +875,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.ShowBorder = not tableRef.ShowBorder
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowBorder)
+				if value ~= tableRef.ShowBorder then
+					tableRef.ShowBorder = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowBorder)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -887,8 +909,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.ShowDuration = not tableRef.ShowDuration
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowDuration)
+				if value ~= tableRef.ShowDuration then
+					tableRef.ShowDuration = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowDuration)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -919,9 +943,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.GlowType = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.GlowType then
+					tableRef.GlowType = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -963,8 +988,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.GlowImportant = not tableRef.GlowImportant
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.GlowImportant)
+				if value ~= tableRef.GlowImportant then
+					tableRef.GlowImportant = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.GlowImportant)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -985,6 +1012,39 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
+		if key == Private.Settings.Keys.Self.OnlyImportant or key == Private.Settings.Keys.Party.OnlyImportant then
+			local tableRef = key == Private.Settings.Keys.Self.OnlyImportant and TargetedSpellsSaved.Settings.Self
+				or TargetedSpellsSaved.Settings.Party
+
+			local function GetValue()
+				return tableRef.OnlyImportant
+			end
+
+			local function SetValue(value)
+				if value ~= tableRef.OnlyImportant then
+					tableRef.OnlyImportant = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.OnlyImportant)
+				end
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Boolean,
+				L.Settings.OnlyImportantLabel,
+				defaults.OnlyImportant,
+				GetValue,
+				SetValue
+			)
+			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.OnlyImportantTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
+				IsSectionEnabled = nil,
+			}
+		end
+
 		if key == Private.Settings.Keys.Self.Grow or key == Private.Settings.Keys.Party.Grow then
 			local tableRef = key == Private.Settings.Keys.Self.Grow and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
@@ -994,9 +1054,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Grow = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.Grow then
+					tableRef.Grow = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -1037,8 +1098,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.SortOrder = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.SortOrder then
+					tableRef.SortOrder = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -1080,9 +1143,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Direction = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.Direction then
+					tableRef.Direction = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -1127,7 +1191,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if value ~= tableRef.Gap then
 					tableRef.Gap = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1165,7 +1228,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if value ~= tableRef.FontSize then
 					tableRef.FontSize = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1203,7 +1265,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if tableRef.Height ~= value then
 					tableRef.Height = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1241,7 +1302,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if value ~= tableRef.Width then
 					tableRef.Width = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end

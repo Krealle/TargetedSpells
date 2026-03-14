@@ -58,7 +58,7 @@ function Private.Utils.AdjustLayout(
 	firstAnchorPoint,
 	firstOffsetX,
 	firstOffsetY,
-	barValue
+	isEditMode
 )
 	---@type Texture?
 	local prevStatusBarTexture = nil
@@ -80,8 +80,8 @@ function Private.Utils.AdjustLayout(
 		frame:SetFrameLevel(frame.Bar:GetFrameLevel() + 10)
 		frame.Bar:ClearAllPoints()
 
-		if barValue ~= nil then
-			frame.Bar:SetValue(barValue)
+		if isEditMode then
+			frame.Bar:SetValue(frame:GetAlpha())
 		end
 
 		if prevStatusBarTexture == nil then

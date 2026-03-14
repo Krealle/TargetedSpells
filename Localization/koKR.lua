@@ -97,6 +97,9 @@ L.Settings.FrameGrowLabels = {
 L.Settings.GlowImportantLabel = "중요 주문 강조"
 L.Settings.GlowImportantTooltip = "중요 여부는 게임에 의해 결정됩니다."
 
+L.Settings.OnlyImportantLabel = "Only Show Important Spells"
+L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+
 L.Settings.GlowTypeLabel = "반짝임 유형"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {

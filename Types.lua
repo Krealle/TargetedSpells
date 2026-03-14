@@ -21,7 +21,7 @@
 
 ---@class TargetedSpellsUtils
 ---@field CollectLayoutingArguments fun(direction: Direction, grow: Grow, width: number, height: number, gap: number): CollectLayoutingArguments
----@field AdjustLayout fun(frames: TargetedSpellsMixin[], geo: CollectLayoutingArguments, barParent: Frame, firstAnchorFrame: Frame, firstAnchorPoint: FramePoint, firstOffsetX: number, firstOffsetY: number, barValue?: number)
+---@field AdjustLayout fun(frames: TargetedSpellsMixin[], geo: CollectLayoutingArguments, barParent: Frame, firstAnchorFrame: Frame, firstAnchorPoint: FramePoint, firstOffsetX: number, firstOffsetY: number, isEditMode: boolean)
 ---@field SortFrames fun(frames: TargetedSpellsMixin[], sortOrder: SortOrder)
 ---@field RollDice fun(): boolean
 ---@field FindThirdPartyGroupFrameForUnit fun(unit: string): Frame?
@@ -160,6 +160,7 @@
 ---@field Position FramePosition
 ---@field ShowBorder boolean
 ---@field GlowImportant boolean
+---@field OnlyImportant boolean
 ---@field GlowType GlowType
 ---@field Opacity number
 ---@field IndicateInterrupts boolean
@@ -187,6 +188,7 @@
 ---@field FontSize number
 ---@field ShowBorder boolean
 ---@field GlowImportant boolean
+---@field OnlyImportant boolean
 ---@field GlowType GlowType
 ---@field Opacity number
 ---@field IndicateInterrupts boolean
@@ -213,7 +215,7 @@
 ---@field private kind FrameKind?
 ---@field private unit string?
 ---@field private startTime number?
----@field private duration DurationObjectDummy|number|nil
+---@field private duration DurationObject|nil
 ---@field private spellId number? -- secret
 ---@field private id number? -- secret
 ---@field private _AutoCastGlow Frame?
@@ -235,8 +237,8 @@
 ---@field SetShowBorder fun(self: TargetedSpellsMixin, bool: boolean)
 ---@field OnSizeChanged fun(self: TargetedSpellsMixin, width: number, height: number)
 ---@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, value: number|string|boolean|table)
----@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObjectDummy|number)
----@field GetDuration fun(self: TargetedSpellsMixin): (DurationObjectDummy|number|nil)
+---@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObject)
+---@field GetDuration fun(self: TargetedSpellsMixin): (DurationObject|number|nil)
 ---@field SetStartTime fun(self: TargetedSpellsMixin, startTime: number?)
 ---@field GetStartTime fun(self: TargetedSpellsMixin): number?
 ---@field ShowGlow fun(self: TargetedSpellsMixin, isImportant: boolean) -- secret bool, but passed explicitly in EditMode code
@@ -331,7 +333,7 @@
 ---@class ExtendedCooldownTypes : Cooldown
 ---@field SetMinimumCountdownDuration fun(self: ExtendedCooldownTypes, minimumDuration: number)
 ---@field GetCountdownFontString fun(self: ExtendedCooldownTypes): FontString
----@field SetCooldownFromDurationObject fun(self: ExtendedCooldownTypes, durationObject: DurationObjectDummy, clearIfZero?: boolean)
+---@field SetCooldownFromDurationObject fun(self: ExtendedCooldownTypes, durationObject: DurationObject, clearIfZero?: boolean)
 
 ---@class IconDataProviderMixin
 ---@field GetRandomIcon fun(self: IconDataProviderMixin): number
@@ -492,39 +494,6 @@ GAME_LOCALE = ""
 ---@field RemovePoint fun(self: CurveObjectDummy, index: number)
 ---@field SetPoints fun(self: CurveObjectDummy, point: nil)
 ---@field SetToDefaults fun(self: CurveObjectDummy)
-
----@class DurationObjectDummy
----@field Assign fun(self: DurationObjectDummy, other: DurationObjectDummy)
----@field copy fun(self: DurationObjectDummy): DurationObjectDummy
----@field EvaluateElapsedPercent fun(self: DurationObjectDummy, curve: CurveObjectDummy, modifier: number?): number
----@field EvaluateRemainingPercent fun(self: DurationObjectDummy, curve: CurveObjectDummy, modifier: number?): number
----@field GetElapsedDuration fun(self: DurationObjectDummy, modifier: number?): number
----@field GetElapsedPercent fun(self: DurationObjectDummy, modifier: number?): number
----@field GetEndTime fun(self: DurationObjectDummy, modifier: number?): number
----@field GetModRate fun(self: DurationObjectDummy): number
----@field GetRemainingDuration fun(self: DurationObjectDummy, modifier: number?): number
----@field GetRemainingPercent fun(self: DurationObjectDummy, modifier: number?): number
----@field GetStartTime fun(self: DurationObjectDummy, modifier: number?): number
----@field GetTotalDuration fun(self: DurationObjectDummy, modifier: number?): number
----@field HasSecretValues fun(self: DurationObjectDummy): boolean
----@field IsZero fun(self: DurationObjectDummy): boolean
----@field Reset fun(self: DurationObjectDummy)
----@field SetTimeFromEnd fun(self: DurationObjectDummy, endTime: number, duration: number, modRate: number?)
----@field SetTimeFromStart fun(self: DurationObjectDummy, startTime: number, duration: number, modRate: number?)
----@field SetTimeSpan fun(self: DurationObjectDummy, startTime: number, endTime: number)
----@field SetToDefaults fun(self: DurationObjectDummy)
-
----@param unit string
----@return DurationObjectDummy
-function UnitCastingDuration(unit)
-	return {}
-end
-
----@param unit string
----@return DurationObjectDummy
-function UnitChannelDuration(unit)
-	return {}
-end
 
 ---@type table<string, StaticPopupDialogsArgs>
 StaticPopupDialogs = {}

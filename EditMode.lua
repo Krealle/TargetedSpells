@@ -87,6 +87,16 @@ function TargetedSpellsEditModeMixin:OnSettingsChanged(key, value)
 
 		self:EndDemo()
 		self:StartDemo()
+	elseif
+		(key == Private.Settings.Keys.Self.OnlyImportant and self.frameKind == Private.Enum.FrameKind.Self)
+		or (key == Private.Settings.Keys.Party.OnlyImportant and self.frameKind == Private.Enum.FrameKind.Party)
+	then
+		if not LibEditMode:IsInEditMode() then
+			return
+		end
+
+		self:EndDemo()
+		self:StartDemo()
 	end
 end
 
@@ -508,6 +518,35 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 			kind = Enum.EditModeSettingDisplayType.Checkbox,
 			desc = L.Settings.GlowImportantTooltip,
 			default = defaults.GlowImportant,
+			get = Get,
+			set = Set,
+		}
+	end
+
+	if key == Private.Settings.Keys.Self.OnlyImportant or key == Private.Settings.Keys.Party.OnlyImportant then
+		local tableRef = key == Private.Settings.Keys.Self.OnlyImportant and TargetedSpellsSaved.Settings.Self
+			or TargetedSpellsSaved.Settings.Party
+
+		---@param layoutName string
+		local function Get(layoutName)
+			return tableRef.OnlyImportant
+		end
+
+		---@param layoutName string
+		---@param value boolean
+		local function Set(layoutName, value)
+			if value ~= tableRef.OnlyImportant then
+				tableRef.OnlyImportant = value
+				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+			end
+		end
+
+		---@type LibEditModeCheckbox
+		return {
+			name = L.Settings.OnlyImportantLabel,
+			kind = Enum.EditModeSettingDisplayType.Checkbox,
+			desc = L.Settings.OnlyImportantTooltip,
+			default = defaults.OnlyImportant,
 			get = Get,
 			set = Set,
 		}
@@ -1273,20 +1312,30 @@ function TargetedSpellsEditModeMixin:LoopFrame(frame, index)
 	frame:SetSpellId()
 	frame:SetStartTime()
 	local castTime = 4 + index / 2
-	frame:SetDuration(castTime)
+	local duration = C_DurationUtil.CreateDuration()
+	duration:SetTimeFromStart(GetTime(), castTime)
+	frame:SetDuration(duration)
 	frame:Show()
-	self:RepositionPreviewFrames()
+	frame:SetAlpha(secretwrap(1))
 
-	if
-		(
-			(self.frameKind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self.GlowImportant)
-			or (self.frameKind == Private.Enum.FrameKind.Party and TargetedSpellsSaved.Settings.Party.GlowImportant)
-		) and Private.Utils.RollDice()
-	then
-		frame:ShowGlow(true)
+	local tableRef = self.frameKind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+
+	if tableRef.GlowImportant and Private.Utils.RollDice() then
+		frame:ShowGlow(secretwrap(true))
+
+		if tableRef.OnlyImportant then
+			frame:SetAlpha(secretwrap(1))
+		end
 	else
 		frame:HideGlow()
+
+		if tableRef.OnlyImportant then
+			frame:SetAlpha(secretwrap(0))
+		end
 	end
+
+	self:RepositionPreviewFrames()
 
 	table.insert(
 		self.demoTimers.timers,
@@ -1450,7 +1499,7 @@ function SelfEditModeMixin:RepositionPreviewFrames()
 		"CENTER",
 		layouting.isHorizontal and offset or 0,
 		(not layouting.isHorizontal) and offset or 0,
-		secretwrap(1)
+		true
 	)
 end
 
@@ -1801,7 +1850,7 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 						targetAnchor,
 						offsetX,
 						offsetY,
-						secretwrap(1)
+						true
 					)
 				end
 			end
