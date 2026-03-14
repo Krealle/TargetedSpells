@@ -10,8 +10,18 @@
 ---@field Utils TargetedSpellsUtils
 ---@field Glows GlowFunctions
 
+---@class CollectLayoutingArguments
+---@field isHorizontal boolean
+---@field isGrowEnd boolean
+---@field orientation "HORIZONTAL"|"VERTICAL"
+---@field growAxisDimension number
+---@field crossAxisDimension number
+---@field originPoint FramePoint
+---@field relativePoint FramePoint
+
 ---@class TargetedSpellsUtils
----@field CalculateCoordinate fun(index: number, dimension: number, gap: number, parentDimension: number, total: number, offset: number, grow: Grow): number
+---@field CollectLayoutingArguments fun(direction: Direction, grow: Grow, width: number, height: number, gap: number): CollectLayoutingArguments
+---@field AdjustLayout fun(frames: TargetedSpellsMixin[], geo: CollectLayoutingArguments, barParent: Frame, firstAnchorFrame: Frame, firstAnchorPoint: FramePoint, firstOffsetX: number, firstOffsetY: number, barValue?: number)
 ---@field SortFrames fun(frames: TargetedSpellsMixin[], sortOrder: SortOrder)
 ---@field RollDice fun(): boolean
 ---@field FindThirdPartyGroupFrameForUnit fun(unit: string): Frame?
@@ -25,11 +35,7 @@
 ---@field MaybeApplyElvUISkin fun(frame: TargetedSpellsMixin)
 ---@field CreateEditablePopup fun(title: string, text: string, button1: string): StaticPopupDialogsArgs
 ---@field HasThirdPartyCandidates fun(): boolean
----@field Pools TargetedSpellsPools
-
----@class TargetedSpellsPools
----@field Bar FramePool<StatusBar>
----@field Frame FramePool<TargetedSpellsMixin>
+---@field Pool FramePool<TargetedSpellsMixin>
 
 ---@class GlowFunctions
 ---@field PixelGlow_Start fun(frame: Frame, width: number, height: number)
@@ -216,7 +222,7 @@
 ---@field private InterruptIcon Texture
 ---@field private InterruptSource FontString
 ---@field private elapsed number
----@field bar StatusBar?
+---@field Bar StatusBar
 ---@field OnLoad fun(self: TargetedSpellsMixin)
 ---@field SetId fun(self: TargetedSpellsMixin, id: number?)
 ---@field GetId fun(self: TargetedSpellsMixin): number?
@@ -237,12 +243,11 @@
 ---@field SetSpellId fun(self: TargetedSpellsMixin, spellId: number?)
 ---@field ShouldBeShown fun(self: TargetedSpellsMixin): boolean
 ---@field ClearStartTime fun(self: TargetedSpellsMixin)
----@field Reposition fun(self: TargetedSpellsMixin, point: FramePoint, relativeTo: Frame|TextureBase, relativePoint: FramePoint, offsetX: number, offsetY: number)
 ---@field SetUnit fun(self: TargetedSpellsMixin, unit: string)
 ---@field SetKind fun(self: TargetedSpellsMixin, kind: FrameKind)
 ---@field GetKind fun(self: TargetedSpellsMixin): FrameKind?
 ---@field GetUnit fun(self: TargetedSpellsMixin): string
----@field PostCreate fun(self: TargetedSpellsMixin, unit: string, kind: FrameKind, castingUnit: string?, bar: StatusBar?)
+---@field PostCreate fun(self: TargetedSpellsMixin, unit: string, kind: FrameKind, castingUnit: string?)
 ---@field Reset fun(self: TargetedSpellsMixin)
 ---@field SetFontSize fun(self: TargetedSpellsMixin)
 ---@field SetFont fun(self: TargetedSpellsMixin)

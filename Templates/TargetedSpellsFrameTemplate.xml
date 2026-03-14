@@ -43,6 +43,7 @@
                 </SwipeTexture>
             </Cooldown>
             <Frame parentKey="Border" hidden="true" frameStrata="BACKGROUND" setAllPoints="true" />
+            <StatusBar parentKey="Bar" ignoreParentAlpha="true" minValue="0" maxValue="1" />
         </Frames>
         <Scripts>
             <OnLoad method="OnLoad" />

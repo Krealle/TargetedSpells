@@ -121,10 +121,8 @@ do
 			TargetedSpellsSaved.Settings.Self.Enabled
 			and not self:LoadConditionsProhibitExecution(Private.Enum.FrameKind.Self)
 		then
-			local selfTargetingFrame = Private.Utils.Pools.Frame:Acquire()
-			local bar = Private.Utils.Pools.Bar:Acquire()
-			bar:SetParent(self.frame)
-			selfTargetingFrame:PostCreate("player", Private.Enum.FrameKind.Self, castingUnit, bar)
+			local selfTargetingFrame = Private.Utils.Pool:Acquire()
+			selfTargetingFrame:PostCreate("player", Private.Enum.FrameKind.Self, castingUnit)
 			table.insert(frames, selfTargetingFrame)
 		end
 
@@ -139,9 +137,8 @@ do
 				local unit = i == partyMemberCount and "player" or "party" .. i
 
 				if (unit == "player" and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty) or unit ~= "player" then
-					local frame = Private.Utils.Pools.Frame:Acquire()
-					local bar = Private.Utils.Pools.Bar:Acquire()
-					frame:PostCreate(unit, Private.Enum.FrameKind.Party, castingUnit, bar)
+					local frame = Private.Utils.Pool:Acquire()
+					frame:PostCreate(unit, Private.Enum.FrameKind.Party, castingUnit)
 					table.insert(frames, frame)
 				end
 			end
@@ -222,109 +219,46 @@ function TargetedSpellsDriver:RepositionFrames()
 		end
 	end
 
+	local selfTableRef = TargetedSpellsSaved.Settings.Self
+	local partyTableRef = TargetedSpellsSaved.Settings.Party
+
 	for targetUnit, frames in pairs(activeFrames) do
 		-- may not use "player" here as the unit token in party for the player is identical
 		if targetUnit == Private.Enum.FrameKind.Self then
-			local tableRef = TargetedSpellsSaved.Settings.Self
-			local width, height, gap, sortOrder, direction, grow =
-				tableRef.Width, tableRef.Height, tableRef.Gap, tableRef.SortOrder, tableRef.Direction, tableRef.Grow
+			Private.Utils.SortFrames(frames, selfTableRef.SortOrder)
 
-			local isHorizontal = direction == Private.Enum.Direction.Horizontal
-			local isGrowEnd = grow == Private.Enum.Grow.End
-			local orientation = isHorizontal and "HORIZONTAL" or "VERTICAL"
-			local growAxisDim = (isHorizontal and width or height) + gap
-			local crossAxisDim = isHorizontal and height or width
-			local originEdge = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM")
-			local farEdge = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP")
-			Private.Utils.SortFrames(frames, sortOrder)
+			local layouting = Private.Utils.CollectLayoutingArguments(
+				selfTableRef.Direction,
+				selfTableRef.Grow,
+				selfTableRef.Width,
+				selfTableRef.Height,
+				selfTableRef.Gap
+			)
 
-			---@type StatusBar?
-			local prevBar = nil
-
-			for _, frame in ipairs(frames) do
-				if frame.bar ~= nil then
-					if isHorizontal then
-						frame.bar:SetSize(growAxisDim, crossAxisDim)
-					else
-						frame.bar:SetSize(crossAxisDim, growAxisDim)
-					end
-
-					frame:ClearAllPoints()
-					frame:SetPoint(originEdge, frame.bar:GetStatusBarTexture(), originEdge)
-					frame:SetFrameLevel(frame.bar:GetFrameLevel() + 10)
-
-					frame.bar:SetOrientation(orientation)
-					frame.bar:SetReverseFill(isGrowEnd)
-					frame.bar:SetParent(self.frame)
-					frame.bar:ClearAllPoints()
-					if prevBar == nil then
-						frame.bar:SetPoint(originEdge, self.frame, "CENTER", 0, 0)
-					else
-						frame.bar:SetPoint(originEdge, prevBar:GetStatusBarTexture(), farEdge, 0, 0)
-					end
-					frame.bar:Show()
-					frame:Show()
-
-					prevBar = frame.bar
-				end
-			end
+			Private.Utils.AdjustLayout(frames, layouting, self.frame, self.frame, "CENTER", 0, 0)
 		else
 			local parentFrame = FindParentFrameForPartyMember(targetUnit)
 
 			if parentFrame ~= nil then
-				local tableRef = TargetedSpellsSaved.Settings.Party
-				local width, height, gap, sortOrder, targetAnchor, direction, grow, offsetX, offsetY =
-					tableRef.Width,
-					tableRef.Height,
-					tableRef.Gap,
-					tableRef.SortOrder,
-					tableRef.TargetAnchor,
-					tableRef.Direction,
-					tableRef.Grow,
-					tableRef.OffsetX,
-					tableRef.OffsetY
+				Private.Utils.SortFrames(frames, partyTableRef.SortOrder)
 
-				local isHorizontal = direction == Private.Enum.Direction.Horizontal
-				local isGrowEnd = grow == Private.Enum.Grow.End
-				local orientation = isHorizontal and "HORIZONTAL" or "VERTICAL"
-				local growAxisDim = (isHorizontal and width or height) + gap
-				local crossAxisDim = isHorizontal and height or width
-				local originEdge = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT")
-					or (isGrowEnd and "TOP" or "BOTTOM")
-				local farEdge = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP")
+				local layouting = Private.Utils.CollectLayoutingArguments(
+					partyTableRef.Direction,
+					partyTableRef.Grow,
+					partyTableRef.Width,
+					partyTableRef.Height,
+					partyTableRef.Gap
+				)
 
-				Private.Utils.SortFrames(frames, sortOrder)
-
-				---@type StatusBar?
-				local prevBar = nil
-
-				for _, frame in ipairs(frames) do
-					if frame.bar ~= nil then
-						if isHorizontal then
-							frame.bar:SetSize(growAxisDim, crossAxisDim)
-						else
-							frame.bar:SetSize(crossAxisDim, growAxisDim)
-						end
-
-						frame:ClearAllPoints()
-						frame:SetPoint(originEdge, frame.bar:GetStatusBarTexture(), originEdge)
-						frame:SetFrameLevel(frame.bar:GetFrameLevel() + 10)
-
-						frame.bar:SetOrientation(orientation)
-						frame.bar:SetReverseFill(isGrowEnd)
-						frame.bar:SetParent(parentFrame)
-						frame.bar:ClearAllPoints()
-						if prevBar == nil then
-							frame.bar:SetPoint(originEdge, parentFrame, targetAnchor, offsetX, offsetY)
-						else
-							frame.bar:SetPoint(originEdge, prevBar:GetStatusBarTexture(), farEdge, 0, 0)
-						end
-						frame.bar:Show()
-						frame:Show()
-
-						prevBar = frame.bar
-					end
-				end
+				Private.Utils.AdjustLayout(
+					frames,
+					layouting,
+					parentFrame,
+					parentFrame,
+					partyTableRef.TargetAnchor,
+					partyTableRef.OffsetX,
+					partyTableRef.OffsetY
+				)
 			end
 		end
 	end
@@ -342,7 +276,7 @@ function TargetedSpellsDriver:ReleaseFrameForUnit(unit, removeUnit, id)
 
 	for i, frame in pairs(frames) do
 		if frame:CanBeHidden(id) then
-			Private.Utils.Pools.Frame:Release(frame)
+			Private.Utils.Pool:Release(frame)
 			frames[i] = nil
 			cleanedSomethingUp = true
 		else
@@ -661,7 +595,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 
 		for i, frame in pairs(frames) do
 			if delayInfo.kinds[frame:GetKind()] and frame:GetId() == delayInfo.id then
-				Private.Utils.Pools.Frame:Release(frame)
+				Private.Utils.Pool:Release(frame)
 				frames[i] = nil
 				cleanedSomethingUp = true
 			end

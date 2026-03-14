@@ -20,6 +20,7 @@ TargetedSpellsMixin = {}
 function TargetedSpellsMixin:OnLoad()
 	Private.EventRegistry:RegisterCallback(Private.Enum.Events.SETTING_CHANGED, self.OnSettingChanged, self)
 
+	self.Bar:SetStatusBarTexture("")
 	self.Cooldown:SetCountdownFont("GameFontHighlightHugeOutline")
 	self.wasInterrupted = false
 	self.doNotHideBefore = nil
@@ -396,7 +397,6 @@ function TargetedSpellsMixin:ClearStartTime()
 	self.startTime = nil
 end
 
-
 function TargetedSpellsMixin:SetUnit(unit)
 	self.unit = unit
 end
@@ -429,7 +429,7 @@ function TargetedSpellsMixin:GetUnit()
 	return self.unit
 end
 
-function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit, bar)
+function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit)
 	self:SetUnit(unit)
 	self:SetKind(kind)
 
@@ -441,10 +441,7 @@ function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit, bar)
 		end
 	end
 
-	if bar ~= nil then
-		self.bar = bar
-		bar:SetValue(self:GetAlpha())
-	end
+	self.Bar:SetValue(self:GetAlpha())
 end
 
 function TargetedSpellsMixin:Reset()
@@ -487,6 +484,8 @@ function TargetedSpellsMixin:Reset()
 
 	self:SetShowDuration(tableRef.ShowDuration, tableRef.ShowDurationFractions)
 	self.Cooldown:SetDrawSwipe(tableRef.ShowSwipe)
+	self.Bar:ClearAllPoints()
+	self.Bar:SetParent(self)
 	-- important to come last - the cooldown swipe ignores display status of its parent
 	self:Hide()
 end

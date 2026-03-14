@@ -4,29 +4,16 @@ local addonName, Private = ...
 ---@class TargetedSpellsUtils
 Private.Utils = {}
 
-Private.Utils.Pools = {
-	Bar = CreateFramePool("StatusBar", UIParent, nil, nil, nil, function(bar)
-		bar:SetMinMaxValues(0, 1)
-		bar:SetIgnoreParentAlpha(true)
-		bar:SetStatusBarTexture("")
-	end),
-	Frame = CreateFramePool(
-		"Frame",
-		UIParent,
-		"TargetedSpellsFrameTemplate",
-		---@param pool FramePool
-		---@param frame TargetedSpellsMixin
-		function(pool, frame)
-			frame:Reset()
-
-			if frame.bar ~= nil then
-				Private.Utils.Pools.Bar:Release(frame.bar)
-				frame.bar = nil
-			end
-		end
-	),
-}
-
+Private.Utils.Pool = CreateFramePool(
+	"Frame",
+	UIParent,
+	"TargetedSpellsFrameTemplate",
+	---@param pool FramePool<TargetedSpellsMixin>
+	---@param frame TargetedSpellsMixin
+	function(pool, frame)
+		frame:Reset()
+	end
+)
 
 do
 	local function sortAsc(a, b)
@@ -46,6 +33,67 @@ end
 
 function Private.Utils.RollDice()
 	return math.random(1, 6) == 6
+end
+
+function Private.Utils.CollectLayoutingArguments(direction, grow, width, height, gap)
+	local isHorizontal = direction == Private.Enum.Direction.Horizontal
+	local isGrowEnd = grow == Private.Enum.Grow.End
+
+	return {
+		isHorizontal = isHorizontal,
+		isGrowEnd = isGrowEnd,
+		orientation = isHorizontal and "HORIZONTAL" or "VERTICAL",
+		growAxisDimension = (isHorizontal and width or height) + gap,
+		crossAxisDimension = isHorizontal and height or width,
+		originPoint = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM"),
+		relativePoint = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP"),
+	}
+end
+
+function Private.Utils.AdjustLayout(
+	frames,
+	layouting,
+	barParent,
+	firstAnchorFrame,
+	firstAnchorPoint,
+	firstOffsetX,
+	firstOffsetY,
+	barValue
+)
+	---@type Texture?
+	local prevStatusBarTexture = nil
+
+	for _, frame in ipairs(frames) do
+		if layouting.isHorizontal then
+			frame.Bar:SetSize(layouting.growAxisDimension, layouting.crossAxisDimension)
+		else
+			frame.Bar:SetSize(layouting.crossAxisDimension, layouting.growAxisDimension)
+		end
+
+		local texture = frame.Bar:GetStatusBarTexture()
+		frame:ClearAllPoints()
+		frame:SetPoint(layouting.originPoint, texture, layouting.originPoint)
+
+		frame.Bar:SetOrientation(layouting.orientation)
+		frame.Bar:SetReverseFill(layouting.isGrowEnd)
+		frame.Bar:SetParent(barParent)
+		frame:SetFrameLevel(frame.Bar:GetFrameLevel() + 10)
+		frame.Bar:ClearAllPoints()
+
+		if barValue ~= nil then
+			frame.Bar:SetValue(barValue)
+		end
+
+		if prevStatusBarTexture == nil then
+			frame.Bar:SetPoint(layouting.originPoint, firstAnchorFrame, firstAnchorPoint, firstOffsetX, firstOffsetY)
+		else
+			frame.Bar:SetPoint(layouting.originPoint, prevStatusBarTexture, layouting.relativePoint, 0, 0)
+		end
+
+		frame:Show()
+
+		prevStatusBarTexture = texture
+	end
 end
 
 do
