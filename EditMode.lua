@@ -39,7 +39,7 @@ function TargetedSpellsEditModeMixin:IsPastLoadingScreen()
 	return (GetTime() - self.editModeFrame.firstFrameTimestamp) > 1
 end
 
-function TargetedSpellsEditModeMixin:OnSettingsChanged(key, value)
+function TargetedSpellsEditModeMixin:OnSettingsChanged(key, flagIdOrValue, newBool)
 	if
 		-- self
 		key == Private.Settings.Keys.Self.Gap
@@ -48,7 +48,6 @@ function TargetedSpellsEditModeMixin:OnSettingsChanged(key, value)
 		or key == Private.Settings.Keys.Self.Height
 		or key == Private.Settings.Keys.Self.SortOrder
 		or key == Private.Settings.Keys.Self.Grow
-		or key == Private.Settings.Keys.Self.GlowImportant
 		or key == Private.Settings.Keys.Self.GlowType
 		-- party
 		or key == Private.Settings.Keys.Party.Gap
@@ -61,10 +60,9 @@ function TargetedSpellsEditModeMixin:OnSettingsChanged(key, value)
 		or key == Private.Settings.Keys.Party.TargetAnchor
 		or key == Private.Settings.Keys.Party.SortOrder
 		or key == Private.Settings.Keys.Party.Grow
-		or key == Private.Settings.Keys.Party.GlowImportant
 		or key == Private.Settings.Keys.Party.GlowType
 	then
-		self:OnLayoutSettingChanged(key, value)
+		self:OnLayoutSettingChanged(key, flagIdOrValue)
 	elseif key == Private.Settings.Keys.Self.Enabled or key == Private.Settings.Keys.Party.Enabled then
 		if not LibEditMode:IsInEditMode() then
 			return
@@ -74,29 +72,35 @@ function TargetedSpellsEditModeMixin:OnSettingsChanged(key, value)
 			(key == Private.Settings.Keys.Self.Enabled and self.frameKind == Private.Enum.FrameKind.Self)
 			or (key == Private.Settings.Keys.Party.Enabled and self.frameKind == Private.Enum.FrameKind.Party)
 		then
-			if value then
+			if flagIdOrValue then
 				self:StartDemo()
 			else
 				self:EndDemo()
 			end
 		end
-	elseif key == Private.Settings.Keys.Party.IncludeSelfInParty and self.frameKind == Private.Enum.FrameKind.Party then
-		if not LibEditMode:IsInEditMode() then
-			return
-		end
+	elseif key == Private.Settings.Keys.Self.FeatureFlags or key == Private.Settings.Keys.Party.FeatureFlags then
+		local flagId = flagIdOrValue
 
-		self:EndDemo()
-		self:StartDemo()
-	elseif
-		(key == Private.Settings.Keys.Self.OnlyImportant and self.frameKind == Private.Enum.FrameKind.Self)
-		or (key == Private.Settings.Keys.Party.OnlyImportant and self.frameKind == Private.Enum.FrameKind.Party)
-	then
-		if not LibEditMode:IsInEditMode() then
-			return
-		end
+		if flagId == Private.Enum.FeatureFlag.GlowImportant then
+			self:OnLayoutSettingChanged(key, flagId, newBool)
+		elseif
+			flagId == Private.Enum.FeatureFlag.OnlyImportant
+			or flagId == Private.Enum.FeatureFlag.IncludeSelfInParty
+		then
+			if not LibEditMode:IsInEditMode() then
+				return
+			end
 
-		self:EndDemo()
-		self:StartDemo()
+			local isSelf = key == Private.Settings.Keys.Self.FeatureFlags
+
+			if
+				(isSelf and self.frameKind == Private.Enum.FrameKind.Self)
+				or (not isSelf and self.frameKind == Private.Enum.FrameKind.Party)
+			then
+				self:EndDemo()
+				self:StartDemo()
+			end
+		end
 	end
 end
 
@@ -355,199 +359,59 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 		}
 	end
 
-	if key == Private.Settings.Keys.Self.ShowSwipe or key == Private.Settings.Keys.Party.ShowSwipe then
-		local tableRef = key == Private.Settings.Keys.Self.ShowSwipe and TargetedSpellsSaved.Settings.Self
+	if key == Private.Settings.Keys.Self.FeatureFlags or key == Private.Settings.Keys.Party.FeatureFlags then
+		local kind = key == Private.Settings.Keys.Self.FeatureFlags and Private.Enum.FrameKind.Self
+			or Private.Enum.FrameKind.Party
+		local tableRef = kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 			or TargetedSpellsSaved.Settings.Party
 
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.ShowSwipe
-		end
+		local function Generator(owner, rootDescription, data)
+			for _, id in ipairs(Private.Settings.GetFeatureFlagsForKind(kind)) do
+				local title = L.Settings.FeatureFlagSettingTitles[id]
 
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.ShowSwipe then
-				tableRef.ShowSwipe = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if title then
+					rootDescription:CreateTitle(title)
+				end
+
+				local function IsEnabled()
+					return tableRef.FeatureFlags[id] == true
+				end
+
+				local function Toggle()
+					tableRef.FeatureFlags[id] = not tableRef.FeatureFlags[id]
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						id,
+						tableRef.FeatureFlags[id]
+					)
+				end
+
+				rootDescription:CreateCheckbox(L.Settings.FeatureFlagLabels[id], IsEnabled, Toggle, {
+					value = id,
+					multiple = true,
+				})
 			end
 		end
 
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.ShowSwipeLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.ShowSwipeTooltip,
-			default = defaults.ShowSwipe,
-			get = Get,
-			set = Set,
-		}
-	end
-
-	if
-		key == Private.Settings.Keys.Self.IndicateInterrupts
-		or key == Private.Settings.Keys.Party.IndicateInterrupts
-	then
-		local tableRef = key == Private.Settings.Keys.Self.IndicateInterrupts and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
 		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.IndicateInterrupts
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.IndicateInterrupts then
-				tableRef.IndicateInterrupts = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-
-				if value then
-					LibEditMode:EnableFrameSetting(self.editModeFrame, L.Settings.RenderInterruptSourceNameLabel)
-				else
-					LibEditMode:DisableFrameSetting(self.editModeFrame, L.Settings.RenderInterruptSourceNameLabel)
+		---@param values table<number, boolean>
+		local function Set(layoutName, values)
+			for id, bool in pairs(values) do
+				if tableRef.FeatureFlags[id] ~= bool then
+					tableRef.FeatureFlags[id] = bool
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, id, bool)
 				end
 			end
 		end
 
-		---@type LibEditModeCheckbox
+		---@type LibEditModeDropdown
 		return {
-			name = L.Settings.IndicateInterruptsLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.IndicateInterruptsTooltip,
-			default = defaults.IndicateInterrupts,
-			get = Get,
-			set = Set,
-		}
-	end
-
-	if
-		key == Private.Settings.Keys.Self.RenderInterruptSourceName
-		or key == Private.Settings.Keys.Party.RenderInterruptSourceName
-	then
-		local tableRef = key == Private.Settings.Keys.Self.RenderInterruptSourceName
-				and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.RenderInterruptSourceName
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.RenderInterruptSourceName then
-				tableRef.RenderInterruptSourceName = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.RenderInterruptSourceNameLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.RenderInterruptSourceNameTooltip,
-			default = defaults.RenderInterruptSourceName,
-			get = Get,
-			set = Set,
-		}
-	end
-
-	if
-		key == Private.Settings.Keys.Self.ShowDurationFractions
-		or key == Private.Settings.Keys.Party.ShowDurationFractions
-	then
-		local tableRef = key == Private.Settings.Keys.Self.ShowDurationFractions and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.ShowDurationFractions
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.ShowDurationFractions then
-				tableRef.ShowDurationFractions = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.ShowDurationFractionsLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.ShowDurationFractionsTooltip,
-			default = defaults.ShowDurationFractions,
-			get = Get,
-			set = Set,
-			disabled = not TargetedSpellsSaved.Settings.Self.ShowDuration,
-		}
-	end
-
-	if key == Private.Settings.Keys.Self.GlowImportant or key == Private.Settings.Keys.Party.GlowImportant then
-		local tableRef = key == Private.Settings.Keys.Self.GlowImportant and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.GlowImportant
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.GlowImportant then
-				tableRef.GlowImportant = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-
-			if value then
-				LibEditMode:EnableFrameSetting(self.editModeFrame, L.Settings.GlowTypeLabel)
-			else
-				LibEditMode:DisableFrameSetting(self.editModeFrame, L.Settings.GlowTypeLabel)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.GlowImportantLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.GlowImportantTooltip,
-			default = defaults.GlowImportant,
-			get = Get,
-			set = Set,
-		}
-	end
-
-	if key == Private.Settings.Keys.Self.OnlyImportant or key == Private.Settings.Keys.Party.OnlyImportant then
-		local tableRef = key == Private.Settings.Keys.Self.OnlyImportant and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.OnlyImportant
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.OnlyImportant then
-				tableRef.OnlyImportant = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.OnlyImportantLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.OnlyImportantTooltip,
-			default = defaults.OnlyImportant,
-			get = Get,
+			name = L.Settings.FeatureFlagsLabel,
+			kind = Enum.EditModeSettingDisplayType.Dropdown,
+			default = defaults.FeatureFlags,
+			desc = L.Settings.FeatureFlagsTooltip,
+			generator = Generator,
 			set = Set,
 		}
 	end
@@ -590,99 +454,7 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 			multiple = false,
 			generator = Generator,
 			set = Set,
-			disabled = not tableRef.GlowImportant,
-		}
-	end
-
-	if key == Private.Settings.Keys.Self.ShowBorder or key == Private.Settings.Keys.Party.ShowBorder then
-		local tableRef = key == Private.Settings.Keys.Self.ShowBorder and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.ShowBorder
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.ShowBorder then
-				tableRef.ShowBorder = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.ShowBorderLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.ShowBorderTooltip,
-			default = defaults.ShowBorder,
-			get = Get,
-			set = Set,
-		}
-	end
-
-	if key == Private.Settings.Keys.Self.ShowDuration or key == Private.Settings.Keys.Party.ShowDuration then
-		local tableRef = key == Private.Settings.Keys.Self.ShowDuration and TargetedSpellsSaved.Settings.Self
-			or TargetedSpellsSaved.Settings.Party
-
-		---@param layoutName string
-		local function Get(layoutName)
-			return tableRef.ShowDuration
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= tableRef.ShowDuration then
-				tableRef.ShowDuration = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-
-			if value then
-				LibEditMode:EnableFrameSetting(self.editModeFrame, L.Settings.FontSizeLabel)
-				LibEditMode:EnableFrameSetting(self.editModeFrame, L.Settings.ShowDurationFractionsLabel)
-			else
-				LibEditMode:DisableFrameSetting(self.editModeFrame, L.Settings.FontSizeLabel)
-				LibEditMode:DisableFrameSetting(self.editModeFrame, L.Settings.ShowDurationFractionsLabel)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.ShowDurationLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.ShowDurationTooltip,
-			default = defaults.ShowDuration,
-			get = Get,
-			set = Set,
-		}
-	end
-
-	if key == Private.Settings.Keys.Party.IncludeSelfInParty then
-		---@param layoutName string
-		local function Get(layoutName)
-			return TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-		end
-
-		---@param layoutName string
-		---@param value boolean
-		local function Set(layoutName, value)
-			if value ~= TargetedSpellsSaved.Settings.Party.IncludeSelfInParty then
-				TargetedSpellsSaved.Settings.Party.IncludeSelfInParty = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
-			end
-		end
-
-		---@type LibEditModeCheckbox
-		return {
-			name = L.Settings.IncludeSelfInPartyLabel,
-			kind = Enum.EditModeSettingDisplayType.Checkbox,
-			desc = L.Settings.IncludeSelfInPartyTooltip,
-			default = defaults.IncludeSelfInParty,
-			get = Get,
-			set = Set,
+			disabled = not tableRef.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant],
 		}
 	end
 
@@ -919,7 +691,7 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 			minValue = sliderSettings.min,
 			maxValue = sliderSettings.max,
 			valueStep = sliderSettings.step,
-			disabled = not tableRef.ShowDuration,
+			disabled = not tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
 		}
 	end
 
@@ -1321,16 +1093,16 @@ function TargetedSpellsEditModeMixin:LoopFrame(frame, index)
 	local tableRef = self.frameKind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 		or TargetedSpellsSaved.Settings.Party
 
-	if tableRef.GlowImportant and Private.Utils.RollDice() then
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] and Private.Utils.RollDice() then
 		frame:ShowGlow(secretwrap(true))
 
-		if tableRef.OnlyImportant then
+		if tableRef.FeatureFlags[Private.Enum.FeatureFlag.OnlyImportant] then
 			frame:SetAlpha(secretwrap(1))
 		end
 	else
 		frame:HideGlow()
 
-		if tableRef.OnlyImportant then
+		if tableRef.FeatureFlags[Private.Enum.FeatureFlag.OnlyImportant] then
 			frame:SetAlpha(secretwrap(0))
 		end
 	end
@@ -1563,7 +1335,7 @@ function SelfEditModeMixin:OnLayoutSettingChanged(key, value)
 			end
 		end
 	elseif key == Private.Settings.Keys.Self.GlowType then
-		if not TargetedSpellsSaved.Settings.Self.GlowImportant then
+		if not TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 			return
 		end
 
@@ -1765,7 +1537,7 @@ function PartyEditModeMixin:OnLayoutSettingChanged(key, value)
 			end
 		end
 	elseif key == Private.Settings.Keys.Party.GlowType then
-		if not TargetedSpellsSaved.Settings.Party.GlowImportant then
+		if not TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 			return
 		end
 
@@ -1823,7 +1595,13 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 		if #activeFrames > 0 then
 			local token = i == 5 and "player" or string.format("party%d", i)
 
-			if i < 5 or (i == 5 and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty) then
+			if
+				i < 5
+				or (
+					i == 5
+					and TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IncludeSelfInParty]
+				)
+			then
 				Private.Utils.SortFrames(activeFrames, sortOrder)
 
 				local parentFrame = Private.Utils.FindThirdPartyGroupFrameForUnit(token)

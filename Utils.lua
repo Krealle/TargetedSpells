@@ -361,6 +361,8 @@ do
 							enumToCompareAgainst = Private.Enum.Role
 						elseif key == "FontFlags" then
 							enumToCompareAgainst = Private.Enum.FontFlags
+						elseif key == "FeatureFlags" then
+							enumToCompareAgainst = Private.Enum.FeatureFlag
 						end
 
 						-- only other case is Position but that's taken care of above

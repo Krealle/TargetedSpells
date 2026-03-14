@@ -130,6 +130,7 @@
 ---@field GetPartyDefaultSettings fun(): SavedVariablesSettingsParty
 ---@field IsContentTypeAvailableForKind fun(kind: FrameKind, contentTypeId: ContentType): boolean
 ---@field GetFontOptions fun(): FontInfo
+---@field GetFeatureFlagsForKind fun(kind: FrameKind): FeatureFlag[]
 
 ---@class SavedVariables
 ---@field Settings SavedVariablesSettings
@@ -154,20 +155,13 @@
 ---@field LoadConditionRole table<number, boolean>
 ---@field SortOrder SortOrder
 ---@field Grow Grow
----@field ShowDuration boolean
----@field ShowDurationFractions boolean
 ---@field FontSize number
 ---@field Position FramePosition
----@field ShowBorder boolean
----@field GlowImportant boolean
----@field OnlyImportant boolean
 ---@field GlowType GlowType
 ---@field Opacity number
----@field IndicateInterrupts boolean
----@field RenderInterruptSourceName boolean
----@field ShowSwipe boolean
 ---@field Font string
 ---@field FontFlags table<FontFlags, boolean>
+---@field FeatureFlags table<FeatureFlag, boolean>
 
 ---@class SavedVariablesSettingsParty
 ---@field Enabled boolean
@@ -183,19 +177,12 @@
 ---@field TargetAnchor FramePoint
 ---@field SortOrder SortOrder
 ---@field Grow Grow
----@field ShowDuration boolean
----@field ShowDurationFractions boolean
 ---@field FontSize number
----@field ShowBorder boolean
----@field GlowImportant boolean
----@field OnlyImportant boolean
 ---@field GlowType GlowType
 ---@field Opacity number
----@field IndicateInterrupts boolean
----@field RenderInterruptSourceName boolean
----@field ShowSwipe boolean
 ---@field Font string
 ---@field FontFlags table<FontFlags, boolean>
+---@field FeatureFlags table<FeatureFlag, boolean>
 
 ---@class TargetedSpellsSelfPreviewFrame: Frame
 ---@field GetChildren fun(self: TargetedSpellsSelfPreviewFrame): TargetedSpellsMixin
@@ -236,7 +223,7 @@
 ---@field SetShowDuration fun(self: TargetedSpellsMixin, showDuration: boolean, showFractions: boolean)
 ---@field SetShowBorder fun(self: TargetedSpellsMixin, bool: boolean)
 ---@field OnSizeChanged fun(self: TargetedSpellsMixin, width: number, height: number)
----@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, value: number|string|boolean|table)
+---@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, flagIdOrValue: number|string|boolean|table, newBool: boolean?)
 ---@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObject)
 ---@field GetDuration fun(self: TargetedSpellsMixin): (DurationObject|number|nil)
 ---@field SetStartTime fun(self: TargetedSpellsMixin, startTime: number?)
@@ -267,9 +254,9 @@
 ---@field protected demoTimers { tickers: table<number, FunctionContainer>, timers: table<number, FunctionContainer> }
 ---@field private buildingFrames true|nil
 ---@field Init fun(self: TargetedSpellsEditModeMixin, displayName: string, frameKind: FrameKind)
----@field OnSettingsChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string)
+---@field OnSettingsChanged fun(self: TargetedSpellsEditModeMixin, key: string, flagIdOrValue: number|string|boolean, newBool: boolean?)
 ---@field CreateSetting fun(self: TargetedSpellsEditModeMixin, key: string, defaults: SavedVariablesSettingsParty|SavedVariablesSettingsSelf): LibEditModeButton|LibEditModeCheckbox | LibEditModeDropdown | LibEditModeSlider
----@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string)
+---@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string, newBool: boolean?)
 ---@field AppendSettings fun(self: TargetedSpellsEditModeMixin)
 ---@field AcquireFrame fun(self: TargetedSpellsEditModeMixin): TargetedSpellsMixin
 ---@field OnEditModePositionChanged fun(self: TargetedSpellsEditModeMixin, frame: Frame, layoutName: string, point: FramePoint, x: number, y: number)
@@ -295,7 +282,7 @@
 ---@field OnEditModePositionChanged fun(self: TargetedSpellsEditModeMixin, frame: Frame, layoutName: string, point: FramePoint, x: number, y: number)
 ---@field RepositionPreviewFrames fun(self: TargetedSpellsEditModeMixin)
 ---@field StartDemo fun(self: TargetedSpellsSelfEditMode)
----@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string)
+---@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string, newBool: boolean?)
 
 ---@class TargetedSpellsPartyEditMode : TargetedSpellsEditModeMixin
 ---@field private maxUnitCount number
@@ -306,7 +293,7 @@
 ---@field AppendSettings fun(self: TargetedSpellsEditModeMixin)
 ---@field RepositionPreviewFrames fun(self: TargetedSpellsEditModeMixin)
 ---@field OnEditModePositionChanged fun(self: TargetedSpellsEditModeMixin, frame: Frame, layoutName: string, point: FramePoint, x: number, y: number)
----@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string)
+---@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string, newBool: boolean?)
 ---@field RepositionPreviewFrames fun(self: TargetedSpellsEditModeMixin)
 ---@field StartDemo fun(self: TargetedSpellsEditModeMixin)
 ---@field ReleaseAllFrames fun(self: TargetedSpellsEditModeMixin)

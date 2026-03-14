@@ -136,7 +136,12 @@ do
 			for i = 1, partyMemberCount do
 				local unit = i == partyMemberCount and "player" or "party" .. i
 
-				if (unit == "player" and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty) or unit ~= "player" then
+				if
+					(
+						unit == "player"
+						and TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IncludeSelfInParty]
+					) or unit ~= "player"
+				then
 					local frame = Private.Utils.Pool:Acquire()
 					frame:PostCreate(unit, Private.Enum.FrameKind.Party, castingUnit)
 					table.insert(frames, frame)
@@ -710,8 +715,8 @@ end
 
 function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interruptedBy)
 	if
-		not TargetedSpellsSaved.Settings.Self.IndicateInterrupts
-		and not TargetedSpellsSaved.Settings.Party.IndicateInterrupts
+		not TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
+		and not TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 	then
 		return false
 	end
@@ -746,9 +751,11 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 		local indicateInterrupts = false
 
 		if frame:GetKind() == Private.Enum.FrameKind.Self then
-			indicateInterrupts = TargetedSpellsSaved.Settings.Self.IndicateInterrupts
+			indicateInterrupts =
+				TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 		else
-			indicateInterrupts = TargetedSpellsSaved.Settings.Party.IndicateInterrupts
+			indicateInterrupts =
+				TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 		end
 
 		if indicateInterrupts then

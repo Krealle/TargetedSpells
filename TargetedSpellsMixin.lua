@@ -74,9 +74,11 @@ function TargetedSpellsMixin:SetInterrupted(name, color)
 	local renderInterruptSourceName = false
 
 	if self.kind == Private.Enum.FrameKind.Self then
-		renderInterruptSourceName = TargetedSpellsSaved.Settings.Self.RenderInterruptSourceName
+		renderInterruptSourceName =
+			TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.RenderInterruptSourceName]
 	else
-		renderInterruptSourceName = TargetedSpellsSaved.Settings.Party.RenderInterruptSourceName
+		renderInterruptSourceName =
+			TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.RenderInterruptSourceName]
 	end
 
 	if renderInterruptSourceName then
@@ -179,72 +181,78 @@ function TargetedSpellsMixin:OnSizeChanged()
 	end
 end
 
-function TargetedSpellsMixin:OnSettingChanged(key, value)
+function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 	if self.kind == Private.Enum.FrameKind.Self then
 		if key == Private.Settings.Keys.Self.Width then
-			PixelUtil.SetSize(self, value, TargetedSpellsSaved.Settings.Self.Height)
+			PixelUtil.SetSize(self, flagIdOrValue, TargetedSpellsSaved.Settings.Self.Height)
 		elseif key == Private.Settings.Keys.Self.Height then
-			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Self.Width, value)
-		elseif key == Private.Settings.Keys.Self.ShowDuration then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowDuration(value, TargetedSpellsSaved.Settings.Self.ShowDurationFractions)
+			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Self.Width, flagIdOrValue)
 		elseif key == Private.Settings.Keys.Self.FontSize then
 			self:SetFontSize()
 		elseif key == Private.Settings.Keys.Self.Font or key == Private.Settings.Keys.Self.FontFlags then
 			self:SetFont()
 		elseif key == Private.Settings.Keys.Self.Opacity then
-			self:SetAlpha(value)
-		elseif key == Private.Settings.Keys.Self.ShowBorder then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowBorder(value)
+			self:SetAlpha(flagIdOrValue)
 		elseif key == Private.Settings.Keys.Self.GlowType then
 			self:HideGlow()
 
-			if TargetedSpellsSaved.Settings.Self.GlowImportant then
+			if TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
 			end
-		elseif key == Private.Settings.Keys.Self.ShowDurationFractions then
-			self:SetScript("OnUpdate", value and self.OnUpdate or nil)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetHideCountdownNumbers(value)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown.DurationText:SetShown(value)
-		elseif key == Private.Settings.Keys.Self.ShowSwipe then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetDrawSwipe(value)
+		elseif key == Private.Settings.Keys.Self.FeatureFlags then
+			if
+				flagIdOrValue == Private.Enum.FeatureFlag.ShowDuration
+				or flagIdOrValue == Private.Enum.FeatureFlag.ShowDurationFractions
+			then
+				self:SetShowDuration(
+					TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+					TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+				)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowBorder then
+				self:SetShowBorder(newBool)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowSwipe then
+				self.Cooldown:SetDrawSwipe(newBool)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.GlowImportant then
+				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.OnlyImportant then
+				self:SetAlphaFromBoolean(not newBool or self:IsSpellImportant())
+			end
 		end
 	else
 		if key == Private.Settings.Keys.Party.Width then
-			PixelUtil.SetSize(self, value, TargetedSpellsSaved.Settings.Party.Height)
+			PixelUtil.SetSize(self, flagIdOrValue, TargetedSpellsSaved.Settings.Party.Height)
 		elseif key == Private.Settings.Keys.Party.Height then
-			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Party.Width, value)
-		elseif key == Private.Settings.Keys.Party.ShowDuration then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowDuration(value, TargetedSpellsSaved.Settings.Party.ShowDurationFractions)
+			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Party.Width, flagIdOrValue)
 		elseif key == Private.Settings.Keys.Party.FontSize then
 			self:SetFontSize()
 		elseif key == Private.Settings.Keys.Party.Font or key == Private.Settings.Keys.Party.FontFlags then
 			self:SetFont()
 		elseif key == Private.Settings.Keys.Party.Opacity then
-			self:SetAlpha(value)
-		elseif key == Private.Settings.Keys.Party.ShowBorder then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowBorder(value)
+			self:SetAlpha(flagIdOrValue)
 		elseif key == Private.Settings.Keys.Party.GlowType then
 			self:HideGlow()
 
-			if TargetedSpellsSaved.Settings.Party.GlowImportant then
+			if TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
 			end
-		elseif key == Private.Settings.Keys.Party.ShowDurationFractions then
-			self:SetScript("OnUpdate", value and self.OnUpdate or nil)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetHideCountdownNumbers(value)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown.DurationText:SetShown(value)
-		elseif key == Private.Settings.Keys.Party.ShowSwipe then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetDrawSwipe(value)
+		elseif key == Private.Settings.Keys.Party.FeatureFlags then
+			if
+				flagIdOrValue == Private.Enum.FeatureFlag.ShowDuration
+				or flagIdOrValue == Private.Enum.FeatureFlag.ShowDurationFractions
+			then
+				self:SetShowDuration(
+					TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+					TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+				)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowBorder then
+				self:SetShowBorder(newBool)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowSwipe then
+				self.Cooldown:SetDrawSwipe(newBool)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.GlowImportant then
+				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.OnlyImportant then
+				self:SetAlphaFromBoolean(not newBool or self:IsSpellImportant())
+			end
 		end
 	end
 end
@@ -378,7 +386,7 @@ function TargetedSpellsMixin:SetSpellId(spellId)
 	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 		or TargetedSpellsSaved.Settings.Party
 
-	if not tableRef.GlowImportant then
+	if not tableRef.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 		return
 	end
 
@@ -386,7 +394,7 @@ function TargetedSpellsMixin:SetSpellId(spellId)
 
 	self:ShowGlow(isImportant)
 
-	if tableRef.OnlyImportant then
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.OnlyImportant] then
 		self:SetAlpha(C_CurveUtil.EvaluateColorValueFromBoolean(isImportant, 1, 0))
 	end
 end
@@ -417,10 +425,13 @@ function TargetedSpellsMixin:SetKind(kind)
 	self:SetFontSize()
 	self:SetFont()
 	self:HideGlow()
-	self:SetShowBorder(tableRef.ShowBorder)
+	self:SetShowBorder(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowBorder])
 	self:SetAlpha(tableRef.Opacity)
-	self:SetShowDuration(tableRef.ShowDuration, tableRef.ShowDurationFractions)
-	self.Cooldown:SetDrawSwipe(tableRef.ShowSwipe)
+	self:SetShowDuration(
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+	)
+	self.Cooldown:SetDrawSwipe(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowSwipe])
 end
 
 function TargetedSpellsMixin:GetKind()
@@ -464,7 +475,7 @@ function TargetedSpellsMixin:Reset()
 	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 		or TargetedSpellsSaved.Settings.Party
 
-	if tableRef.GlowImportant then
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 		local glowType = tableRef.GlowType
 
 		if glowType == Private.Enum.GlowType.PixelGlow then
@@ -484,8 +495,11 @@ function TargetedSpellsMixin:Reset()
 
 	self:HideGlow()
 
-	self:SetShowDuration(tableRef.ShowDuration, tableRef.ShowDurationFractions)
-	self.Cooldown:SetDrawSwipe(tableRef.ShowSwipe)
+	self:SetShowDuration(
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+	)
+	self.Cooldown:SetDrawSwipe(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowSwipe])
 	self.Bar:ClearAllPoints()
 	self.Bar:SetParent(self)
 	-- important to come last - the cooldown swipe ignores display status of its parent
@@ -498,7 +512,7 @@ function TargetedSpellsMixin:SetFontSize()
 
 	local fontString = nil
 
-	if tableRef.ShowDurationFractions then
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions] then
 		fontString = self.Cooldown.DurationText
 	else
 		fontString = self.Cooldown:GetCountdownFontString()
@@ -519,7 +533,7 @@ function TargetedSpellsMixin:SetFont()
 
 	local fontString = nil
 
-	if tableRef.ShowDurationFractions then
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions] then
 		fontString = self.Cooldown.DurationText
 	else
 		fontString = self.Cooldown:GetCountdownFontString()

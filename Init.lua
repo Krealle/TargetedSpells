@@ -34,8 +34,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	TargetedSpellsSaved.Settings.Party = TargetedSpellsSaved.Settings.Party or {}
 
 	local resetKeys = {}
+	local selfDefaults = Private.Settings.GetSelfDefaultSettings()
+	local partyDefaults = Private.Settings.GetPartyDefaultSettings()
 
-	for key, value in pairs(Private.Settings.GetSelfDefaultSettings()) do
+	for key, value in pairs(selfDefaults) do
 		if
 			TargetedSpellsSaved.Settings.Self[key] == nil
 			or type(value) ~= type(TargetedSpellsSaved.Settings.Self[key])
@@ -60,7 +62,7 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		end
 	end
 
-	for key, value in pairs(Private.Settings.GetPartyDefaultSettings()) do
+	for key, value in pairs(partyDefaults) do
 		if
 			TargetedSpellsSaved.Settings.Party[key] == nil
 			or type(value) ~= type(TargetedSpellsSaved.Settings.Party[key])
@@ -87,6 +89,45 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 
 	if TargetedSpellsSaved.v2DeprecationWarningSeen == nil then
 		TargetedSpellsSaved.v2DeprecationWarningSeen = true
+
+		local function MigrateFeatureFlags(kind)
+			local flagSourceMap = {
+				[Private.Enum.FeatureFlag.GlowImportant] = "GlowImportant",
+				[Private.Enum.FeatureFlag.OnlyImportant] = "OnlyImportant",
+				[Private.Enum.FeatureFlag.ShowDuration] = "ShowDuration",
+				[Private.Enum.FeatureFlag.ShowDurationFractions] = "ShowDurationFractions",
+				[Private.Enum.FeatureFlag.ShowBorder] = "ShowBorder",
+				[Private.Enum.FeatureFlag.ShowSwipe] = "ShowSwipe",
+				[Private.Enum.FeatureFlag.IndicateInterrupts] = "IndicateInterrupts",
+				[Private.Enum.FeatureFlag.RenderInterruptSourceName] = "RenderInterruptSourceName",
+			}
+
+			local settings, flagDefaults = nil, nil
+			if kind == Private.Enum.FrameKind.Self then
+				settings = TargetedSpellsSaved.Settings.Self
+				flagDefaults = selfDefaults.FeatureFlags
+			else
+				flagSourceMap[Private.Enum.FeatureFlag.IncludeSelfInParty] = "IncludeSelfInParty"
+				settings = TargetedSpellsSaved.Settings.Party
+				flagDefaults = partyDefaults.FeatureFlags
+			end
+
+			if settings.FeatureFlags == nil then
+				settings.FeatureFlags = {}
+			end
+
+			for flagId, oldKey in pairs(flagSourceMap) do
+				if settings.FeatureFlags[flagId] == nil then
+					settings.FeatureFlags[flagId] = (settings[oldKey] ~= nil) and settings[oldKey]
+						or flagDefaults[flagId]
+				end
+
+				settings[oldKey] = nil
+			end
+		end
+
+		MigrateFeatureFlags(Private.Enum.FrameKind.Self)
+		MigrateFeatureFlags(Private.Enum.FrameKind.Party)
 
 		if #resetKeys > 0 then
 			C_Timer.After(3, function()

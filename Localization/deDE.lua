@@ -158,3 +158,24 @@ L.Settings.Export = "Exportieren"
 
 L.Settings.FontLabel = "Schriftart"
 L.Settings.FontTooltip = nil
+
+L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsTooltip = nil
+
+L.Settings.FeatureFlagLabels = {
+	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
+	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
+	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
+	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
+	[Private.Enum.FeatureFlag.ShowBorder] = L.Settings.ShowBorderLabel,
+	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
+	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+}
+
+L.Settings.FeatureFlagSettingTitles = {
+	[Private.Enum.FeatureFlag.GlowImportant] = "Anzeige",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Unterbrechungseinstellungen",
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Gruppeneinstellungen",
+}

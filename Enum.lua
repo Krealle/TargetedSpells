@@ -82,3 +82,16 @@ Private.Enum.FontFlags = {
 	OUTLINE = 1,
 	SHADOW = 2,
 }
+
+---@enum FeatureFlag
+Private.Enum.FeatureFlag = {
+	GlowImportant = 1,
+	OnlyImportant = 2,
+	ShowDuration = 3,
+	ShowDurationFractions = 4,
+	ShowBorder = 5,
+	ShowSwipe = 6,
+	IndicateInterrupts = 7,
+	RenderInterruptSourceName = 8,
+	IncludeSelfInParty = 9,
+}

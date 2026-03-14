@@ -16,21 +16,14 @@ Private.Settings.Keys = {
 		Gap = "FRAME_GAP_SELF",
 		Direction = "GROW_DIRECTION_SELF",
 		SortOrder = "FRAME_SORT_ORDER_SELF",
-		GlowImportant = "GLOW_IMPORTANT_SELF",
-		OnlyImportant = "ONLY_IMPORTANT_SELF",
 		GlowType = "GLOW_TYPE_SELF",
 		Grow = "FRAME_GROW_SELF",
-		ShowDuration = "SHOW_DURATION_SELF",
-		ShowDurationFractions = "SHOW_DURATION_FRACTIONS_SELF",
 		Opacity = "OPACITY_SELF",
-		ShowBorder = "BORDER_SELF",
-		IndicateInterrupts = "INDICATE_INTERRUPTS_SELF",
 		Import = "IMPORT_SELF",
 		Export = "EXPORT_SELF",
-		ShowSwipe = "SWIPE_SELF",
 		Font = "FONT_SELF",
 		FontFlags = "FONT_FLAGS_SELF",
-		RenderInterruptSourceName = "RENDER_INTERRUPT_SOURCE_NAME_SELF",
+		FeatureFlags = "FEATURE_FLAGS_SELF",
 	},
 	Party = {
 		Enabled = "ENABLED_PARTY",
@@ -47,21 +40,13 @@ Private.Settings.Keys = {
 		TargetAnchor = "FRAME_TARGET_ANCHOR_PARTY",
 		SortOrder = "FRAME_SORT_ORDER_PARTY",
 		Grow = "FRAME_GROW_PARTY",
-		GlowImportant = "GLOW_IMPORTANT_PARTY",
-		OnlyImportant = "ONLY_IMPORTANT_PARTY",
 		GlowType = "GLOW_TYPE_PARTY",
-		IncludeSelfInParty = "INCLUDE_SELF_IN_PARTY_PARTY",
-		ShowDuration = "SHOW_DURATION_PARTY",
-		ShowDurationFractions = "SHOW_DURATION_FRACTIONS_PARTY",
 		Opacity = "OPACITY_PARTY",
-		ShowBorder = "BORDER_PARTY",
-		IndicateInterrupts = "INDICATE_INTERRUPTS_PARTY",
 		Import = "IMPORT_PARTY",
 		Export = "EXPORT_PARTY",
-		ShowSwipe = "SWIPE_PARTY",
 		Font = "FONT_PARTY",
 		FontFlags = "FONT_FLAGS_PARTY",
-		RenderInterruptSourceName = "RENDER_INTERRUPT_SOURCE_NAME_PARTY",
+		FeatureFlags = "FEATURE_FLAGS_PARTY",
 	},
 }
 
@@ -77,18 +62,11 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 			Private.Settings.Keys.Self.Direction,
 			Private.Settings.Keys.Self.SortOrder,
 			Private.Settings.Keys.Self.Grow,
-			Private.Settings.Keys.Self.GlowImportant,
-			Private.Settings.Keys.Self.OnlyImportant,
 			Private.Settings.Keys.Self.GlowType,
-			Private.Settings.Keys.Self.ShowDuration,
-			Private.Settings.Keys.Self.ShowDurationFractions,
+			Private.Settings.Keys.Self.FeatureFlags,
 			Private.Settings.Keys.Self.Font,
 			Private.Settings.Keys.Self.FontSize,
 			Private.Settings.Keys.Self.FontFlags,
-			Private.Settings.Keys.Self.ShowBorder,
-			Private.Settings.Keys.Self.ShowSwipe,
-			Private.Settings.Keys.Self.IndicateInterrupts,
-			Private.Settings.Keys.Self.RenderInterruptSourceName,
 			Private.Settings.Keys.Self.Opacity,
 		}
 	end
@@ -97,7 +75,6 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.Enabled,
 		Private.Settings.Keys.Party.LoadConditionContentType,
 		Private.Settings.Keys.Party.LoadConditionRole,
-		Private.Settings.Keys.Party.IncludeSelfInParty,
 		Private.Settings.Keys.Party.Width,
 		Private.Settings.Keys.Party.Height,
 		Private.Settings.Keys.Party.Gap,
@@ -108,19 +85,39 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.OffsetX,
 		Private.Settings.Keys.Party.OffsetY,
 		Private.Settings.Keys.Party.SortOrder,
-		Private.Settings.Keys.Party.GlowImportant,
-		Private.Settings.Keys.Party.OnlyImportant,
 		Private.Settings.Keys.Party.GlowType,
-		Private.Settings.Keys.Party.ShowDuration,
-		Private.Settings.Keys.Party.ShowDurationFractions,
+		Private.Settings.Keys.Party.FeatureFlags,
 		Private.Settings.Keys.Party.Font,
 		Private.Settings.Keys.Party.FontSize,
 		Private.Settings.Keys.Party.FontFlags,
-		Private.Settings.Keys.Party.ShowBorder,
-		Private.Settings.Keys.Party.ShowSwipe,
-		Private.Settings.Keys.Party.IndicateInterrupts,
-		Private.Settings.Keys.Party.RenderInterruptSourceName,
 		Private.Settings.Keys.Party.Opacity,
+	}
+end
+
+function Private.Settings.GetFeatureFlagsForKind(kind)
+	if kind == Private.Enum.FrameKind.Self then
+		return {
+			Private.Enum.FeatureFlag.GlowImportant,
+			Private.Enum.FeatureFlag.OnlyImportant,
+			Private.Enum.FeatureFlag.ShowDuration,
+			Private.Enum.FeatureFlag.ShowDurationFractions,
+			Private.Enum.FeatureFlag.ShowBorder,
+			Private.Enum.FeatureFlag.ShowSwipe,
+			Private.Enum.FeatureFlag.IndicateInterrupts,
+			Private.Enum.FeatureFlag.RenderInterruptSourceName,
+		}
+	end
+
+	return {
+		Private.Enum.FeatureFlag.IncludeSelfInParty,
+		Private.Enum.FeatureFlag.GlowImportant,
+		Private.Enum.FeatureFlag.OnlyImportant,
+		Private.Enum.FeatureFlag.ShowDuration,
+		Private.Enum.FeatureFlag.ShowDurationFractions,
+		Private.Enum.FeatureFlag.ShowBorder,
+		Private.Enum.FeatureFlag.ShowSwipe,
+		Private.Enum.FeatureFlag.IndicateInterrupts,
+		Private.Enum.FeatureFlag.RenderInterruptSourceName,
 	}
 end
 
@@ -216,22 +213,24 @@ function Private.Settings.GetSelfDefaultSettings()
 		},
 		SortOrder = Private.Enum.SortOrder.Ascending,
 		Grow = Private.Enum.Grow.Start,
-		ShowDuration = true,
-		ShowDurationFractions = true,
 		FontSize = 20,
 		Position = Private.Settings.GetDefaultEditModeFramePosition(),
 		Opacity = 1,
-		ShowBorder = true,
-		GlowImportant = true,
-		OnlyImportant = false,
 		GlowType = Private.Enum.GlowType.PixelGlow,
-		IndicateInterrupts = false,
-		RenderInterruptSourceName = false,
-		ShowSwipe = true,
 		Font = "Fonts\\FRIZQT__.TTF",
 		FontFlags = {
 			[Private.Enum.FontFlags.OUTLINE] = true,
 			[Private.Enum.FontFlags.SHADOW] = false,
+		},
+		FeatureFlags = {
+			[Private.Enum.FeatureFlag.GlowImportant] = true,
+			[Private.Enum.FeatureFlag.OnlyImportant] = false,
+			[Private.Enum.FeatureFlag.ShowDuration] = true,
+			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
+			[Private.Enum.FeatureFlag.ShowBorder] = true,
+			[Private.Enum.FeatureFlag.ShowSwipe] = true,
+			[Private.Enum.FeatureFlag.IndicateInterrupts] = false,
+			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = false,
 		},
 	}
 end
@@ -264,21 +263,23 @@ function Private.Settings.GetPartyDefaultSettings()
 		TargetAnchor = Private.Enum.Anchor.Right,
 		SortOrder = Private.Enum.SortOrder.Ascending,
 		Grow = Private.Enum.Grow.Start,
-		IncludeSelfInParty = true,
-		ShowDuration = true,
-		ShowDurationFractions = true,
 		Opacity = 1,
-		ShowBorder = true,
-		GlowImportant = true,
-		OnlyImportant = false,
 		GlowType = Private.Enum.GlowType.PixelGlow,
-		IndicateInterrupts = true,
-		RenderInterruptSourceName = true,
-		ShowSwipe = true,
 		Font = "Fonts\\FRIZQT__.TTF",
 		FontFlags = {
 			[Private.Enum.FontFlags.OUTLINE] = true,
 			[Private.Enum.FontFlags.SHADOW] = false,
+		},
+		FeatureFlags = {
+			[Private.Enum.FeatureFlag.GlowImportant] = true,
+			[Private.Enum.FeatureFlag.OnlyImportant] = false,
+			[Private.Enum.FeatureFlag.ShowDuration] = true,
+			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
+			[Private.Enum.FeatureFlag.ShowBorder] = true,
+			[Private.Enum.FeatureFlag.ShowSwipe] = true,
+			[Private.Enum.FeatureFlag.IndicateInterrupts] = true,
+			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = true,
+			[Private.Enum.FeatureFlag.IncludeSelfInParty] = true,
 		},
 	}
 end
@@ -447,161 +448,58 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.ShowSwipe or key == Private.Settings.Keys.Party.ShowSwipe then
-			local tableRef = key == Private.Settings.Keys.Self.ShowSwipe and TargetedSpellsSaved.Settings.Self
+		if key == Private.Settings.Keys.Self.FeatureFlags or key == Private.Settings.Keys.Party.FeatureFlags then
+			local kind = key == Private.Settings.Keys.Self.FeatureFlags and Private.Enum.FrameKind.Self
+				or Private.Enum.FrameKind.Party
+			local kindTableRef = kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
+			local applicableFlags = Private.Settings.GetFeatureFlagsForKind(kind)
+
+			local defaultValue = GetMask(applicableFlags, function(id)
+				return defaults.FeatureFlags[id]
+			end)
 
 			local function GetValue()
-				return tableRef.ShowSwipe
+				return GetMask(applicableFlags, function(id)
+					return kindTableRef.FeatureFlags[id]
+				end)
 			end
 
-			local function SetValue(value)
-				if value ~= tableRef.ShowSwipe then
-					tableRef.ShowSwipe = value
-					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowSwipe)
+			local function SetValue(mask)
+				for _, id in ipairs(applicableFlags) do
+					local enabled = DecodeBitToBool(mask, id)
+					if enabled ~= kindTableRef.FeatureFlags[id] then
+						kindTableRef.FeatureFlags[id] = enabled
+						Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, id, enabled)
+					end
 				end
+			end
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for _, id in ipairs(applicableFlags) do
+					container:AddCheckbox(id, L.Settings.FeatureFlagLabels[id], L.Settings.FeatureFlagsTooltip)
+				end
+
+				return container:GetData()
 			end
 
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowSwipeLabel,
-				defaults.ShowSwipe,
+				Settings.VarType.Number,
+				L.Settings.FeatureFlagsLabel,
+				defaultValue,
 				GetValue,
 				SetValue
 			)
 
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowSwipeTooltip)
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.FeatureFlagsTooltip)
 
 			return {
 				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if
-			key == Private.Settings.Keys.Self.IndicateInterrupts
-			or key == Private.Settings.Keys.Party.IndicateInterrupts
-		then
-			local tableRef = key == Private.Settings.Keys.Self.IndicateInterrupts and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.IndicateInterrupts
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.IndicateInterrupts then
-					tableRef.IndicateInterrupts = value
-					Private.EventRegistry:TriggerEvent(
-						Private.Enum.Events.SETTING_CHANGED,
-						key,
-						tableRef.IndicateInterrupts
-					)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.IndicateInterruptsLabel,
-				defaults.IndicateInterrupts,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.IndicateInterruptsTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if
-			key == Private.Settings.Keys.Self.RenderInterruptSourceName
-			or key == Private.Settings.Keys.Party.RenderInterruptSourceName
-		then
-			local tableRef = key == Private.Settings.Keys.Self.RenderInterruptSourceName
-					and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.RenderInterruptSourceName
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.RenderInterruptSourceName then
-					tableRef.RenderInterruptSourceName = value
-					Private.EventRegistry:TriggerEvent(
-						Private.Enum.Events.SETTING_CHANGED,
-						key,
-						tableRef.RenderInterruptSourceName
-					)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.RenderInterruptSourceNameLabel,
-				defaults.RenderInterruptSourceName,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.RenderInterruptSourceNameTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if
-			key == Private.Settings.Keys.Self.ShowDurationFractions
-			or key == Private.Settings.Keys.Party.ShowDurationFractions
-		then
-			local tableRef = key == Private.Settings.Keys.Self.ShowDurationFractions
-					and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.ShowDurationFractions
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.ShowDurationFractions then
-					tableRef.ShowDurationFractions = value
-					Private.EventRegistry:TriggerEvent(
-						Private.Enum.Events.SETTING_CHANGED,
-						key,
-						tableRef.ShowDurationFractions
-					)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowDurationFractionsLabel,
-				defaults.ShowDurationFractions,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowDurationFractionsTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
+				hideSteppers = true,
 				IsSectionEnabled = nil,
 			}
 		end
@@ -632,41 +530,6 @@ table.insert(Private.LoginFnQueue, function()
 			)
 
 			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.EnabledTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if key == Private.Settings.Keys.Party.IncludeSelfInParty then
-			local function GetValue()
-				return TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-			end
-
-			local function SetValue(value)
-				if value ~= TargetedSpellsSaved.Settings.Party.IncludeSelfInParty then
-					TargetedSpellsSaved.Settings.Party.IncludeSelfInParty = value
-					Private.EventRegistry:TriggerEvent(
-						Private.Enum.Events.SETTING_CHANGED,
-						key,
-						TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-					)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.IncludeSelfInPartyLabel,
-				Settings.Default.True,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.IncludeSelfInPartyTooltip)
 
 			return {
 				initializer = initializer,
@@ -866,74 +729,6 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.ShowBorder or key == Private.Settings.Keys.Party.ShowBorder then
-			local tableRef = key == Private.Settings.Keys.Self.ShowBorder and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.ShowBorder
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.ShowBorder then
-					tableRef.ShowBorder = value
-					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowBorder)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowBorderLabel,
-				defaults.ShowBorder,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowBorderTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if key == Private.Settings.Keys.Self.ShowDuration or key == Private.Settings.Keys.Party.ShowDuration then
-			local tableRef = key == Private.Settings.Keys.Self.ShowDuration and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.ShowDuration
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.ShowDuration then
-					tableRef.ShowDuration = value
-					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowDuration)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowDurationLabel,
-				defaults.ShowDuration,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowDurationTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
 		if key == Private.Settings.Keys.Self.GlowType or key == Private.Settings.Keys.Party.GlowType then
 			local tableRef = key == Private.Settings.Keys.Self.GlowType and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
@@ -971,72 +766,6 @@ table.insert(Private.LoginFnQueue, function()
 				SetValue
 			)
 			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.GlowTypeTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if key == Private.Settings.Keys.Self.GlowImportant or key == Private.Settings.Keys.Party.GlowImportant then
-			local tableRef = key == Private.Settings.Keys.Self.GlowImportant and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.GlowImportant
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.GlowImportant then
-					tableRef.GlowImportant = value
-					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.GlowImportant)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.GlowImportantLabel,
-				defaults.GlowImportant,
-				GetValue,
-				SetValue
-			)
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.GlowImportantTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if key == Private.Settings.Keys.Self.OnlyImportant or key == Private.Settings.Keys.Party.OnlyImportant then
-			local tableRef = key == Private.Settings.Keys.Self.OnlyImportant and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.OnlyImportant
-			end
-
-			local function SetValue(value)
-				if value ~= tableRef.OnlyImportant then
-					tableRef.OnlyImportant = value
-					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.OnlyImportant)
-				end
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.OnlyImportantLabel,
-				defaults.OnlyImportant,
-				GetValue,
-				SetValue
-			)
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.OnlyImportantTooltip)
 
 			return {
 				initializer = initializer,
