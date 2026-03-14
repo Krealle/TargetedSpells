@@ -43,8 +43,8 @@ function Private.Utils.CollectLayoutingArguments(direction, grow, width, height,
 		isHorizontal = isHorizontal,
 		isGrowEnd = isGrowEnd,
 		orientation = isHorizontal and "HORIZONTAL" or "VERTICAL",
-		growAxisDimension = (isHorizontal and width or height) + gap,
-		crossAxisDimension = isHorizontal and height or width,
+		x = (isHorizontal and width or height) + gap,
+		y = isHorizontal and height or width,
 		originPoint = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM"),
 		relativePoint = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP"),
 	}
@@ -65,9 +65,9 @@ function Private.Utils.AdjustLayout(
 
 	for _, frame in ipairs(frames) do
 		if layouting.isHorizontal then
-			frame.Bar:SetSize(layouting.growAxisDimension, layouting.crossAxisDimension)
+			frame.Bar:SetSize(layouting.x, layouting.y)
 		else
-			frame.Bar:SetSize(layouting.crossAxisDimension, layouting.growAxisDimension)
+			frame.Bar:SetSize(layouting.y, layouting.x)
 		end
 
 		local texture = frame.Bar:GetStatusBarTexture()

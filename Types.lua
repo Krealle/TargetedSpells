@@ -14,8 +14,8 @@
 ---@field isHorizontal boolean
 ---@field isGrowEnd boolean
 ---@field orientation "HORIZONTAL"|"VERTICAL"
----@field growAxisDimension number
----@field crossAxisDimension number
+---@field x number
+---@field y number
 ---@field originPoint FramePoint
 ---@field relativePoint FramePoint
 
