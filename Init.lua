@@ -33,6 +33,8 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	---@class SavedVariablesSettingsParty
 	TargetedSpellsSaved.Settings.Party = TargetedSpellsSaved.Settings.Party or {}
 
+	local resetKeys = {}
+
 	for key, value in pairs(Private.Settings.GetSelfDefaultSettings()) do
 		if
 			TargetedSpellsSaved.Settings.Self[key] == nil
@@ -43,10 +45,18 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 
 		if key == "Grow" and TargetedSpellsSaved.Settings.Self[key] == 1 then
 			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.Grow.Start
+			table.insert(
+				resetKeys,
+				Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.FrameGrowLabel
+			)
 		end
 
 		if key == "GlowType" and TargetedSpellsSaved.Settings.Self[key] == 3 then
 			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.GlowType.PixelGlow
+			table.insert(
+				resetKeys,
+				Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.GlowTypeLabel
+			)
 		end
 	end
 
@@ -60,10 +70,32 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 
 		if key == "Grow" and TargetedSpellsSaved.Settings.Party[key] == 1 then
 			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.Grow.Start
+			table.insert(
+				resetKeys,
+				Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.FrameGrowLabel
+			)
 		end
 
 		if key == "GlowType" and TargetedSpellsSaved.Settings.Party[key] == 3 then
 			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.GlowType.PixelGlow
+			table.insert(
+				resetKeys,
+				Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.GlowTypeLabel
+			)
+		end
+	end
+
+	if TargetedSpellsSaved.v2DeprecationWarningSeen == nil then
+		TargetedSpellsSaved.v2DeprecationWarningSeen = true
+
+		if #resetKeys > 0 then
+			C_Timer.After(3, function()
+				Private.Utils.ShowStaticPopup({
+					whileDead = true,
+					button1 = OKAY,
+					text = string.format(Private.L.Functionality.V2DeprecationWarning, table.concat(resetKeys, "\n")),
+				})
+			end)
 		end
 	end
 

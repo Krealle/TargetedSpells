@@ -28,6 +28,12 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
+L.Functionality.V2DeprecationWarning = string.format(
+	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
+	addonNameWithIcon,
+	"%s"
+)
+
 L.Settings.EnabledLabel = "启用"
 L.Settings.EnabledTooltip = nil
 L.Settings.DisabledLabel = "禁用"
