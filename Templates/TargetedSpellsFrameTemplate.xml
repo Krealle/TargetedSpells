@@ -17,8 +17,8 @@
                         <Anchor point="BOTTOMRIGHT" x="15" y="-15" />
                     </Anchors>
                 </Texture>
-                <FontString hidden="true" parentKey="DurationText" font="GameFontHighlightHugeOutline" justifyH="CENTER" setAllPoints="true">
-                </FontString>
+                <!-- <FontString hidden="true" parentKey="DurationText" font="GameFontHighlightHugeOutline" justifyH="CENTER" setAllPoints="true"> -->
+                <!-- </FontString> -->
                 <Texture parentKey="InterruptIcon" hidden="true" setAllPoints="true" file="Interface\TARGETINGFRAME\UI-RaidTargetingIcon_7.blp">
                     <Anchors>
                         <Anchor point="TOPLEFT" x="4" y="-4" />
@@ -41,6 +41,12 @@
                 <SwipeTexture file="Interface\HUD\UI-HUD-CoolDownManager-Icon-Swipe">
                     <Color r="0" g="0" b="0" a="0.7" />
                 </SwipeTexture>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <FontString hidden="true" parentKey="DurationText" font="GameFontHighlightHugeOutline" justifyH="CENTER" setAllPoints="true">
+                        </FontString>
+                    </Layer>
+                </Layers>
             </Cooldown>
             <Frame parentKey="Border" hidden="true" frameStrata="BACKGROUND" setAllPoints="true" />
             <StatusBar parentKey="Bar" ignoreParentAlpha="true" minValue="0" maxValue="1" />

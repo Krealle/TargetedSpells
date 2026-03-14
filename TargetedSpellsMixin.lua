@@ -118,12 +118,12 @@ function TargetedSpellsMixin:OnUpdate(elapsed)
 	local remainingDuration = type(self.duration) == "number" and self.startTime + self.duration - GetTime()
 		or self.duration:GetRemainingDuration()
 
-	self.DurationText:SetFormattedText("%.1f", remainingDuration)
+	self.Cooldown.DurationText:SetFormattedText("%.1f", remainingDuration)
 end
 
 function TargetedSpellsMixin:SetShowDuration(showDuration, showFractions)
 	self.Cooldown:SetHideCountdownNumbers(not showDuration or showFractions)
-	self.DurationText:SetShown(showDuration and showFractions)
+	self.Cooldown.DurationText:SetShown(showDuration and showFractions)
 	self:SetScript("OnUpdate", showDuration and showFractions and self.OnUpdate or nil)
 end
 
@@ -211,7 +211,7 @@ function TargetedSpellsMixin:OnSettingChanged(key, value)
 			---@diagnostic disable-next-line: param-type-mismatch
 			self.Cooldown:SetHideCountdownNumbers(value)
 			---@diagnostic disable-next-line: param-type-mismatch
-			self.DurationText:SetShown(value)
+			self.Cooldown.DurationText:SetShown(value)
 		elseif key == Private.Settings.Keys.Self.ShowSwipe then
 			---@diagnostic disable-next-line: param-type-mismatch
 			self.Cooldown:SetDrawSwipe(value)
@@ -244,7 +244,7 @@ function TargetedSpellsMixin:OnSettingChanged(key, value)
 			---@diagnostic disable-next-line: param-type-mismatch
 			self.Cooldown:SetHideCountdownNumbers(value)
 			---@diagnostic disable-next-line: param-type-mismatch
-			self.DurationText:SetShown(value)
+			self.Cooldown.DurationText:SetShown(value)
 		elseif key == Private.Settings.Keys.Party.ShowSwipe then
 			---@diagnostic disable-next-line: param-type-mismatch
 			self.Cooldown:SetDrawSwipe(value)
@@ -497,7 +497,7 @@ function TargetedSpellsMixin:SetFontSize()
 	local fontString = nil
 
 	if tableRef.ShowDurationFractions then
-		fontString = self.DurationText
+		fontString = self.Cooldown.DurationText
 	else
 		fontString = self.Cooldown:GetCountdownFontString()
 	end
@@ -518,7 +518,7 @@ function TargetedSpellsMixin:SetFont()
 	local fontString = nil
 
 	if tableRef.ShowDurationFractions then
-		fontString = self.DurationText
+		fontString = self.Cooldown.DurationText
 	else
 		fontString = self.Cooldown:GetCountdownFontString()
 	end

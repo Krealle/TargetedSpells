@@ -203,10 +203,13 @@
 ---@field Outer Texture
 ---@field Animation AnimationGroup
 
+---@class CustomCooldown : ExtendedCooldownTypes
+---@field DurationText FontString
+
 ---@class TargetedSpellsMixin : Frame
 ---@field private Overlay Texture
 ---@field private Icon Texture
----@field private Cooldown ExtendedCooldownTypes
+---@field private Cooldown CustomCooldown
 ---@field private kind FrameKind?
 ---@field private unit string?
 ---@field private startTime number?
@@ -217,7 +220,6 @@
 ---@field private _PixelGlow Frame?
 ---@field private _ProcGlow Frame?
 ---@field private _Star4 Star4Glow?
----@field private DurationText FontString
 ---@field private Border Frame
 ---@field private InterruptIcon Texture
 ---@field private InterruptSource FontString
