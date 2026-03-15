@@ -213,6 +213,8 @@
 ---@field private InterruptIcon Texture
 ---@field private InterruptSource FontString
 ---@field private elapsed number
+---@field private wasInterrupted boolean
+---@field private doNotHideBefore number?
 ---@field Bar StatusBar
 ---@field OnLoad fun(self: TargetedSpellsMixin)
 ---@field SetId fun(self: TargetedSpellsMixin, id: number?)
@@ -225,7 +227,7 @@
 ---@field OnSizeChanged fun(self: TargetedSpellsMixin, width: number, height: number)
 ---@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, flagIdOrValue: number|string|boolean|table, newBool: boolean?)
 ---@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObject)
----@field GetDuration fun(self: TargetedSpellsMixin): (DurationObject|number|nil)
+---@field GetDuration fun(self: TargetedSpellsMixin): DurationObject|nil
 ---@field SetStartTime fun(self: TargetedSpellsMixin, startTime: number?)
 ---@field GetStartTime fun(self: TargetedSpellsMixin): number?
 ---@field ShowGlow fun(self: TargetedSpellsMixin, isImportant: boolean) -- secret bool, but passed explicitly in EditMode code
@@ -243,16 +245,17 @@
 ---@field SetFontSize fun(self: TargetedSpellsMixin)
 ---@field SetFont fun(self: TargetedSpellsMixin)
 
----@class EditModeFrame : frame
+---@class EditModeFrame : Frame
 ---@field firstFrameTimestamp number
 
 ---@class TargetedSpellsEditModeMixin : Frame
 ---@field protected editModeFrame EditModeFrame
+---@field protected frameKind FrameKind
 ---@field private demoPlaying boolean
 ---@field private frames table<number, TargetedSpellsMixin[]> | TargetedSpellsMixin[]
 ---@field protected demoTimers { tickers: table<number, FunctionContainer>, timers: table<number, FunctionContainer> }
 ---@field Init fun(self: TargetedSpellsEditModeMixin, displayName: string, frameKind: FrameKind)
----@field OnSettingsChanged fun(self: TargetedSpellsEditModeMixin, key: string, flagIdOrValue: number|string|boolean, newBool: boolean?)
+---@field OnSettingsChanged fun(self: TargetedSpellsEditModeMixin, key: string, flagIdOrValue: number|string|boolean|table, newBool: boolean?)
 ---@field CreateSetting fun(self: TargetedSpellsEditModeMixin, key: string, defaults: SavedVariablesSettingsParty|SavedVariablesSettingsSelf): LibEditModeButton|LibEditModeCheckbox | LibEditModeDropdown | LibEditModeSlider
 ---@field OnLayoutSettingChanged fun(self: TargetedSpellsEditModeMixin, key: string, value: number|string, newBool: boolean?)
 ---@field AppendSettings fun(self: TargetedSpellsEditModeMixin)
@@ -301,6 +304,7 @@
 ---@field private frame Frame
 ---@field private role Role
 ---@field private contentType ContentType
+---@field private delay number
 ---@field frames table<string, TargetedSpellsMixin[]>
 ---@field SetupFrame fun(self: TargetedSpellsDriver, isBoot: boolean)
 ---@field AcquireFrames fun(self: TargetedSpellsDriver, castingUnit: string): TargetedSpellsMixin[]
@@ -309,9 +313,10 @@
 ---@field LoadConditionsProhibitExecution fun(self: TargetedSpellsDriver, kind: FrameKind): boolean
 ---@field UnitIsIrrelevant fun(self: TargetedSpellsDriver, unit: string, skipTargetCheck?: boolean): boolean
 ---@field OnFrameEvent fun(self: TargetedSpellsDriver, listenerFrame: Frame, event: WowEvent, ...)
----@field OnSettingsChanged fun(self: TargetedSpellsDriver, key: string, value: number|string|table)
+---@field OnSettingsChanged fun(self: TargetedSpellsDriver, key: string, value: number|string|boolean|table)
 ---@field DetermineSpellDelayRequirement fun(self: TargetedSpellsDriver): boolean
 ---@field MaybeMarkAsInterruptedAndDelay fun(self: TargetedSpellsDriver, unit: string, id: number|string|nil, interruptedBy: string?): boolean
+---@field CleanupDanglingFrames fun(self: TargetedSpellsDriver)
 
 ----- type patching / completion
 
