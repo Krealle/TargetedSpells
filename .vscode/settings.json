@@ -68,7 +68,11 @@
     "OTHER",
     "FROM",
     "USE",
-    "GenerateClosure"
+    "GenerateClosure",
+    "OKAY",
+    "MultiBarBottomLeft",
+    "SpellActivationOverlayFrame",
+    "NineSliceUtil"
   ],
   "stylua.targetReleaseVersion": "latest",
   "Lua.diagnostics.disable": ["assign-type-mismatch"],
