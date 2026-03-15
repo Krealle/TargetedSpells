@@ -17,8 +17,6 @@
                         <Anchor point="BOTTOMRIGHT" x="15" y="-15" />
                     </Anchors>
                 </Texture>
-                <!-- <FontString hidden="true" parentKey="DurationText" font="GameFontHighlightHugeOutline" justifyH="CENTER" setAllPoints="true"> -->
-                <!-- </FontString> -->
                 <Texture parentKey="InterruptIcon" hidden="true" setAllPoints="true" file="Interface\TARGETINGFRAME\UI-RaidTargetingIcon_7.blp">
                     <Anchors>
                         <Anchor point="TOPLEFT" x="4" y="-4" />
