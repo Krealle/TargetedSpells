@@ -238,7 +238,6 @@
 ---@field OnUpdate fun(self: TargetedSpellsMixin, elapsed: number)
 ---@field SetShowDuration fun(self: TargetedSpellsMixin, showDuration: boolean, showFractions: boolean)
 ---@field ApplyBorderStyle fun(self: TargetedSpellsMixin, styleName: string)
----@field BuildBorderTextures fun(self: TargetedSpellsMixin)
 ---@field OnSizeChanged fun(self: TargetedSpellsMixin, width: number, height: number)
 ---@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, flagIdOrValue: number|string|boolean|table, newBool: boolean?)
 ---@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObject)
