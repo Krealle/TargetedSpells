@@ -171,6 +171,7 @@
 ---@field Direction Direction
 ---@field LoadConditionContentType table<number, boolean>
 ---@field LoadConditionRole table<number, boolean>
+---@field RoleFilter table<number, boolean>
 ---@field OffsetX number
 ---@field OffsetY number
 ---@field SourceAnchor FramePoint

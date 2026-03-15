@@ -9,6 +9,7 @@ function TargetedSpellsDriver:Init()
 	self.frames = {}
 	self.role = Private.Enum.Role.Damager
 	self.contentType = Private.Enum.ContentType.OpenWorld
+	self.anyRoleFilterActive = Private.Settings.IsAnyRoleFilterActive()
 
 	Private.EventRegistry:RegisterCallback(Private.Enum.Events.SETTING_CHANGED, self.OnSettingsChanged, self)
 
@@ -318,6 +319,30 @@ function TargetedSpellsDriver:LoadConditionsProhibitExecution(kind)
 	return false
 end
 
+function TargetedSpellsDriver:RoleFilterPreventsExecution(unit)
+	if not self.anyRoleFilterActive then
+		return false
+	end
+
+	if not IsInGroup() then
+		return false
+	end
+
+	local target = string.format("%starget", unit)
+
+	if not UnitExists(target) or not UnitInParty(target) or UnitCanAttack("player", target) then
+		return false
+	end
+
+	local role = UnitGroupRolesAssigned(target)
+
+	local roleKey = role == "TANK" and Private.Enum.Role.Tank
+		or role == "HEALER" and Private.Enum.Role.Healer
+		or Private.Enum.Role.Damager
+
+	return not TargetedSpellsSaved.Settings.Party.RoleFilter[roleKey]
+end
+
 function TargetedSpellsDriver:UnitIsIrrelevant(unit, skipTargetCheck)
 	if string.sub(unit, 1, 9) ~= "nameplate" then
 		return true
@@ -554,6 +579,10 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			return
 		end
 
+		if self:RoleFilterPreventsExecution(info.unit) then
+			return
+		end
+
 		local frames = self:AcquireFrames(info.unit)
 
 		if #frames == 0 then
@@ -711,6 +740,8 @@ function TargetedSpellsDriver:OnSettingsChanged(key, value)
 		or key == Private.Settings.Keys.Self.Gap
 	then
 		self:PositionSelfFrame()
+	elseif key == Private.Settings.Keys.Party.RoleFilter then
+		self.anyRoleFilterActive = Private.Settings.IsAnyRoleFilterActive()
 	end
 end
 

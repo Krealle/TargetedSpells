@@ -259,7 +259,6 @@ end
 
 function TargetedSpellsMixin:SetDuration(duration)
 	self.duration = duration
-
 	self.Cooldown:SetCooldownFromDurationObject(duration)
 end
 

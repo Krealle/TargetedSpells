@@ -29,6 +29,7 @@ Private.Settings.Keys = {
 		Enabled = "ENABLED_PARTY",
 		LoadConditionContentType = "LOAD_CONDITION_CONTENT_TYPE_PARTY",
 		LoadConditionRole = "LOAD_CONDITION_ROLE_PARTY",
+		RoleFilter = "ROLE_EXCLUSION_PARTY",
 		Width = "FRAME_WIDTH_PARTY",
 		Height = "FRAME_HEIGHT_PARTY",
 		FontSize = "FONT_SIZE_PARTY",
@@ -75,6 +76,7 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.Enabled,
 		Private.Settings.Keys.Party.LoadConditionContentType,
 		Private.Settings.Keys.Party.LoadConditionRole,
+		Private.Settings.Keys.Party.RoleFilter,
 		Private.Settings.Keys.Party.Width,
 		Private.Settings.Keys.Party.Height,
 		Private.Settings.Keys.Party.Gap,
@@ -257,6 +259,11 @@ function Private.Settings.GetPartyDefaultSettings()
 			[Private.Enum.Role.Tank] = true,
 			[Private.Enum.Role.Damager] = true,
 		},
+		RoleFilter = {
+			[Private.Enum.Role.Healer] = true,
+			[Private.Enum.Role.Tank] = true,
+			[Private.Enum.Role.Damager] = true,
+		},
 		OffsetX = 2,
 		OffsetY = 15,
 		SourceAnchor = Private.Enum.Anchor.Left,
@@ -305,6 +312,13 @@ function Private.Settings.IsContentTypeAvailableForKind(kind, contentTypeId)
 	end
 
 	return true
+end
+
+function Private.Settings.IsAnyRoleFilterActive()
+	return not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Healer]
+		or not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Tank]
+		or not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Damager]
+		or false
 end
 
 table.insert(Private.LoginFnQueue, function()
@@ -1134,6 +1148,69 @@ table.insert(Private.LoginFnQueue, function()
 
 			local initializer =
 				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.LoadConditionRoleTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = true,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if key == Private.Settings.Keys.Party.RoleFilter then
+			local defaultValue = GetMask(Private.Enum.Role, function(id)
+				return defaults.RoleFilter[id]
+			end)
+
+			local function GetValue()
+				return GetMask(Private.Enum.Role, function(id)
+					return TargetedSpellsSaved.Settings.Party.RoleFilter[id]
+				end)
+			end
+
+			local function SetValue(mask)
+				local hasChanges = false
+
+				for label, id in pairs(Private.Enum.Role) do
+					local enabled = DecodeBitToBool(mask, id)
+
+					if enabled ~= TargetedSpellsSaved.Settings.Party.RoleFilter[id] then
+						TargetedSpellsSaved.Settings.Party.RoleFilter[id] = enabled
+						hasChanges = true
+					end
+				end
+
+				if hasChanges then
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						TargetedSpellsSaved.Settings.Party.RoleFilter
+					)
+				end
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Number,
+				L.Settings.RoleFilterLabel,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for label, id in pairs(Private.Enum.Role) do
+					local translated = L.Settings.RoleFilterLabels[id]
+
+					container:AddCheckbox(id, translated, L.Settings.RoleFilterTooltip)
+				end
+
+				return container:GetData()
+			end
+
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.RoleFilterTooltip)
 
 			return {
 				initializer = initializer,

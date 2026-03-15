@@ -2,16 +2,18 @@
 
 - reworked layouting - no more gaps!
   - thanks to surarn for the lead on this
-  - deprecated Glow Type > Button Glow option
+  - deprecated `Glow Type` > `Button Glow` option
     - this glow type was effectively incompatible with secrets which I unfortunately noticed too late
-    - users of this option were automatically migrated to Glow Type > Pixel Glow
-  - deprecated Grow > Center option
+    - users of this option were automatically migrated to `Glow Type` > `Pixel Glow`
+  - deprecated `Grow` > `Center` option
     - no longer possible due to the layouting workarounds
-    - users of this option were automatically migrated to Grow > Start
+    - users of this option were automatically migrated to `Grow` > `Start`
 - fixed a bug where, when using duration fractions, the duration text would be rendered behind the swipe animation
 - consolidated checkbox settings into a new Features dropdown
   - your settings will automatically be migrated to the new format
 - fixed a couple of rare layouting issues when using DandersFrames
+- NEW: `Role Filter` setting for Party frames
+  - allows you to never render spells targeting certain roles
 
 ## Version 1.1.18
 

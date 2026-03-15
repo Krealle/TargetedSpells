@@ -357,7 +357,7 @@ do
 						local enumToCompareAgainst = nil
 						if key == "LoadConditionContentType" then
 							enumToCompareAgainst = Private.Enum.ContentType
-						elseif key == "LoadConditionRole" then
+						elseif key == "LoadConditionRole" or key == "RoleFilter" then
 							enumToCompareAgainst = Private.Enum.Role
 						elseif key == "FontFlags" then
 							enumToCompareAgainst = Private.Enum.FontFlags

@@ -61,6 +61,10 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Damager] = "Schadensverursacher",
 }
 
+L.Settings.RoleFilterLabel = "Rollenfilter"
+L.Settings.RoleFilterTooltip = "Erlaubt, Zauber auf individuelle Rollen nicht anzuzeigen. Nutzung auf eigene Gefahr."
+L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
+
 L.Settings.FrameWidthLabel = "Breite"
 L.Settings.FrameWidthTooltip = nil
 

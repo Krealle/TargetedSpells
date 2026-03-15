@@ -16,8 +16,8 @@ local addonName, Private = ...
 
 local datasetsByLabel = {}
 
-function Private.Profile(label, cb)
-	local result, rest = C_AddOnProfiler.MeasureCall(cb)
+function Private.Profile(label, cb, ...)
+	local result, rest = C_AddOnProfiler.MeasureCall(cb, ...)
 
 	if datasetsByLabel[label] == nil then
 		datasetsByLabel[label] = {}
