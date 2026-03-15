@@ -240,7 +240,7 @@ function TargetedSpellsDriver:RepositionFrames()
 				selfTableRef.Gap
 			)
 
-			Private.Utils.AdjustLayout(frames, layouting, self.frame, self.frame, "CENTER", 0, 0)
+			Private.Utils.AdjustLayout(frames, layouting, self.frame, self.frame, "CENTER", 0, 0, false)
 		else
 			local parentFrame = FindParentFrameForPartyMember(targetUnit)
 
@@ -262,7 +262,8 @@ function TargetedSpellsDriver:RepositionFrames()
 					parentFrame,
 					partyTableRef.TargetAnchor,
 					partyTableRef.OffsetX,
-					partyTableRef.OffsetY
+					partyTableRef.OffsetY,
+					false
 				)
 			end
 		end
@@ -569,7 +570,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			self:ReleaseFrameForUnit(info.unit, false, info.id)
 		end
 
-		---@type DurationObjectDummy|number|nil
+		---@type DurationObject|nil
 		local duration = UnitCastingDuration(info.unit) or UnitChannelDuration(info.unit)
 
 		-- without `nameplateShowOffscreen` active, castTime may stay nil
