@@ -281,10 +281,11 @@ function TargetedSpellsDriver:ReleaseFrameForUnit(unit, removeUnit, id)
 	local cleanedSomethingUp = false
 	local cleanedEverythingUp = true
 
-	for i, frame in pairs(frames) do
+	for i = #frames, 1, -1 do
+		local frame = frames[i]
 		if frame:CanBeHidden(id) then
 			Private.Utils.Pool:Release(frame)
-			frames[i] = nil
+			table.remove(frames, i)
 			cleanedSomethingUp = true
 		else
 			cleanedEverythingUp = false
