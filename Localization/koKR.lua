@@ -135,9 +135,6 @@ L.Settings.RenderInterruptSourceNameTooltip = nil
 L.Settings.ShowSwipeLabel = "회전 표시"
 L.Settings.ShowSwipeTooltip = nil
 
-L.Settings.ShowBorderLabel = "테두리 표시"
-L.Settings.ShowBorderTooltip = nil
-
 L.Settings.OpacityLabel = "불투명도"
 L.Settings.OpacityTooltip = nil
 
@@ -173,7 +170,6 @@ L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
 	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
 	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
-	[Private.Enum.FeatureFlag.ShowBorder] = L.Settings.ShowBorderLabel,
 	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
 	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,

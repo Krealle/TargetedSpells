@@ -24,6 +24,7 @@ Private.Settings.Keys = {
 		Font = "FONT_SELF",
 		FontFlags = "FONT_FLAGS_SELF",
 		FeatureFlags = "FEATURE_FLAGS_SELF",
+		BorderStyle = "BORDER_STYLE_SELF",
 	},
 	Party = {
 		Enabled = "ENABLED_PARTY",
@@ -48,6 +49,7 @@ Private.Settings.Keys = {
 		Font = "FONT_PARTY",
 		FontFlags = "FONT_FLAGS_PARTY",
 		FeatureFlags = "FEATURE_FLAGS_PARTY",
+		BorderStyle = "BORDER_STYLE_PARTY",
 	},
 }
 
@@ -65,6 +67,7 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 			Private.Settings.Keys.Self.Grow,
 			Private.Settings.Keys.Self.GlowType,
 			Private.Settings.Keys.Self.FeatureFlags,
+			Private.Settings.Keys.Self.BorderStyle,
 			Private.Settings.Keys.Self.Font,
 			Private.Settings.Keys.Self.FontSize,
 			Private.Settings.Keys.Self.FontFlags,
@@ -89,6 +92,7 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.SortOrder,
 		Private.Settings.Keys.Party.GlowType,
 		Private.Settings.Keys.Party.FeatureFlags,
+		Private.Settings.Keys.Party.BorderStyle,
 		Private.Settings.Keys.Party.Font,
 		Private.Settings.Keys.Party.FontSize,
 		Private.Settings.Keys.Party.FontFlags,
@@ -103,7 +107,6 @@ function Private.Settings.GetFeatureFlagsForKind(kind)
 			Private.Enum.FeatureFlag.OnlyImportant,
 			Private.Enum.FeatureFlag.ShowDuration,
 			Private.Enum.FeatureFlag.ShowDurationFractions,
-			Private.Enum.FeatureFlag.ShowBorder,
 			Private.Enum.FeatureFlag.ShowSwipe,
 			Private.Enum.FeatureFlag.IndicateInterrupts,
 			Private.Enum.FeatureFlag.RenderInterruptSourceName,
@@ -116,7 +119,6 @@ function Private.Settings.GetFeatureFlagsForKind(kind)
 		Private.Enum.FeatureFlag.OnlyImportant,
 		Private.Enum.FeatureFlag.ShowDuration,
 		Private.Enum.FeatureFlag.ShowDurationFractions,
-		Private.Enum.FeatureFlag.ShowBorder,
 		Private.Enum.FeatureFlag.ShowSwipe,
 		Private.Enum.FeatureFlag.IndicateInterrupts,
 		Private.Enum.FeatureFlag.RenderInterruptSourceName,
@@ -229,11 +231,11 @@ function Private.Settings.GetSelfDefaultSettings()
 			[Private.Enum.FeatureFlag.OnlyImportant] = false,
 			[Private.Enum.FeatureFlag.ShowDuration] = true,
 			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
-			[Private.Enum.FeatureFlag.ShowBorder] = true,
 			[Private.Enum.FeatureFlag.ShowSwipe] = true,
 			[Private.Enum.FeatureFlag.IndicateInterrupts] = false,
 			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = false,
 		},
+		BorderStyle = "Blizzard Dialog",
 	}
 end
 
@@ -282,12 +284,12 @@ function Private.Settings.GetPartyDefaultSettings()
 			[Private.Enum.FeatureFlag.OnlyImportant] = false,
 			[Private.Enum.FeatureFlag.ShowDuration] = true,
 			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
-			[Private.Enum.FeatureFlag.ShowBorder] = true,
 			[Private.Enum.FeatureFlag.ShowSwipe] = true,
 			[Private.Enum.FeatureFlag.IndicateInterrupts] = true,
 			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = true,
 			[Private.Enum.FeatureFlag.IncludeSelfInParty] = true,
 		},
+		BorderStyle = "Blizzard Dialog",
 	}
 end
 
@@ -454,6 +456,53 @@ table.insert(Private.LoginFnQueue, function()
 				SetValue
 			)
 			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.FontTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = false,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if key == Private.Settings.Keys.Self.BorderStyle or key == Private.Settings.Keys.Party.BorderStyle then
+			local tableRef = key == Private.Settings.Keys.Self.BorderStyle and TargetedSpellsSaved.Settings.Self
+				or TargetedSpellsSaved.Settings.Party
+
+			local function GetValue()
+				return tableRef.BorderStyle
+			end
+
+			local function SetValue(value)
+				if value ~= tableRef.BorderStyle then
+					tableRef.BorderStyle = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
+			end
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+				container:Add("Solid", L.Settings.BorderStyleSolid)
+
+				local borders = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BORDER))
+				table.sort(borders)
+
+				for _, label in ipairs(borders) do
+					container:Add(label, label)
+				end
+
+				return container:GetData()
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.String,
+				L.Settings.BorderStyleLabel,
+				defaults.BorderStyle,
+				GetValue,
+				SetValue
+			)
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.BorderStyleTooltip)
 
 			return {
 				initializer = initializer,

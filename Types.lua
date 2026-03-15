@@ -162,6 +162,7 @@
 ---@field Font string
 ---@field FontFlags table<FontFlags, boolean>
 ---@field FeatureFlags table<FeatureFlag, boolean>
+---@field BorderStyle string
 
 ---@class SavedVariablesSettingsParty
 ---@field Enabled boolean
@@ -184,6 +185,7 @@
 ---@field Font string
 ---@field FontFlags table<FontFlags, boolean>
 ---@field FeatureFlags table<FeatureFlag, boolean>
+---@field BorderStyle string
 
 ---@class TargetedSpellsSelfPreviewFrame: Frame
 ---@field GetChildren fun(self: TargetedSpellsSelfPreviewFrame): TargetedSpellsMixin
@@ -210,9 +212,20 @@
 ---@field private _PixelGlow Frame?
 ---@field private _ProcGlow Frame?
 ---@field private _Star4 Star4Glow?
----@field private Border Frame
 ---@field private InterruptIcon Texture
 ---@field private InterruptSource FontString
+---@field private BorderSolidTop Texture
+---@field private BorderSolidBottom Texture
+---@field private BorderSolidLeft Texture
+---@field private BorderSolidRight Texture
+---@field private BorderTopLeft Texture
+---@field private BorderTopRight Texture
+---@field private BorderBottomLeft Texture
+---@field private BorderBottomRight Texture
+---@field private BorderTop Texture
+---@field private BorderBottom Texture
+---@field private BorderLeft Texture
+---@field private BorderRight Texture
 ---@field private elapsed number
 ---@field private wasInterrupted boolean
 ---@field private doNotHideBefore number?
@@ -224,7 +237,8 @@
 ---@field CanBeHidden fun(self: TargetedSpellsMixin, id: number|string|nil): boolean
 ---@field OnUpdate fun(self: TargetedSpellsMixin, elapsed: number)
 ---@field SetShowDuration fun(self: TargetedSpellsMixin, showDuration: boolean, showFractions: boolean)
----@field SetShowBorder fun(self: TargetedSpellsMixin, bool: boolean)
+---@field ApplyBorderStyle fun(self: TargetedSpellsMixin, styleName: string)
+---@field BuildBorderTextures fun(self: TargetedSpellsMixin)
 ---@field OnSizeChanged fun(self: TargetedSpellsMixin, width: number, height: number)
 ---@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, flagIdOrValue: number|string|boolean|table, newBool: boolean?)
 ---@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObject)
@@ -554,3 +568,14 @@ ShadowUF = nil
 
 ---@type Frame?
 Vd1 = nil
+
+---@type table?
+QUI = nil
+
+---@type Frame?
+QUI_PartyHeader = nil
+
+---@type table?
+Cell = nil
+---@type Frame?
+CellPartyFrameHeader = nil

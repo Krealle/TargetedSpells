@@ -135,8 +135,9 @@ L.Settings.RenderInterruptSourceNameTooltip = nil
 L.Settings.ShowSwipeLabel = "Show Swipe"
 L.Settings.ShowSwipeTooltip = nil
 
-L.Settings.ShowBorderLabel = "Show Border"
-L.Settings.ShowBorderTooltip = nil
+L.Settings.BorderStyleLabel = "Border Style"
+L.Settings.BorderStyleTooltip = nil
+L.Settings.BorderStyleSolid = "Solid"
 
 L.Settings.OpacityLabel = "Opacity"
 L.Settings.OpacityTooltip = nil
@@ -172,7 +173,6 @@ L.Settings.FeatureFlagLabels = {
 	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
 	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
 	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
-	[Private.Enum.FeatureFlag.ShowBorder] = L.Settings.ShowBorderLabel,
 	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
 	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
 	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,

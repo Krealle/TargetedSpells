@@ -1,6 +1,7 @@
 ---@type string, TargetedSpells
 local _, Private = ...
 local LibEditMode = LibStub("LibEditMode")
+local LibSharedMedia = LibStub("LibSharedMedia-3.0")
 
 local PreviewIconDataProvider = nil
 
@@ -14,6 +15,9 @@ local function GetRandomIcon()
 	return PreviewIconDataProvider:GetRandomIcon()
 end
 
+local BACKDROP_COORD_START = 0.0625
+local BACKDROP_COORD_END = 1 - BACKDROP_COORD_START
+
 ---@class TargetedSpellsMixin
 TargetedSpellsMixin = {}
 
@@ -26,28 +30,189 @@ function TargetedSpellsMixin:OnLoad()
 	self.doNotHideBefore = nil
 	self.elapsed = 0
 	Private.Utils.MaybeApplyElvUISkin(self)
+end
 
-	---@param firstPoint string
-	---@param secondPoint string
-	---@param dimension string
-	local function AddStrip(firstPoint, secondPoint, dimension)
-		local texture = self.Border:CreateTexture(nil, "BACKGROUND")
+do
+	local BORDER_EDGE_SIZES = {
+		["Blizzard Tooltip"] = 16,
+		["Blizzard Dialog"] = 8,
+		["Blizzard Dialog Gold"] = 8,
+		["Blizzard Achievement Wood"] = 6,
+		["Blizzard Party"] = 8,
+	}
 
-		texture:SetColorTexture(1, 1, 1, 0.8)
-		texture:SetPoint(firstPoint, self.Border, firstPoint)
-		texture:SetPoint(secondPoint, self.Border, secondPoint)
+	local BORDER_INSETS = {
+		["Blizzard Tooltip"] = 3,
+	}
 
-		if dimension == "h" then
-			texture:SetHeight(1)
+	function TargetedSpellsMixin:ApplyBorderStyle(styleName)
+		if styleName == "Solid" then
+			self.BorderTopLeft:Hide()
+			self.BorderTopRight:Hide()
+			self.BorderBottomLeft:Hide()
+			self.BorderBottomRight:Hide()
+			self.BorderTop:Hide()
+			self.BorderBottom:Hide()
+			self.BorderLeft:Hide()
+			self.BorderRight:Hide()
+
+			self.BorderSolidTop:Show()
+			self.BorderSolidBottom:Show()
+			self.BorderSolidLeft:Show()
+			self.BorderSolidRight:Show()
+		elseif styleName == "None" then
+			self.BorderSolidTop:Hide()
+			self.BorderSolidBottom:Hide()
+			self.BorderSolidLeft:Hide()
+			self.BorderSolidRight:Hide()
+
+			self.BorderTopLeft:Hide()
+			self.BorderTopRight:Hide()
+			self.BorderBottomLeft:Hide()
+			self.BorderBottomRight:Hide()
+			self.BorderTop:Hide()
+			self.BorderBottom:Hide()
+			self.BorderLeft:Hide()
+			self.BorderRight:Hide()
 		else
-			texture:SetWidth(1)
+			self.BorderSolidTop:Hide()
+			self.BorderSolidBottom:Hide()
+			self.BorderSolidLeft:Hide()
+			self.BorderSolidRight:Hide()
+
+			local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+				or TargetedSpellsSaved.Settings.Party
+
+			local edgeSize = BORDER_EDGE_SIZES[styleName] or 8
+			local outwardOffset = BORDER_INSETS[styleName] or 0
+			local borderWidth = tableRef.Width + 2 * outwardOffset
+			local borderHeight = tableRef.Height + 2 * outwardOffset
+
+			-- replicates BackdropTemplateMixin:SetupTextureCoordinates using known
+			-- dimensions instead of GetWidth()/GetHeight() to avoid secret errors
+			local edgeRepeatX = math.max(0, borderWidth / edgeSize - 2 - BACKDROP_COORD_START)
+			local edgeRepeatY = math.max(0, borderHeight / edgeSize - 2 - BACKDROP_COORD_START)
+
+			self.BorderTopLeft:ClearAllPoints()
+			self.BorderTopLeft:SetPoint("TOPLEFT", self, "TOPLEFT", -outwardOffset, outwardOffset)
+			self.BorderTopLeft:SetSize(edgeSize, edgeSize)
+
+			self.BorderTopRight:ClearAllPoints()
+			self.BorderTopRight:SetPoint("TOPRIGHT", self, "TOPRIGHT", outwardOffset, outwardOffset)
+			self.BorderTopRight:SetSize(edgeSize, edgeSize)
+
+			self.BorderBottomLeft:ClearAllPoints()
+			self.BorderBottomLeft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", -outwardOffset, -outwardOffset)
+			self.BorderBottomLeft:SetSize(edgeSize, edgeSize)
+
+			self.BorderBottomRight:ClearAllPoints()
+			self.BorderBottomRight:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", outwardOffset, -outwardOffset)
+			self.BorderBottomRight:SetSize(edgeSize, edgeSize)
+
+			self.BorderTop:SetHeight(edgeSize)
+			self.BorderBottom:SetHeight(edgeSize)
+			self.BorderLeft:SetWidth(edgeSize)
+			self.BorderRight:SetWidth(edgeSize)
+
+			local path = LibSharedMedia:Fetch(LibSharedMedia.MediaType.BORDER, styleName) or ""
+
+			local sliceTexCoords = {
+				[self.BorderTopLeft] = {
+					0.5078125,
+					BACKDROP_COORD_START,
+					0.5078125,
+					BACKDROP_COORD_END,
+					0.6171875,
+					BACKDROP_COORD_START,
+					0.6171875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderTopRight] = {
+
+					0.6328125,
+					BACKDROP_COORD_START,
+					0.6328125,
+					BACKDROP_COORD_END,
+					0.7421875,
+					BACKDROP_COORD_START,
+					0.7421875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderBottomLeft] = {
+
+					0.7578125,
+					BACKDROP_COORD_START,
+					0.7578125,
+					BACKDROP_COORD_END,
+					0.8671875,
+					BACKDROP_COORD_START,
+					0.8671875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderBottomRight] = {
+
+					0.8828125,
+					BACKDROP_COORD_START,
+					0.8828125,
+					BACKDROP_COORD_END,
+					0.9921875,
+					BACKDROP_COORD_START,
+					0.9921875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderTop] = {
+
+					0.2578125,
+					edgeRepeatX,
+					0.3671875,
+					edgeRepeatX,
+					0.2578125,
+					BACKDROP_COORD_START,
+					0.3671875,
+					BACKDROP_COORD_START,
+				},
+				[self.BorderBottom] = {
+
+					0.3828125,
+					edgeRepeatX,
+					0.4921875,
+					edgeRepeatX,
+					0.3828125,
+					BACKDROP_COORD_START,
+					0.4921875,
+					BACKDROP_COORD_START,
+				},
+				[self.BorderLeft] = {
+
+					0.0078125,
+					BACKDROP_COORD_START,
+					0.0078125,
+					edgeRepeatY,
+					0.1171875,
+					BACKDROP_COORD_START,
+					0.1171875,
+					edgeRepeatY,
+				},
+				[self.BorderRight] = {
+
+					0.1328125,
+					BACKDROP_COORD_START,
+					0.1328125,
+					edgeRepeatY,
+					0.2421875,
+					BACKDROP_COORD_START,
+					0.2421875,
+					edgeRepeatY,
+				},
+			}
+
+			for tex, entry in pairs(sliceTexCoords) do
+				tex:SetTexture(path, "REPEAT", "REPEAT")
+				tex:SetTexCoord(entry[1], entry[2], entry[3], entry[4], entry[5], entry[6], entry[7], entry[8])
+				tex:Show()
+			end
 		end
 	end
-
-	AddStrip("TOPLEFT", "TOPRIGHT", "h")
-	AddStrip("BOTTOMLEFT", "BOTTOMRIGHT", "h")
-	AddStrip("TOPLEFT", "BOTTOMLEFT", "w")
-	AddStrip("TOPRIGHT", "BOTTOMRIGHT", "w")
 end
 
 function TargetedSpellsMixin:SetId(id)
@@ -177,14 +342,6 @@ function TargetedSpellsMixin:SetShowDuration(showDuration, showFractions)
 	self:SetScript("OnUpdate", showDuration and showFractions and self.OnUpdate or nil)
 end
 
-function TargetedSpellsMixin:SetShowBorder(bool)
-	if bool then
-		self.Border:Show()
-	else
-		self.Border:Hide()
-	end
-end
-
 --- shamelessly ~~stolen~~ repurposed from WeakAuras2
 function TargetedSpellsMixin:OnSizeChanged()
 	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
@@ -250,6 +407,8 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 			if TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
 			end
+		elseif key == Private.Settings.Keys.Self.BorderStyle then
+			self:ApplyBorderStyle(flagIdOrValue)
 		elseif key == Private.Settings.Keys.Self.FeatureFlags then
 			if
 				flagIdOrValue == Private.Enum.FeatureFlag.ShowDuration
@@ -259,8 +418,6 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 					TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
 					TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
 				)
-			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowBorder then
-				self:SetShowBorder(newBool)
 			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowSwipe then
 				self.Cooldown:SetDrawSwipe(newBool)
 			elseif flagIdOrValue == Private.Enum.FeatureFlag.GlowImportant then
@@ -286,6 +443,8 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 			if TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
 			end
+		elseif key == Private.Settings.Keys.Party.BorderStyle then
+			self:ApplyBorderStyle(flagIdOrValue)
 		elseif key == Private.Settings.Keys.Party.FeatureFlags then
 			if
 				flagIdOrValue == Private.Enum.FeatureFlag.ShowDuration
@@ -295,8 +454,6 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 					TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
 					TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
 				)
-			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowBorder then
-				self:SetShowBorder(newBool)
 			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowSwipe then
 				self.Cooldown:SetDrawSwipe(newBool)
 			elseif flagIdOrValue == Private.Enum.FeatureFlag.GlowImportant then
@@ -494,7 +651,7 @@ function TargetedSpellsMixin:SetKind(kind)
 	self:SetFontSize()
 	self:SetFont()
 	self:HideGlow()
-	self:SetShowBorder(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowBorder])
+	self:ApplyBorderStyle(tableRef.BorderStyle)
 	self:SetAlpha(tableRef.Opacity)
 	self:SetShowDuration(
 		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],

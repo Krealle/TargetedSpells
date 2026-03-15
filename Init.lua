@@ -60,6 +60,13 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 				Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.GlowTypeLabel
 			)
 		end
+
+		if key == "ShowBorder" then
+			local shown = TargetedSpellsSaved.Settings.Self[key]
+			TargetedSpellsSaved.Settings.Self[key] = nil
+			-- table.insert(resetKeys, Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.BorderStyleLabel)
+			TargetedSpellsSaved.Settings.Self.BorderStyle = shown and "Solid" or "None"
+		end
 	end
 
 	for key, value in pairs(partyDefaults) do
@@ -85,6 +92,13 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 				Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.GlowTypeLabel
 			)
 		end
+
+		if key == "ShowBorder" then
+			local shown = TargetedSpellsSaved.Settings.Party[key]
+			TargetedSpellsSaved.Settings.Party[key] = nil
+			-- table.insert(resetKeys, Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.BorderStyleLabel)
+			TargetedSpellsSaved.Settings.Party.BorderStyle = shown and "Solid" or "None"
+		end
 	end
 
 	if TargetedSpellsSaved.v2DeprecationWarningSeen == nil then
@@ -96,7 +110,6 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 				[Private.Enum.FeatureFlag.OnlyImportant] = "OnlyImportant",
 				[Private.Enum.FeatureFlag.ShowDuration] = "ShowDuration",
 				[Private.Enum.FeatureFlag.ShowDurationFractions] = "ShowDurationFractions",
-				[Private.Enum.FeatureFlag.ShowBorder] = "ShowBorder",
 				[Private.Enum.FeatureFlag.ShowSwipe] = "ShowSwipe",
 				[Private.Enum.FeatureFlag.IndicateInterrupts] = "IndicateInterrupts",
 				[Private.Enum.FeatureFlag.RenderInterruptSourceName] = "RenderInterruptSourceName",

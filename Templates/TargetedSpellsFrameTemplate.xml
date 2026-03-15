@@ -32,6 +32,77 @@
                         </Anchor>
                     </Anchors>
                 </FontString>
+                <!-- Solid border strips -->
+                <Texture parentKey="BorderSolidTop" hidden="true" file="Interface\Buttons\WHITE8x8">
+                    <Color r="1" g="1" b="1" a="0.8" />
+                    <Size>
+                        <AbsDimension x="0" y="1" />
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativePoint="TOPLEFT" />
+                        <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                </Texture>
+                <Texture parentKey="BorderSolidBottom" hidden="true" file="Interface\Buttons\WHITE8x8">
+                    <Color r="1" g="1" b="1" a="0.8" />
+                    <Size>
+                        <AbsDimension x="0" y="1" />
+                    </Size>
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" />
+                        <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                </Texture>
+                <Texture parentKey="BorderSolidLeft" hidden="true" file="Interface\Buttons\WHITE8x8">
+                    <Color r="1" g="1" b="1" a="0.8" />
+                    <Size>
+                        <AbsDimension x="1" y="0" />
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativePoint="TOPLEFT" />
+                        <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" />
+                    </Anchors>
+                </Texture>
+                <Texture parentKey="BorderSolidRight" hidden="true" file="Interface\Buttons\WHITE8x8">
+                    <Color r="1" g="1" b="1" a="0.8" />
+                    <Size>
+                        <AbsDimension x="1" y="0" />
+                    </Size>
+                    <Anchors>
+                        <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" />
+                        <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
+                    </Anchors>
+                </Texture>
+                <!-- Slice border corners -->
+                <Texture parentKey="BorderTopLeft" hidden="true" />
+                <Texture parentKey="BorderTopRight" hidden="true" />
+                <Texture parentKey="BorderBottomLeft" hidden="true" />
+                <Texture parentKey="BorderBottomRight" hidden="true" />
+                <!-- Slice border edges, statically anchored to their adjacent corners -->
+                <Texture parentKey="BorderTop" hidden="true">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BorderTopLeft" relativePoint="TOPRIGHT" />
+                        <Anchor point="TOPRIGHT" relativeKey="$parent.BorderTopRight" relativePoint="TOPLEFT" />
+                    </Anchors>
+                </Texture>
+                <Texture parentKey="BorderBottom" hidden="true">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.BorderBottomLeft" relativePoint="BOTTOMRIGHT" />
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.BorderBottomRight" relativePoint="BOTTOMLEFT" />
+                    </Anchors>
+                </Texture>
+                <Texture parentKey="BorderLeft" hidden="true">
+                    <Anchors>
+                        <Anchor point="TOPLEFT" relativeKey="$parent.BorderTopLeft" relativePoint="BOTTOMLEFT" />
+                        <Anchor point="BOTTOMLEFT" relativeKey="$parent.BorderBottomLeft" relativePoint="TOPLEFT" />
+                    </Anchors>
+                </Texture>
+                <Texture parentKey="BorderRight" hidden="true">
+                    <Anchors>
+                        <Anchor point="TOPRIGHT" relativeKey="$parent.BorderTopRight" relativePoint="BOTTOMRIGHT" />
+                        <Anchor point="BOTTOMRIGHT" relativeKey="$parent.BorderBottomRight" relativePoint="TOPRIGHT" />
+                    </Anchors>
+                </Texture>
             </Layer>
         </Layers>
         <Frames>
@@ -46,7 +117,6 @@
                     </Layer>
                 </Layers>
             </Cooldown>
-            <Frame parentKey="Border" hidden="true" frameStrata="BACKGROUND" setAllPoints="true" />
             <StatusBar parentKey="Bar" ignoreParentAlpha="true" minValue="0" maxValue="1" />
         </Frames>
         <Scripts>

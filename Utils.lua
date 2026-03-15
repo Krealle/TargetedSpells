@@ -208,6 +208,26 @@ do
 			end
 		end
 
+		if QUI then
+			for i = 1, 5 do
+				local frame = _G["QUI_PartyHeaderUnitButton" .. i]
+
+				if frame and frame.unit == unit then
+					return frame
+				end
+			end
+		end
+
+		if Cell then
+			for i = 1, 5 do
+				local frame = _G["CellPartyFrameHeaderUnitButton" .. i]
+
+				if frame and frame.unit == unit then
+					return frame
+				end
+			end
+		end
+
 		-- use these last, including e.g. ElvUI. people using multiple unit frame addons (god knows for what reason)
 		-- _likely_ prefer using the other one over oUF derivates because what else would be the point of having them.
 		if hasManualThirdPartyRegistrations then

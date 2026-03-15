@@ -1112,6 +1112,55 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 		}
 	end
 
+	if key == Private.Settings.Keys.Self.BorderStyle or key == Private.Settings.Keys.Party.BorderStyle then
+		local tableRef = key == Private.Settings.Keys.Self.BorderStyle and TargetedSpellsSaved.Settings.Self
+			or TargetedSpellsSaved.Settings.Party
+
+		---@param layoutName string
+		---@param value string
+		local function Set(layoutName, value)
+			if tableRef.BorderStyle ~= value then
+				tableRef.BorderStyle = value
+				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+			end
+		end
+
+		local function Generator(owner, rootDescription, data)
+			rootDescription:CreateRadio(L.Settings.BorderStyleSolid, function()
+				return tableRef.BorderStyle == "Solid"
+			end, function()
+				Set(LibEditMode:GetActiveLayoutName(), "Solid")
+			end)
+
+			local LibSharedMedia = LibStub("LibSharedMedia-3.0")
+
+			local borders = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BORDER))
+			table.sort(borders)
+
+			for _, label in ipairs(borders) do
+				local function IsEnabled()
+					return tableRef.BorderStyle == label
+				end
+
+				local function SetProxy()
+					Set(LibEditMode:GetActiveLayoutName(), label)
+				end
+
+				rootDescription:CreateRadio(label, IsEnabled, SetProxy)
+			end
+		end
+
+		---@type LibEditModeDropdown
+		return {
+			name = L.Settings.BorderStyleLabel,
+			kind = Enum.EditModeSettingDisplayType.Dropdown,
+			default = defaults.BorderStyle,
+			desc = L.Settings.BorderStyleTooltip,
+			generator = Generator,
+			set = Set,
+		}
+	end
+
 	error(
 		string.format(
 			"Edit Mode Settings for key '%s' are either not implemented or you're calling this with the wrong key.",
@@ -1526,6 +1575,14 @@ local function GetEditModePartyParentFrame(useRaidStylePartyFrames)
 		and ElvUF_Party:IsShown()
 	then
 		return ElvUF_Party, ElvUF_Party:GetWidth()
+	end
+
+	if QUI ~= nil and QUI_PartyHeader ~= nil then
+		return QUI_PartyHeader, QUI_PartyHeader:GetWidth()
+	end
+
+	if Cell ~= nil and CellPartyFrameHeader ~= nil then
+		return CellPartyFrameHeader, CellPartyFrameHeader:GetWidth()
 	end
 
 	if Private.Utils.HasThirdPartyCandidates() or Grid2 ~= nil or DandersFrames ~= nil then
