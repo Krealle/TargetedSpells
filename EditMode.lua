@@ -83,10 +83,7 @@ function TargetedSpellsEditModeMixin:OnSettingsChanged(key, flagIdOrValue, newBo
 
 		if flagId == Private.Enum.FeatureFlag.GlowImportant then
 			self:OnLayoutSettingChanged(key, flagId, newBool)
-		elseif
-			flagId == Private.Enum.FeatureFlag.OnlyImportant
-			or flagId == Private.Enum.FeatureFlag.IncludeSelfInParty
-		then
+		elseif flagId == Private.Enum.FeatureFlag.OnlyImportant then
 			if not LibEditMode:IsInEditMode() then
 				return
 			end
@@ -100,6 +97,13 @@ function TargetedSpellsEditModeMixin:OnSettingsChanged(key, flagIdOrValue, newBo
 				self:EndDemo()
 				self:StartDemo()
 			end
+		elseif flagId == Private.Enum.FeatureFlag.IncludeSelfInParty then
+			if self.frameKind ~= Private.Enum.FrameKind.Party or not LibEditMode:IsInEditMode() then
+				return
+			end
+
+			self:EndDemo()
+			self:StartDemo()
 		end
 	end
 end
@@ -1230,15 +1234,23 @@ function SelfEditModeMixin:RepositionPreviewFrames()
 		return
 	end
 
-	-- await for the setup to be finished
-	if self.buildingFrames ~= nil then
-		return
-	end
-
 	---@type TargetedSpellsMixin[]
 	local activeFrames = {}
 
-	for i, frame in ipairs(self.frames) do
+	for index = 1, self.maxFrames do
+		if self.frames[index] == nil then
+			self.frames[index] = self:AcquireFrame()
+
+			table.insert(
+				self.demoTimers.tickers,
+				C_Timer.NewTicker(5 + index, GenerateClosure(self.LoopFrame, self, self.frames[index], index))
+			)
+
+			self:LoopFrame(self.frames[index], index)
+		end
+
+		local frame = self.frames[index]
+
 		if frame:ShouldBeShown() then
 			table.insert(activeFrames, frame)
 		end
@@ -1281,26 +1293,6 @@ function SelfEditModeMixin:StartDemo()
 	end
 
 	self.demoPlaying = true
-	self.buildingFrames = true
-
-	for index = 1, self.maxFrames do
-		if self.frames[index] == nil then
-			self.frames[index] = self:AcquireFrame()
-		end
-
-		local frame = self.frames[index]
-
-		if frame then
-			table.insert(
-				self.demoTimers.tickers,
-				C_Timer.NewTicker(5 + index, GenerateClosure(self.LoopFrame, self, frame, index))
-			)
-
-			self:LoopFrame(frame, index)
-		end
-	end
-
-	self.buildingFrames = nil
 
 	self:RepositionPreviewFrames()
 end
@@ -1476,11 +1468,7 @@ local function GetEditModePartyParentFrame(useRaidStylePartyFrames)
 		return ElvUF_Party, ElvUF_Party:GetWidth()
 	end
 
-	if DandersFrames ~= nil and DandersPartyGroupContainer ~= nil then
-		return DandersPartyGroupContainer, DandersPartyGroupContainer:GetWidth()
-	end
-
-	if Private.Utils.HasThirdPartyCandidates() or Grid2 ~= nil then
+	if Private.Utils.HasThirdPartyCandidates() or Grid2 ~= nil or DandersFrames ~= nil then
 		local maybeFrame = Private.Utils.FindThirdPartyGroupFrameForUnit("player")
 
 		if maybeFrame then
@@ -1558,11 +1546,6 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 		return
 	end
 
-	-- await for the setup to be finished
-	if self.buildingFrames ~= nil then
-		return
-	end
-
 	local tableRef = TargetedSpellsSaved.Settings.Party
 
 	local offsetX, offsetY, sortOrder, targetAnchor =
@@ -1577,49 +1560,67 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 	)
 
 	for i = 1, self.maxUnitCount do
-		if i == self.maxUnitCount and not self.useRaidStylePartyFrames then
-			break
-		end
-
-		---@type TargetedSpellsMixin[]
-		local activeFrames = {}
-
-		for j = 1, self.amountOfPreviewFramesPerUnit do
-			local frame = self.frames[i][j]
-
-			if frame and frame:ShouldBeShown() then
-				table.insert(activeFrames, frame)
-			end
-		end
-
-		if #activeFrames > 0 then
+		if
+			i < 5
+			or (i == 5 and TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IncludeSelfInParty])
+		then
 			local token = i == 5 and "player" or string.format("party%d", i)
+			local parentFrame = Private.Utils.FindThirdPartyGroupFrameForUnit(token)
 
-			if
-				i < 5
-				or (
-					i == 5
-					and TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IncludeSelfInParty]
-				)
-			then
-				Private.Utils.SortFrames(activeFrames, sortOrder)
-
-				local parentFrame = Private.Utils.FindThirdPartyGroupFrameForUnit(token)
-
-				if parentFrame == nil then
-					if self.useRaidStylePartyFrames then
+			if parentFrame == nil then
+				if self.useRaidStylePartyFrames then
+					-- some addons like Danders set alpha to 0
+					if CompactPartyFrame:GetAlpha() > 0 then
+						---@type Frame
 						parentFrame = CompactPartyFrame.memberUnitFrames[i]
-					else
+					end
+				else
+					-- same as above
+					if PartyFrame:GetAlpha() > 0 then
 						for memberFrame in PartyFrame.PartyMemberFramePool:EnumerateActive() do
 							if memberFrame.layoutIndex == i then
+								---@type Frame
 								parentFrame = memberFrame
 								break
 							end
 						end
 					end
 				end
+			end
 
-				if parentFrame ~= nil then
+			if parentFrame ~= nil then
+				if self.frames[i] == nil then
+					self.frames[i] = {}
+				end
+
+				---@type TargetedSpellsMixin[]
+				local activeFrames = {}
+
+				for j = 1, self.amountOfPreviewFramesPerUnit do
+					if self.frames[i][j] == nil then
+						self.frames[i][j] = self:AcquireFrame()
+
+						table.insert(
+							self.demoTimers.tickers,
+							C_Timer.NewTicker(
+								5 + j + i,
+								GenerateClosure(self.LoopFrame, self, self.frames[i][j], j + i)
+							)
+						)
+
+						self:LoopFrame(self.frames[i][j], j + i)
+					end
+
+					local frame = self.frames[i][j]
+
+					if frame:ShouldBeShown() then
+						table.insert(activeFrames, frame)
+					end
+				end
+
+				if #activeFrames > 0 then
+					Private.Utils.SortFrames(activeFrames, sortOrder)
+
 					Private.Utils.AdjustLayout(
 						activeFrames,
 						layouting,
@@ -1642,46 +1643,22 @@ function PartyEditModeMixin:StartDemo()
 	end
 
 	self.demoPlaying = true
-	self.buildingFrames = true
-
-	for unit = 1, self.maxUnitCount do
-		if self.frames[unit] == nil then
-			self.frames[unit] = {}
-		end
-
-		if unit == self.maxUnitCount and not self.useRaidStylePartyFrames then
-			break
-		end
-
-		for index = 1, self.amountOfPreviewFramesPerUnit do
-			if self.frames[unit][index] == nil then
-				self.frames[unit][index] = self:AcquireFrame()
-			end
-
-			local frame = self.frames[unit][index]
-
-			table.insert(
-				self.demoTimers.tickers,
-				C_Timer.NewTicker(5 + index + unit, GenerateClosure(self.LoopFrame, self, frame, index + unit))
-			)
-
-			self:LoopFrame(frame, index + unit)
-		end
-	end
-
-	self.buildingFrames = nil
 
 	self:RepositionPreviewFrames()
 end
 
 function PartyEditModeMixin:ReleaseAllFrames()
 	for unit = 1, self.maxUnitCount do
-		for index = 1, self.amountOfPreviewFramesPerUnit do
-			local frame = self.frames[unit][index]
+		local frames = self.frames[unit]
 
-			if frame then
-				Private.Utils.Pool:Release(frame)
-				self.frames[unit][index] = nil
+		if frames ~= nil then
+			for index = 1, self.amountOfPreviewFramesPerUnit do
+				local frame = frames[index]
+
+				if frame then
+					Private.Utils.Pool:Release(frame)
+					frames[index] = nil
+				end
 			end
 		end
 	end

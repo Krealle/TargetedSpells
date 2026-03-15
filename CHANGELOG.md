@@ -11,6 +11,7 @@
 - fixed a bug where, when using duration fractions, the duration text would be rendered behind the swipe animation
 - consolidated checkbox settings into a new Features dropdown
   - your settings will automatically be migrated to the new format
+- fixed a couple of rare layouting issues when using DandersFrames
 
 ## Version 1.1.18
 
