@@ -62,7 +62,8 @@ L.Settings.LoadConditionRoleLabels = {
 }
 
 L.Settings.RoleFilterLabel = "Rollenfilter"
-L.Settings.RoleFilterTooltip = "Erlaubt, Zauber auf individuelle Rollen nicht anzuzeigen. Nutzung auf eigene Gefahr."
+L.Settings.RoleFilterTooltip =
+	"Erlaubt Zauber die auf bestimmte Rollen zielen nicht anzuzeigen. Nutzung auf eigene Gefahr."
 L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "Breite"
