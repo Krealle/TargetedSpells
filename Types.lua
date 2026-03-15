@@ -319,6 +319,12 @@
 ---@field MaybeMarkAsInterruptedAndDelay fun(self: TargetedSpellsDriver, unit: string, id: number|string|nil, interruptedBy: string?): boolean
 ---@field CleanupDanglingFrames fun(self: TargetedSpellsDriver)
 
+---@class NumericFormatter
+---@field SetBreakpoints fun(self: NumericFormatter, breakpoints: table)
+
+---@class DurationObject
+---@field FormatRemainingDuration fun(self: DurationObject, formatter: NumericFormatter, modifier?: string): string
+
 ----- type patching / completion
 
 ---@class ExtendedCooldownTypes : Cooldown
@@ -389,9 +395,6 @@ function CreateFramePool(frameType, parent, template, resetFunc, forbidden, post
 
 ---@class LibEditModeColorPicker : LibEditModeSetting, LibEditModeGetterSetter
 ---@field hasOpacity boolean?
-
----@class Frame
----@field SetAlphaFromBoolean fun(self: Frame, value: boolean)
 
 ---@return function?
 local function GenerateClosureInternal(generatorArray, f, ...)
@@ -468,23 +471,6 @@ UNIT_NAMEPLATES_SHOW_OFFSCREEN = ""
 
 ---@type string|nil
 GAME_LOCALE = ""
-
----@class CurveObjectBaseDummy
----@field GetType fun(self: CurveObjectBaseDummy): CurveType
----@field HasSecretValues fun(self: CurveObjectBaseDummy): boolean
----@field SetType fun(self: CurveObjectBaseDummy, type: CurveType)
-
----@class CurveObjectDummy: CurveObjectBaseDummy
----@field AddPoint fun(self: CurveObjectDummy, pointX: number, pointY: number)
----@field ClearPoints fun(self: CurveObjectDummy)
----@field Copy fun(self: CurveObjectDummy): CurveObjectDummy
----@field Evaluate fun(self: CurveObjectDummy, x: number): number
----@field GetPoint fun(self: CurveObjectDummy, index: number): number
----@field GetPointCount fun(self: CurveObjectDummy): number
----@field GetPointCount fun(self: CurveObjectDummy): number
----@field RemovePoint fun(self: CurveObjectDummy, index: number)
----@field SetPoints fun(self: CurveObjectDummy, point: nil)
----@field SetToDefaults fun(self: CurveObjectDummy)
 
 ---@type table<string, StaticPopupDialogsArgs>
 StaticPopupDialogs = {}

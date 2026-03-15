@@ -104,20 +104,71 @@ function TargetedSpellsMixin:CanBeHidden(id)
 	return id == self:GetId()
 end
 
-function TargetedSpellsMixin:OnUpdate(elapsed)
-	self.elapsed = self.elapsed + elapsed
+do
+	local formatter = nil
 
-	if self.elapsed < 0.1 then
-		return
+	function TargetedSpellsMixin:OnUpdate(elapsed)
+		self.elapsed = self.elapsed + elapsed
+
+		if self.elapsed < 0.1 then
+			return
+		end
+
+		self.elapsed = self.elapsed - 0.1
+
+		if self.duration == nil then
+			return
+		end
+
+		if C_StringUtil.CreateNumericRuleFormatter == nil then
+			self.Cooldown.DurationText:SetFormattedText("%.1f", self.duration:GetRemainingDuration())
+		else
+			if formatter == nil then
+				formatter = C_StringUtil.CreateNumericRuleFormatter()
+
+				local breakpoints = {
+					{
+						threshold = 0,
+						rounding = Enum.NumericRuleFormatRounding.Nearest,
+						format = "%.1f",
+						step = 0.1,
+					},
+					{
+						threshold = 3,
+						rounding = Enum.NumericRuleFormatRounding.Nearest,
+						format = "%d",
+					},
+					{
+						threshold = 60,
+						rounding = Enum.NumericRuleFormatRounding.Nearest,
+						format = "%d:%02d",
+						components = {
+							{
+								div = 60,
+							},
+							{
+								mod = 60,
+							},
+						},
+					},
+					{
+						threshold = 300,
+						rounding = Enum.NumericRuleFormatRounding.Up,
+						format = "%dm",
+						components = {
+							{
+								div = 60,
+							},
+						},
+					},
+				}
+
+				formatter:SetBreakpoints(breakpoints)
+			end
+
+			self.Cooldown.DurationText:SetText(self.duration:FormatRemainingDuration(formatter))
+		end
 	end
-
-	self.elapsed = self.elapsed - 0.1
-
-	if self.duration == nil then
-		return
-	end
-
-	self.Cooldown.DurationText:SetFormattedText("%.1f", self.duration:GetRemainingDuration())
 end
 
 function TargetedSpellsMixin:SetShowDuration(showDuration, showFractions)
@@ -257,9 +308,28 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 	end
 end
 
-function TargetedSpellsMixin:SetDuration(duration)
-	self.duration = duration
-	self.Cooldown:SetCooldownFromDurationObject(duration)
+do
+	-- todo: remove in 12.0.5
+	local IsLongCastCurve = C_CurveUtil.CreateCurve()
+	IsLongCastCurve:SetType(Enum.LuaCurveType.Linear)
+	IsLongCastCurve:AddPoint(0, 1)
+	IsLongCastCurve:AddPoint(60, 1)
+	IsLongCastCurve:AddPoint(60.001, 0)
+
+	function TargetedSpellsMixin:SetDuration(duration)
+		self.duration = duration
+		self.Cooldown:SetCooldownFromDurationObject(duration)
+
+		local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+			or TargetedSpellsSaved.Settings.Party
+
+		if
+			tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+			and duration.FormatRemainingDuration == nil
+		then
+			self.Cooldown.DurationText:SetAlpha(duration:EvaluateRemainingDuration(IsLongCastCurve))
+		end
+	end
 end
 
 function TargetedSpellsMixin:GetDuration()
@@ -394,7 +464,7 @@ function TargetedSpellsMixin:SetSpellId(spellId)
 	self:ShowGlow(isImportant)
 
 	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.OnlyImportant] then
-		self:SetAlpha(C_CurveUtil.EvaluateColorValueFromBoolean(isImportant, 1, 0))
+		self:SetAlphaFromBoolean(isImportant, 1, 0)
 	end
 end
 
@@ -461,6 +531,7 @@ function TargetedSpellsMixin:Reset()
 	self.spellId = nil
 	self.Cooldown:Clear()
 	self.duration = nil
+	self.Cooldown.DurationText:SetAlpha(1)
 	self:ClearAllPoints()
 	self.wasInterrupted = false
 	self.doNotHideBefore = nil

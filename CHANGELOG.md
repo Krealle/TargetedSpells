@@ -14,6 +14,9 @@
 - fixed a couple of rare layouting issues when using DandersFrames
 - NEW: `Role Filter` setting for Party frames
   - allows you to never render spells targeting certain roles
+- cast duration for abilities with a remaining duration of more than 60 seconds will now be hidden to reduce clutter
+  - with 12.0.5, this will again render these durations, but properly formatted (e.g. 59m)
+  - with 12.0.5, casts with a duration of more than 3 seconds will not show fractions above 3 seconds
 
 ## Version 1.1.18
 
