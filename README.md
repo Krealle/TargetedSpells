@@ -25,7 +25,9 @@
   - [VuhDo](https://www.curseforge.com/wow/addons/vuhdo)
   - [Enhance QoL](https://www.curseforge.com/wow/addons/eqol)
   - [Danders Frames](https://www.curseforge.com/wow/addons/danders-frames)
-  - ShadowedUF
+  - [ShadowedUF](https://github.com/NoSelph/ShadowedUnitFrames)
+  - [QUI](https://github.com/zol-wow/QUI)
+  - [Cell](https://www.curseforge.com/wow/addons/cell)
   - more coming when the dust settles
 - blizzlike look - built on top of the Cooldown Manager design
 - customization options are heavily inspired by what's available in WeakAuras - that's where the aura lived before, so resurrecting most of that functionality only makes sense
