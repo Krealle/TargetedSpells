@@ -262,6 +262,15 @@ do
 					return frame
 				end
 			end
+
+			-- of course this vibecoded mess doesn't adhere to any standards so its using completely different
+			-- frames in edit mode that also don't communicate the unit they intend to resemble. clown emoji
+			local id = (unit == "player" and 5 or string.gsub(unit, "party", ""))
+			local frame = _G["QUI_TestFrame" .. id]
+
+			if frame and frame:IsShown() then
+				return frame
+			end
 		end
 
 		if Cell then

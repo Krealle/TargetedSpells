@@ -540,6 +540,9 @@ QUI = nil
 ---@type Frame?
 QUI_PartyHeader = nil
 
+---@type Frame?
+QUI_GroupFramesMover = nil
+
 ---@type table?
 Cell = nil
 ---@type Frame?

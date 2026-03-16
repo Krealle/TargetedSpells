@@ -29,7 +29,18 @@ function TargetedSpellsEditModeMixin:Init(displayName, frameKind)
 	Private.Utils.RegisterEditModeFrame(frameKind, self.editModeFrame)
 	Private.EventRegistry:RegisterCallback(Private.Enum.Events.SETTING_CHANGED, self.OnSettingsChanged, self)
 
-	LibEditMode:RegisterCallback("enter", GenerateClosure(self.StartDemo, self))
+	do
+		local cb = GenerateClosure(self.StartDemo, self)
+
+		if QUI == nil then
+			LibEditMode:RegisterCallback("enter", cb)
+		else
+			LibEditMode:RegisterCallback("enter", function()
+				C_Timer.After(0.25, cb)
+			end)
+		end
+	end
+
 	LibEditMode:RegisterCallback("exit", GenerateClosure(self.EndDemo, self))
 
 	self:AppendSettings()
@@ -1527,7 +1538,17 @@ function PartyEditModeMixin:AppendSettings()
 	)
 	self.editModeFrame:SetScript("OnDragStart", nil)
 	self.editModeFrame:SetScript("OnDragStop", nil)
-	LibEditMode:RegisterCallback("enter", GenerateClosure(self.RepositionEditModeFrame, self))
+
+	do
+		local cb = GenerateClosure(self.RepositionEditModeFrame, self)
+		if QUI == nil then
+			LibEditMode:RegisterCallback("enter", cb)
+		else
+			LibEditMode:RegisterCallback("enter", function()
+				C_Timer.After(0.25, cb)
+			end)
+		end
+	end
 
 	local settingsOrder = Private.Settings.GetSettingsDisplayOrder(Private.Enum.FrameKind.Party)
 	local settings = {}
@@ -1566,8 +1587,14 @@ local function GetEditModePartyParentFrame(useRaidStylePartyFrames)
 		return ElvUF_Party, ElvUF_Party:GetWidth()
 	end
 
-	if QUI ~= nil and QUI_PartyHeader ~= nil then
-		return QUI_PartyHeader, QUI_PartyHeader:GetWidth()
+	if QUI ~= nil then
+		if QUI_PartyHeader ~= nil and QUI_PartyHeader:IsShown() then
+			return QUI_PartyHeader, QUI_PartyHeader:GetWidth()
+		end
+
+		if QUI_GroupFramesMover ~= nil then
+			return QUI_GroupFramesMover, QUI_GroupFramesMover:GetWidth()
+		end
 	end
 
 	if Cell ~= nil and CellPartyFrameHeader ~= nil then
