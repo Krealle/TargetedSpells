@@ -21,7 +21,7 @@
 
 ---@class TargetedSpellsUtils
 ---@field CollectLayoutingArguments fun(direction: Direction, grow: Grow, width: number, height: number, gap: number): CollectLayoutingArguments
----@field AdjustLayout fun(frames: TargetedSpellsMixin[], geo: CollectLayoutingArguments, barParent: Frame, firstAnchorFrame: Frame, firstAnchorPoint: FramePoint, firstOffsetX: number, firstOffsetY: number, isEditMode: boolean)
+---@field AdjustLayout fun(frames: TargetedSpellsMixin[], geo: CollectLayoutingArguments, barParent: Frame, firstAnchorPoint: FramePoint, firstOffsetX: number, firstOffsetY: number, isEditMode: boolean)
 ---@field SortFrames fun(frames: TargetedSpellsMixin[], sortOrder: SortOrder)
 ---@field RollDice fun(): boolean
 ---@field FindThirdPartyGroupFrameForUnit fun(unit: string): Frame?

@@ -100,7 +100,6 @@ function Private.Utils.AdjustLayout(
 	frames,
 	layouting,
 	barParent,
-	firstAnchorFrame,
 	firstAnchorPoint,
 	firstOffsetX,
 	firstOffsetY,
@@ -123,6 +122,7 @@ function Private.Utils.AdjustLayout(
 		frame.Bar:SetOrientation(layouting.orientation)
 		frame.Bar:SetReverseFill(layouting.isGrowEnd)
 		frame.Bar:SetParent(barParent)
+		frame:SetParent(frame.Bar)
 		frame:SetFrameLevel(frame.Bar:GetFrameLevel() + 10)
 		frame.Bar:ClearAllPoints()
 
@@ -131,7 +131,7 @@ function Private.Utils.AdjustLayout(
 		end
 
 		if prevStatusBarTexture == nil then
-			frame.Bar:SetPoint(layouting.originPoint, firstAnchorFrame, firstAnchorPoint, firstOffsetX, firstOffsetY)
+			frame.Bar:SetPoint(layouting.originPoint, barParent, firstAnchorPoint, firstOffsetX, firstOffsetY)
 		else
 			frame.Bar:SetPoint(layouting.originPoint, prevStatusBarTexture, layouting.relativePoint, 0, 0)
 		end
@@ -266,10 +266,29 @@ do
 			-- of course this vibecoded mess doesn't adhere to any standards so its using completely different
 			-- frames in edit mode that also don't communicate the unit they intend to resemble. clown emoji
 			local id = (unit == "player" and 5 or string.gsub(unit, "party", ""))
-			local frame = _G["QUI_TestFrame" .. id]
+			-- even worse, it uses two frames with the same name so you can't globally access them as needed.
+			-- only occurs after opening edit mode the second time tho
+			local frameName = "QUI_TestFrame" .. id
+			local frame = _G[frameName]
 
 			if frame and frame:IsShown() then
 				return frame
+			end
+
+			if QUI_GroupFramesMover and QUI_GroupFramesMover:IsShown() then
+				local relevantParent = select(7, QUI_GroupFramesMover:GetChildren())
+
+				if relevantParent then
+					local children = { relevantParent:GetChildren() }
+
+					for i = 1, #children do
+						local child = children[i]
+
+						if child and child:GetName() == frameName then
+							return child
+						end
+					end
+				end
 			end
 		end
 

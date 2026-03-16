@@ -241,7 +241,7 @@ function TargetedSpellsDriver:RepositionFrames()
 				selfTableRef.Gap
 			)
 
-			Private.Utils.AdjustLayout(frames, layouting, self.frame, self.frame, "CENTER", 0, 0, false)
+			Private.Utils.AdjustLayout(frames, layouting, self.frame, "CENTER", 0, 0, false)
 		else
 			local parentFrame = FindParentFrameForPartyMember(targetUnit)
 
@@ -259,7 +259,6 @@ function TargetedSpellsDriver:RepositionFrames()
 				Private.Utils.AdjustLayout(
 					frames,
 					layouting,
-					parentFrame,
 					parentFrame,
 					partyTableRef.TargetAnchor,
 					partyTableRef.OffsetX,

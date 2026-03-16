@@ -684,6 +684,9 @@ function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit)
 end
 
 function TargetedSpellsMixin:Reset()
+	self:SetParent(UIParent)
+	self.Bar:ClearAllPoints()
+	self.Bar:SetParent(self)
 	self:ClearStartTime()
 	self.spellId = nil
 	self.Cooldown:Clear()
@@ -727,8 +730,7 @@ function TargetedSpellsMixin:Reset()
 		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
 	)
 	self.Cooldown:SetDrawSwipe(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowSwipe])
-	self.Bar:ClearAllPoints()
-	self.Bar:SetParent(self)
+
 	-- important to come last - the cooldown swipe ignores display status of its parent
 	self:Hide()
 end

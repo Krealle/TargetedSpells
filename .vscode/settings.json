@@ -73,7 +73,8 @@
     "MultiBarBottomLeft",
     "SpellActivationOverlayFrame",
     "NineSliceUtil",
-    "UIParent"
+    "UIParent",
+    "RunNextFrame"
   ],
   "stylua.targetReleaseVersion": "latest",
   "Lua.diagnostics.disable": ["assign-type-mismatch"],

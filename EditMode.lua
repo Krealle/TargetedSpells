@@ -32,13 +32,9 @@ function TargetedSpellsEditModeMixin:Init(displayName, frameKind)
 	do
 		local cb = GenerateClosure(self.StartDemo, self)
 
-		if QUI == nil then
-			LibEditMode:RegisterCallback("enter", cb)
-		else
-			LibEditMode:RegisterCallback("enter", function()
-				C_Timer.After(0.25, cb)
-			end)
-		end
+		LibEditMode:RegisterCallback("enter", QUI == nil and cb or function()
+			C_Timer.After(0.25, cb)
+		end)
 	end
 
 	LibEditMode:RegisterCallback("exit", GenerateClosure(self.EndDemo, self))
@@ -1388,7 +1384,6 @@ function SelfEditModeMixin:RepositionPreviewFrames()
 		activeFrames,
 		layouting,
 		self.editModeFrame,
-		self.editModeFrame,
 		"CENTER",
 		layouting.isHorizontal and offset or 0,
 		(not layouting.isHorizontal) and offset or 0,
@@ -1541,13 +1536,10 @@ function PartyEditModeMixin:AppendSettings()
 
 	do
 		local cb = GenerateClosure(self.RepositionEditModeFrame, self)
-		if QUI == nil then
-			LibEditMode:RegisterCallback("enter", cb)
-		else
-			LibEditMode:RegisterCallback("enter", function()
-				C_Timer.After(0.25, cb)
-			end)
-		end
+
+		LibEditMode:RegisterCallback("enter", QUI == nil and cb or function()
+			C_Timer.After(0.25, cb)
+		end)
 	end
 
 	local settingsOrder = Private.Settings.GetSettingsDisplayOrder(Private.Enum.FrameKind.Party)
@@ -1757,7 +1749,6 @@ function PartyEditModeMixin:RepositionPreviewFrames()
 					Private.Utils.AdjustLayout(
 						activeFrames,
 						layouting,
-						parentFrame,
 						parentFrame,
 						targetAnchor,
 						offsetX,
