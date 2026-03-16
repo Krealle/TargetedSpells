@@ -1126,18 +1126,7 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 		end
 
 		local function Generator(owner, rootDescription, data)
-			rootDescription:CreateRadio(L.Settings.BorderStyleSolid, function()
-				return tableRef.BorderStyle == "Solid"
-			end, function()
-				Set(LibEditMode:GetActiveLayoutName(), "Solid")
-			end)
-
-			local LibSharedMedia = LibStub("LibSharedMedia-3.0")
-
-			local borders = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BORDER))
-			table.sort(borders)
-
-			for _, label in ipairs(borders) do
+			for _, label in ipairs(Private.Settings.GetBorderOptions()) do
 				local function IsEnabled()
 					return tableRef.BorderStyle == label
 				end

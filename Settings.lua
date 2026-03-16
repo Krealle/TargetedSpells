@@ -235,7 +235,7 @@ function Private.Settings.GetSelfDefaultSettings()
 			[Private.Enum.FeatureFlag.IndicateInterrupts] = false,
 			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = false,
 		},
-		BorderStyle = "Blizzard Dialog",
+		BorderStyle = "Blizzard Tooltip Border",
 	}
 end
 
@@ -289,7 +289,7 @@ function Private.Settings.GetPartyDefaultSettings()
 			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = true,
 			[Private.Enum.FeatureFlag.IncludeSelfInParty] = true,
 		},
-		BorderStyle = "Blizzard Dialog",
+		BorderStyle = "Blizzard Tooltip Border",
 	}
 end
 
@@ -302,6 +302,20 @@ function Private.Settings.GetFontOptions()
 		fonts = fonts,
 		byLabel = byLabel,
 	}
+end
+
+function Private.Settings.GetBorderOptions()
+	local borders = {
+		"Solid",
+	}
+
+	for _, border in pairs(CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BORDER))) do
+		table.insert(borders, border)
+	end
+
+	table.sort(borders)
+
+	return borders
 end
 
 function Private.Settings.IsContentTypeAvailableForKind(kind, contentTypeId)
@@ -324,6 +338,12 @@ function Private.Settings.IsAnyRoleFilterActive()
 end
 
 table.insert(Private.LoginFnQueue, function()
+	LibSharedMedia:Register(
+		LibSharedMedia.MediaType.BORDER,
+		"Blizzard Tooltip Border",
+		"Interface\\Tooltips\\UI-Tooltip-Border"
+	)
+
 	local L = Private.L
 	local settingsName = C_AddOns.GetAddOnMetadata(addonName, "Title")
 	local category, layout = Settings.RegisterVerticalLayoutCategory(settingsName)
@@ -481,12 +501,8 @@ table.insert(Private.LoginFnQueue, function()
 
 			local function GetOptions()
 				local container = Settings.CreateControlTextContainer()
-				container:Add("Solid", L.Settings.BorderStyleSolid)
 
-				local borders = CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BORDER))
-				table.sort(borders)
-
-				for _, label in ipairs(borders) do
+				for _, label in ipairs(Private.Settings.GetBorderOptions()) do
 					container:Add(label, label)
 				end
 
