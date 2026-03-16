@@ -20,6 +20,7 @@
 - extended support for LibSharedMedia Borders
 - added support for QUI and Cell
 - fixed a bug where, when using another unit frame addon but also using ElvUI, party demo frames were anchoring incorrectly in Edit Mode
+- fixed a bug where, where when using Self _or_ Party interrupt indication, frames of the other frame type may linger
 
 ## Version 1.1.18
 

@@ -479,13 +479,20 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 		end
 
 		local startTime = GetTime() -- todo: this is wrong, but we can't do better yet
+		local OnCooldownDone = GenerateClosure(self.OnCooldownDone, self, {
+			unit = unit,
+			spellId = spellId,
+			startTime = startTime,
+			id = id,
+		})
 
 		for i, frame in ipairs(frames) do
 			table.insert(self.frames[unit], frame)
 			frame:SetSpellId(spellId)
 			frame:SetStartTime(startTime)
-			frame:SetDuration(duration)
 			frame:SetId(id)
+			frame:SetDuration(duration)
+			frame:SetOnCooldownDone(OnCooldownDone)
 		end
 
 		self:RepositionFrames()
@@ -557,9 +564,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			id = select(4, ...)
 		end
 
-		if self:MaybeMarkAsInterruptedAndDelay(unit, id, interruptedBy) then
-			return
-		end
+		self:MaybeMarkAsInterruptedAndDelay(unit, id, interruptedBy)
 
 		if self:ReleaseFrameForUnit(unit, true, id) then
 			self:RepositionFrames()
@@ -599,13 +604,15 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			self:ReleaseFrameForUnit(info.unit, false, info.id)
 		end
 
-		---@type DurationObject|nil
 		local duration = UnitCastingDuration(info.unit) or UnitChannelDuration(info.unit)
 
 		-- without `nameplateShowOffscreen` active, castTime may stay nil
+
 		if duration == nil then
 			return
 		end
+
+		local OnCooldownDone = GenerateClosure(self.OnCooldownDone, self, info)
 
 		for i, frame in ipairs(frames) do
 			table.insert(self.frames[info.unit], frame)
@@ -613,6 +620,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			frame:SetStartTime(info.startTime)
 			frame:SetId(info.id)
 			frame:SetDuration(duration)
+			frame:SetOnCooldownDone(OnCooldownDone)
 		end
 
 		self:RepositionFrames()
@@ -750,17 +758,17 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 		not TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 		and not TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 	then
-		return false
+		return
 	end
 
 	-- either via events that don't communicate interruptedBy, or via interrupt events briefly before deaths, e.g. on totems that cast something like Cinderbrew Meadery barrels
 	if interruptedBy == nil then
-		return false
+		return
 	end
 
 	-- event gets sent when unit dies mid-cast, incorrectly implying it was interrupted
 	if not UnitExists(unit) then
-		return false
+		return
 	end
 
 	local interruptName = UnitNameFromGUID(interruptedBy)
@@ -798,7 +806,7 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 	end
 
 	if not kindsToDelay[Private.Enum.FrameKind.Self] and not kindsToDelay[Private.Enum.FrameKind.Party] then
-		return false
+		return
 	end
 
 	---@type DelayInfo
@@ -812,8 +820,12 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 		1,
 		GenerateClosure(self.OnFrameEvent, self, self.frame, Private.Enum.Events.DELAYED_FRAME_CLEANUP, delayInfo)
 	)
+end
 
-	return true
+function TargetedSpellsDriver:OnCooldownDone(info)
+	if self:ReleaseFrameForUnit(info.unit, true, info.id) then
+		self:RepositionFrames()
+	end
 end
 
 table.insert(Private.LoginFnQueue, GenerateClosure(TargetedSpellsDriver.Init, TargetedSpellsDriver))

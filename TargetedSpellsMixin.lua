@@ -701,6 +701,7 @@ function TargetedSpellsMixin:Reset()
 	self.InterruptSource:SetText()
 	self.InterruptSource:Hide()
 	self.InterruptSource:SetTextColor(1, 1, 1)
+	self.Cooldown:SetScript("OnCooldownDone", nil)
 
 	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 		or TargetedSpellsSaved.Settings.Party
@@ -780,4 +781,8 @@ function TargetedSpellsMixin:SetFont()
 	else
 		fontString:SetShadowOffset(0, 0)
 	end
+end
+
+function TargetedSpellsMixin:SetOnCooldownDone(callback)
+	self.Cooldown:SetScript("OnCooldownDone", callback)
 end
