@@ -19,6 +19,7 @@
   - with 12.0.5, casts with a duration of more than 3 seconds will not show fractions above 3 seconds
 - extended support for LibSharedMedia Borders
 - added support for QUI and Cell
+- fixed a bug where, when using another unit frame addon but also using ElvUI, party demo frames were anchoring incorrectly in Edit Mode
 
 ## Version 1.1.18
 
