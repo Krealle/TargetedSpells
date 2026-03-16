@@ -50,18 +50,24 @@ function Private.Utils.CollectLayoutingArguments(direction, grow, width, height,
 	}
 end
 
-function Private.Utils.ShowMigrationPopup(resetKeys)
-	EventRegistry:RegisterFrameEventAndCallback("FIRST_FRAME_RENDERED", function(ownerId)
-		EventRegistry:UnregisterFrameEventAndCallback("FIRST_FRAME_RENDERED", ownerId)
+function Private.Utils.ShowMigrationPopup(resetKeys, kind)
+	local text = string.format(Private.L.Functionality.V2DeprecationWarning, table.concat(resetKeys, "\n"))
+	if kind == "import" then
+		-- cannot show StaticPopup while in Edit Mode apparently
+		print(text)
+	elseif kind == "login" then
+		EventRegistry:RegisterFrameEventAndCallback("FIRST_FRAME_RENDERED", function(ownerId)
+			EventRegistry:UnregisterFrameEventAndCallback("FIRST_FRAME_RENDERED", ownerId)
 
-		C_Timer.After(3, function()
-			Private.Utils.ShowStaticPopup({
-				whileDead = true,
-				button1 = OKAY,
-				text = string.format(Private.L.Functionality.V2DeprecationWarning, table.concat(resetKeys, "\n")),
-			})
+			C_Timer.After(3, function()
+				Private.Utils.ShowStaticPopup({
+					whileDead = true,
+					button1 = OKAY,
+					text = text,
+				})
+			end)
 		end)
-	end)
+	end
 end
 
 function Private.Utils.ApplyMigration(key, kind, defaults)
@@ -454,6 +460,13 @@ do
 
 							if hasChanges then
 								tableRef[key] = newTable
+
+								local resetKey = Private.Utils.ApplyMigration(key, kindString, defaults)
+
+								if resetKey then
+									table.insert(resetKeys, resetKey)
+								end
+
 								Private.EventRegistry:TriggerEvent(
 									Private.Enum.Events.SETTING_CHANGED,
 									eventKey,
@@ -463,6 +476,13 @@ do
 						end
 					elseif newValue ~= tableRef[key] then
 						tableRef[key] = newValue
+
+						local resetKey = Private.Utils.ApplyMigration(key, kindString, defaults)
+
+						if resetKey then
+							table.insert(resetKeys, resetKey)
+						end
+
 						hasChanges = true
 
 						if eventKey and hasChanges then
@@ -474,12 +494,6 @@ do
 						hasAnyChange = true
 					end
 				end
-
-				local resetKey = Private.Utils.ApplyMigration(key, kindString, defaults)
-
-				if resetKey then
-					table.insert(resetKeys, resetKey)
-				end
 			end
 
 			if anyPrimaryLoadConditionIsDisabled then
@@ -488,8 +502,8 @@ do
 			end
 		end
 
-		if #resetKeys > 0 or true then
-			Private.Utils.ShowMigrationPopup(resetKeys)
+		if #resetKeys > 0 then
+			Private.Utils.ShowMigrationPopup(resetKeys, "import")
 		end
 
 		return hasAnyChange

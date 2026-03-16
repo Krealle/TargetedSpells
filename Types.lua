@@ -36,6 +36,8 @@
 ---@field CreateEditablePopup fun(title: string, text: string, button1: string): StaticPopupDialogsArgs
 ---@field HasThirdPartyCandidates fun(): boolean
 ---@field Pool FramePool<TargetedSpellsMixin>
+---@field ShowMigrationPopup fun(resetKeys: string[], kind: "import"|"login")
+---@field ApplyMigration fun(key: string, kind: FrameKind, defaults: SavedVariablesSettingsSelf|SavedVariablesSettingsParty): string?
 
 ---@class GlowFunctions
 ---@field PixelGlow_Start fun(frame: Frame, width: number, height: number)

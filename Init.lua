@@ -110,7 +110,7 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		MigrateFeatureFlags(Private.Enum.FrameKind.Party)
 
 		if #resetKeys > 0 then
-			Private.Utils.ShowMigrationPopup(resetKeys)
+			Private.Utils.ShowMigrationPopup(resetKeys, "login")
 		end
 	end
 
