@@ -72,7 +72,8 @@
     "OKAY",
     "MultiBarBottomLeft",
     "SpellActivationOverlayFrame",
-    "NineSliceUtil"
+    "NineSliceUtil",
+    "UIParent"
   ],
   "stylua.targetReleaseVersion": "latest",
   "Lua.diagnostics.disable": ["assign-type-mismatch"],

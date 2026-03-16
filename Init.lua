@@ -21,6 +21,7 @@ Private.LoginFnQueue = {}
 EventUtil.ContinueOnAddOnLoaded(addonName, function()
 	---@class SavedVariables
 	TargetedSpellsSaved = TargetedSpellsSaved or {}
+
 	if TargetedSpellsSaved.nameplateShowOffscreenWasInitialized == nil then
 		TargetedSpellsSaved.nameplateShowOffscreenWasInitialized = true
 		C_CVar.SetCVar("nameplateShowOffscreen", 1)
@@ -45,27 +46,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 			TargetedSpellsSaved.Settings.Self[key] = value
 		end
 
-		if key == "Grow" and TargetedSpellsSaved.Settings.Self[key] == 1 then
-			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.Grow.Start
-			table.insert(
-				resetKeys,
-				Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.FrameGrowLabel
-			)
-		end
+		local resetKey = Private.Utils.ApplyMigration(key, Private.Enum.FrameKind.Self, selfDefaults)
 
-		if key == "GlowType" and TargetedSpellsSaved.Settings.Self[key] == 3 then
-			TargetedSpellsSaved.Settings.Self[key] = Private.Enum.GlowType.PixelGlow
-			table.insert(
-				resetKeys,
-				Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.GlowTypeLabel
-			)
-		end
-
-		if key == "ShowBorder" then
-			local shown = TargetedSpellsSaved.Settings.Self[key]
-			TargetedSpellsSaved.Settings.Self[key] = nil
-			-- table.insert(resetKeys, Private.L.EditMode.TargetedSpellsSelfLabel .. ": " .. Private.L.Settings.BorderStyleLabel)
-			TargetedSpellsSaved.Settings.Self.BorderStyle = shown and "Solid" or "None"
+		if resetKey then
+			table.insert(resetKeys, resetKey)
 		end
 	end
 
@@ -77,27 +61,10 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 			TargetedSpellsSaved.Settings.Party[key] = value
 		end
 
-		if key == "Grow" and TargetedSpellsSaved.Settings.Party[key] == 1 then
-			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.Grow.Start
-			table.insert(
-				resetKeys,
-				Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.FrameGrowLabel
-			)
-		end
+		local resetKey = Private.Utils.ApplyMigration(key, Private.Enum.FrameKind.Self, selfDefaults)
 
-		if key == "GlowType" and TargetedSpellsSaved.Settings.Party[key] == 3 then
-			TargetedSpellsSaved.Settings.Party[key] = Private.Enum.GlowType.PixelGlow
-			table.insert(
-				resetKeys,
-				Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.GlowTypeLabel
-			)
-		end
-
-		if key == "ShowBorder" then
-			local shown = TargetedSpellsSaved.Settings.Party[key]
-			TargetedSpellsSaved.Settings.Party[key] = nil
-			-- table.insert(resetKeys, Private.L.EditMode.TargetedSpellsPartyLabel .. ": " .. Private.L.Settings.BorderStyleLabel)
-			TargetedSpellsSaved.Settings.Party.BorderStyle = shown and "Solid" or "None"
+		if resetKey then
+			table.insert(resetKeys, resetKey)
 		end
 	end
 
@@ -143,13 +110,7 @@ EventUtil.ContinueOnAddOnLoaded(addonName, function()
 		MigrateFeatureFlags(Private.Enum.FrameKind.Party)
 
 		if #resetKeys > 0 then
-			C_Timer.After(3, function()
-				Private.Utils.ShowStaticPopup({
-					whileDead = true,
-					button1 = OKAY,
-					text = string.format(Private.L.Functionality.V2DeprecationWarning, table.concat(resetKeys, "\n")),
-				})
-			end)
+			Private.Utils.ShowMigrationPopup(resetKeys)
 		end
 	end
 

@@ -50,6 +50,46 @@ function Private.Utils.CollectLayoutingArguments(direction, grow, width, height,
 	}
 end
 
+function Private.Utils.ShowMigrationPopup(resetKeys)
+	EventRegistry:RegisterFrameEventAndCallback("FIRST_FRAME_RENDERED", function(ownerId)
+		EventRegistry:UnregisterFrameEventAndCallback("FIRST_FRAME_RENDERED", ownerId)
+
+		C_Timer.After(3, function()
+			Private.Utils.ShowStaticPopup({
+				whileDead = true,
+				button1 = OKAY,
+				text = string.format(Private.L.Functionality.V2DeprecationWarning, table.concat(resetKeys, "\n")),
+			})
+		end)
+	end)
+end
+
+function Private.Utils.ApplyMigration(key, kind, defaults)
+	local tableRef = kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+	local prefix = kind == Private.Enum.FrameKind.Self and Private.L.EditMode.TargetedSpellsSelfLabel
+		or Private.L.EditMode.TargetedSpellsPartyLabel
+
+	if key == "Grow" and tableRef[key] == 1 then
+		tableRef[key] = Private.Enum.Grow.Start
+		return prefix .. ": " .. Private.L.Settings.FrameGrowLabel
+	end
+
+	if key == "GlowType" and tableRef[key] == 3 then
+		tableRef[key] = Private.Enum.GlowType.PixelGlow
+		return prefix .. ": " .. Private.L.Settings.GlowTypeLabel
+	end
+
+	if key == "ShowBorder" then
+		local shown = tableRef[key]
+		tableRef[key] = nil
+		tableRef.BorderStyle = shown and defaults.BorderStyle or "None"
+		return prefix .. ": " .. Private.L.Settings.BorderStyleLabel
+	end
+
+	return nil
+end
+
 function Private.Utils.AdjustLayout(
 	frames,
 	layouting,
@@ -336,6 +376,7 @@ do
 		end
 
 		local hasAnyChange = false
+		local resetKeys = {}
 
 		for kind, kindString in pairs(Private.Enum.FrameKind) do
 			local tableRef = TargetedSpellsSaved.Settings[kind]
@@ -433,12 +474,22 @@ do
 						hasAnyChange = true
 					end
 				end
+
+				local resetKey = Private.Utils.ApplyMigration(key, kindString, defaults)
+
+				if resetKey then
+					table.insert(resetKeys, resetKey)
+				end
 			end
 
 			if anyPrimaryLoadConditionIsDisabled then
 				tableRef.Enabled = false
 				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, eventKeys.Enabled, false)
 			end
+		end
+
+		if #resetKeys > 0 or true then
+			Private.Utils.ShowMigrationPopup(resetKeys)
 		end
 
 		return hasAnyChange
