@@ -142,6 +142,9 @@ L.Settings.BorderStyleSolid = "Solid"
 L.Settings.OpacityLabel = "Opacity"
 L.Settings.OpacityTooltip = nil
 
+L.Settings.IconZoomLabel = "Icon Zoom"
+L.Settings.IconZoomTooltip = nil
+
 L.Settings.FrameOffsetXLabel = "Offset X"
 L.Settings.FrameOffsetXTooltip = nil
 

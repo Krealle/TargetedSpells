@@ -348,6 +348,7 @@ function TargetedSpellsMixin:OnSizeChanged()
 		or TargetedSpellsSaved.Settings.Party
 	local width = tableRef.Width
 	local height = tableRef.Height
+	local zoom = tableRef.IconZoom
 
 	local coordinates = { 0, 0, 0, 1, 1, 0, 1, 1 }
 	local aspectRatio = width / height
@@ -359,9 +360,9 @@ function TargetedSpellsMixin:OnSizeChanged()
 		local coordinate = coordinates[i]
 
 		if i % 2 == 1 then
-			coordinates[i] = (coordinate - 0.5) * xRatio + 0.5
+			coordinates[i] = (coordinate - 0.5) * (xRatio / zoom) + 0.5
 		else
-			coordinates[i] = (coordinate - 0.5) * yRatio + 0.5
+			coordinates[i] = (coordinate - 0.5) * (yRatio / zoom) + 0.5
 		end
 	end
 
@@ -401,6 +402,8 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 			self:SetFont()
 		elseif key == Private.Settings.Keys.Self.Opacity then
 			self:SetAlpha(flagIdOrValue)
+		elseif key == Private.Settings.Keys.Self.IconZoom then
+			self:OnSizeChanged()
 		elseif key == Private.Settings.Keys.Self.GlowType then
 			self:HideGlow()
 
@@ -437,6 +440,8 @@ function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 			self:SetFont()
 		elseif key == Private.Settings.Keys.Party.Opacity then
 			self:SetAlpha(flagIdOrValue)
+		elseif key == Private.Settings.Keys.Party.IconZoom then
+			self:OnSizeChanged()
 		elseif key == Private.Settings.Keys.Party.GlowType then
 			self:HideGlow()
 

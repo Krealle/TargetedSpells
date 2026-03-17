@@ -125,6 +125,7 @@
 ---@field Position FramePosition
 ---@field GlowType GlowType
 ---@field Opacity number
+---@field IconZoom number
 ---@field Font string
 ---@field FontFlags table<FontFlags, boolean>
 ---@field FeatureFlags table<FeatureFlag, boolean>
@@ -148,6 +149,7 @@
 ---@field FontSize number
 ---@field GlowType GlowType
 ---@field Opacity number
+---@field IconZoom number
 ---@field Font string
 ---@field FontFlags table<FontFlags, boolean>
 ---@field FeatureFlags table<FeatureFlag, boolean>
@@ -204,7 +206,7 @@
 ---@field OnUpdate fun(self: TargetedSpellsMixin, elapsed: number)
 ---@field SetShowDuration fun(self: TargetedSpellsMixin, showDuration: boolean, showFractions: boolean)
 ---@field ApplyBorderStyle fun(self: TargetedSpellsMixin, styleName: string)
----@field OnSizeChanged fun(self: TargetedSpellsMixin, width: number, height: number)
+---@field OnSizeChanged fun(self: TargetedSpellsMixin)
 ---@field OnSettingChanged fun(self: TargetedSpellsMixin, key: string, flagIdOrValue: number|string|boolean|table, newBool: boolean?)
 ---@field SetDuration fun(self: TargetedSpellsMixin, duration: DurationObject)
 ---@field GetDuration fun(self: TargetedSpellsMixin): DurationObject|nil

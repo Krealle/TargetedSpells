@@ -1,26 +1,44 @@
 ## Version 2.0.0
 
+### Layouting
+
 - reworked layouting - no more gaps!
   - thanks to surarn for the lead on this
-  - deprecated `Glow Type` > `Button Glow` option
-    - this glow type was effectively incompatible with secrets which I unfortunately noticed too late
-    - users of this option were automatically migrated to `Glow Type` > `Pixel Glow`
-  - deprecated `Grow` > `Center` option
-    - no longer possible due to the layouting workarounds
-    - users of this option were automatically migrated to `Grow` > `Start`
-- fixed a bug where, when using duration fractions, the duration text would be rendered behind the swipe animation
+
+### Settings
+
+- deprecated `Glow Type` > `Button Glow` option
+  - this glow type was effectively incompatible with secrets which I unfortunately noticed too late
+  - users of this option were automatically migrated to `Glow Type` > `Pixel Glow`
+- deprecated `Grow` > `Center` option
+  - no longer possible due to the layouting workarounds
+  - users of this option were automatically migrated to `Grow` > `Start`
 - consolidated checkbox settings into a new Features dropdown
   - your settings will automatically be migrated to the new format
-- fixed a couple of rare layouting issues when using DandersFrames
 - NEW: `Role Filter` setting for Party frames
   - allows you to never render spells targeting certain roles
+- NEW: `Icon Zoom` setting
+  - self explanatory, niche, go wild
+- NEW: `Border Style` setting
+  - via LibSharedMedia borders
+  - you'll find not all borders work well but such is life
+
+### Bug Fixes
+
+- fixed a bug where, when using duration fractions, the duration text would be rendered behind the swipe animation
+- fixed a couple of rare layouting issues when using DandersFrames
+- fixed a bug where, when using another unit frame addon but also using ElvUI, party demo frames were anchoring incorrectly in Edit Mode
+- fixed a bug where, where when using Self _or_ Party interrupt indication, frames of the other frame type may linger
+
+### AddOn Compatibility
+
+- added support for QUI and Cell
+
+### Other
+
 - cast duration for abilities with a remaining duration of more than 60 seconds will now be hidden to reduce clutter
   - with 12.0.5, this will again render these durations, but properly formatted (e.g. 59m)
   - with 12.0.5, casts with a duration of more than 3 seconds will not show fractions above 3 seconds
-- extended support for LibSharedMedia Borders
-- added support for QUI and Cell
-- fixed a bug where, when using another unit frame addon but also using ElvUI, party demo frames were anchoring incorrectly in Edit Mode
-- fixed a bug where, where when using Self _or_ Party interrupt indication, frames of the other frame type may linger
 
 ## Version 1.1.18
 

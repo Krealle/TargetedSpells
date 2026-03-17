@@ -370,6 +370,40 @@ function TargetedSpellsEditModeMixin:CreateSetting(key, defaults)
 		}
 	end
 
+	if key == Private.Settings.Keys.Self.IconZoom or key == Private.Settings.Keys.Party.IconZoom then
+		local tableRef = key == Private.Settings.Keys.Self.IconZoom and TargetedSpellsSaved.Settings.Self
+			or TargetedSpellsSaved.Settings.Party
+		local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
+
+		---@param layoutName string
+		local function Get(layoutName)
+			return tableRef.IconZoom
+		end
+
+		---@param layoutName string
+		---@param value number
+		local function Set(layoutName, value)
+			if value ~= tableRef.IconZoom then
+				tableRef.IconZoom = value
+				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+			end
+		end
+
+		---@type LibEditModeSlider
+		return {
+			name = L.Settings.IconZoomLabel,
+			kind = Enum.EditModeSettingDisplayType.Slider,
+			default = defaults.IconZoom,
+			desc = L.Settings.IconZoomTooltip,
+			get = Get,
+			set = Set,
+			minValue = sliderSettings.min,
+			maxValue = sliderSettings.max,
+			valueStep = sliderSettings.step,
+			formatter = FormatPercentage,
+		}
+	end
+
 	if key == Private.Settings.Keys.Self.FeatureFlags or key == Private.Settings.Keys.Party.FeatureFlags then
 		local kind = key == Private.Settings.Keys.Self.FeatureFlags and Private.Enum.FrameKind.Self
 			or Private.Enum.FrameKind.Party
