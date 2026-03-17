@@ -28,6 +28,12 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
+L.Functionality.V2DeprecationWarning = string.format(
+	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
+	addonNameWithIcon,
+	"%s"
+)
+
 L.Settings.EnabledLabel = "활성화"
 L.Settings.EnabledTooltip = nil
 L.Settings.DisabledLabel = "비활성화"
@@ -57,6 +63,10 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "탱커",
 	[Private.Enum.Role.Damager] = "딜러",
 }
+
+L.Settings.RoleFilterLabel = "Role Filter"
+L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
+L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "너비"
 L.Settings.FrameWidthTooltip = nil
@@ -90,7 +100,6 @@ L.Settings.FrameSortOrderDescending = "내림차순"
 L.Settings.FrameGrowLabel = "성장 방향"
 L.Settings.FrameGrowTooltip = nil
 L.Settings.FrameGrowLabels = {
-	[Private.Enum.Grow.Center] = "가운데",
 	[Private.Enum.Grow.Start] = "시작",
 	[Private.Enum.Grow.End] = "끝",
 }
@@ -98,12 +107,14 @@ L.Settings.FrameGrowLabels = {
 L.Settings.GlowImportantLabel = "중요 주문 강조"
 L.Settings.GlowImportantTooltip = "중요 여부는 게임에 의해 결정됩니다."
 
+L.Settings.OnlyImportantLabel = "Only Show Important Spells"
+L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+
 L.Settings.GlowTypeLabel = "반짝임 유형"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "픽셀 반짝임",
 	[Private.Enum.GlowType.AutoCastGlow] = "자동시전 반짝임",
-	[Private.Enum.GlowType.ButtonGlow] = "동작 버튼 반짝임",
 	[Private.Enum.GlowType.ProcGlow] = "스킬 발동 반짝임",
 	[Private.Enum.GlowType.Star4] = "별 4",
 }
@@ -123,9 +134,6 @@ L.Settings.RenderInterruptSourceNameTooltip = nil
 
 L.Settings.ShowSwipeLabel = "회전 표시"
 L.Settings.ShowSwipeTooltip = nil
-
-L.Settings.ShowBorderLabel = "테두리 표시"
-L.Settings.ShowBorderTooltip = nil
 
 L.Settings.OpacityLabel = "불투명도"
 L.Settings.OpacityTooltip = nil
@@ -153,3 +161,23 @@ L.Settings.Export = "내보내기"
 L.Settings.FontLabel = "글꼴"
 
 L.Settings.FontTooltip = nil
+
+L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsTooltip = nil
+
+L.Settings.FeatureFlagLabels = {
+	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
+	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
+	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
+	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
+	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
+	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+}
+
+L.Settings.FeatureFlagSettingTitles = {
+	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
+}

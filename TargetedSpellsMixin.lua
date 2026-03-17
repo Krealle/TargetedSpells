@@ -1,16 +1,7 @@
 ---@type string, TargetedSpells
-local addonName, Private = ...
-local LibCustomGlow = LibStub("LibCustomGlow-1.0")
+local _, Private = ...
 local LibEditMode = LibStub("LibEditMode")
-
-TARGETED_SPELLS_BACKDROP = {
-	edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-	tile = true,
-	tileEdge = true,
-	tileSize = 8,
-	edgeSize = 8,
-	insets = { left = 1, right = 1, top = 1, bottom = 1 },
-}
+local LibSharedMedia = LibStub("LibSharedMedia-3.0")
 
 local PreviewIconDataProvider = nil
 
@@ -24,17 +15,204 @@ local function GetRandomIcon()
 	return PreviewIconDataProvider:GetRandomIcon()
 end
 
+local BACKDROP_COORD_START = 0.0625
+local BACKDROP_COORD_END = 1 - BACKDROP_COORD_START
+
 ---@class TargetedSpellsMixin
 TargetedSpellsMixin = {}
 
 function TargetedSpellsMixin:OnLoad()
 	Private.EventRegistry:RegisterCallback(Private.Enum.Events.SETTING_CHANGED, self.OnSettingChanged, self)
 
+	self.Bar:SetStatusBarTexture("")
 	self.Cooldown:SetCountdownFont("GameFontHighlightHugeOutline")
 	self.wasInterrupted = false
 	self.doNotHideBefore = nil
 	self.elapsed = 0
 	Private.Utils.MaybeApplyElvUISkin(self)
+end
+
+do
+	local BORDER_EDGE_SIZES = {
+		["Blizzard Tooltip"] = 16,
+		["Blizzard Dialog"] = 8,
+		["Blizzard Dialog Gold"] = 8,
+		["Blizzard Achievement Wood"] = 6,
+		["Blizzard Party"] = 8,
+	}
+
+	local BORDER_INSETS = {
+		["Blizzard Tooltip"] = 3,
+	}
+
+	function TargetedSpellsMixin:ApplyBorderStyle(styleName)
+		if styleName == "Solid" then
+			self.BorderTopLeft:Hide()
+			self.BorderTopRight:Hide()
+			self.BorderBottomLeft:Hide()
+			self.BorderBottomRight:Hide()
+			self.BorderTop:Hide()
+			self.BorderBottom:Hide()
+			self.BorderLeft:Hide()
+			self.BorderRight:Hide()
+
+			self.BorderSolidTop:Show()
+			self.BorderSolidBottom:Show()
+			self.BorderSolidLeft:Show()
+			self.BorderSolidRight:Show()
+		elseif styleName == "None" then
+			self.BorderSolidTop:Hide()
+			self.BorderSolidBottom:Hide()
+			self.BorderSolidLeft:Hide()
+			self.BorderSolidRight:Hide()
+
+			self.BorderTopLeft:Hide()
+			self.BorderTopRight:Hide()
+			self.BorderBottomLeft:Hide()
+			self.BorderBottomRight:Hide()
+			self.BorderTop:Hide()
+			self.BorderBottom:Hide()
+			self.BorderLeft:Hide()
+			self.BorderRight:Hide()
+		else
+			self.BorderSolidTop:Hide()
+			self.BorderSolidBottom:Hide()
+			self.BorderSolidLeft:Hide()
+			self.BorderSolidRight:Hide()
+
+			local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+				or TargetedSpellsSaved.Settings.Party
+
+			local edgeSize = BORDER_EDGE_SIZES[styleName] or 8
+			local outwardOffset = BORDER_INSETS[styleName] or 0
+			local borderWidth = tableRef.Width + 2 * outwardOffset
+			local borderHeight = tableRef.Height + 2 * outwardOffset
+
+			-- replicates BackdropTemplateMixin:SetupTextureCoordinates using known
+			-- dimensions instead of GetWidth()/GetHeight() to avoid secret errors
+			local edgeRepeatX = math.max(0, borderWidth / edgeSize - 2 - BACKDROP_COORD_START)
+			local edgeRepeatY = math.max(0, borderHeight / edgeSize - 2 - BACKDROP_COORD_START)
+
+			self.BorderTopLeft:ClearAllPoints()
+			self.BorderTopLeft:SetPoint("TOPLEFT", self, "TOPLEFT", -outwardOffset, outwardOffset)
+			self.BorderTopLeft:SetSize(edgeSize, edgeSize)
+
+			self.BorderTopRight:ClearAllPoints()
+			self.BorderTopRight:SetPoint("TOPRIGHT", self, "TOPRIGHT", outwardOffset, outwardOffset)
+			self.BorderTopRight:SetSize(edgeSize, edgeSize)
+
+			self.BorderBottomLeft:ClearAllPoints()
+			self.BorderBottomLeft:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", -outwardOffset, -outwardOffset)
+			self.BorderBottomLeft:SetSize(edgeSize, edgeSize)
+
+			self.BorderBottomRight:ClearAllPoints()
+			self.BorderBottomRight:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", outwardOffset, -outwardOffset)
+			self.BorderBottomRight:SetSize(edgeSize, edgeSize)
+
+			self.BorderTop:SetHeight(edgeSize)
+			self.BorderBottom:SetHeight(edgeSize)
+			self.BorderLeft:SetWidth(edgeSize)
+			self.BorderRight:SetWidth(edgeSize)
+
+			local path = LibSharedMedia:Fetch(LibSharedMedia.MediaType.BORDER, styleName) or ""
+
+			local sliceTexCoords = {
+				[self.BorderTopLeft] = {
+					0.5078125,
+					BACKDROP_COORD_START,
+					0.5078125,
+					BACKDROP_COORD_END,
+					0.6171875,
+					BACKDROP_COORD_START,
+					0.6171875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderTopRight] = {
+
+					0.6328125,
+					BACKDROP_COORD_START,
+					0.6328125,
+					BACKDROP_COORD_END,
+					0.7421875,
+					BACKDROP_COORD_START,
+					0.7421875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderBottomLeft] = {
+
+					0.7578125,
+					BACKDROP_COORD_START,
+					0.7578125,
+					BACKDROP_COORD_END,
+					0.8671875,
+					BACKDROP_COORD_START,
+					0.8671875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderBottomRight] = {
+
+					0.8828125,
+					BACKDROP_COORD_START,
+					0.8828125,
+					BACKDROP_COORD_END,
+					0.9921875,
+					BACKDROP_COORD_START,
+					0.9921875,
+					BACKDROP_COORD_END,
+				},
+				[self.BorderTop] = {
+
+					0.2578125,
+					edgeRepeatX,
+					0.3671875,
+					edgeRepeatX,
+					0.2578125,
+					BACKDROP_COORD_START,
+					0.3671875,
+					BACKDROP_COORD_START,
+				},
+				[self.BorderBottom] = {
+
+					0.3828125,
+					edgeRepeatX,
+					0.4921875,
+					edgeRepeatX,
+					0.3828125,
+					BACKDROP_COORD_START,
+					0.4921875,
+					BACKDROP_COORD_START,
+				},
+				[self.BorderLeft] = {
+
+					0.0078125,
+					BACKDROP_COORD_START,
+					0.0078125,
+					edgeRepeatY,
+					0.1171875,
+					BACKDROP_COORD_START,
+					0.1171875,
+					edgeRepeatY,
+				},
+				[self.BorderRight] = {
+
+					0.1328125,
+					BACKDROP_COORD_START,
+					0.1328125,
+					edgeRepeatY,
+					0.2421875,
+					BACKDROP_COORD_START,
+					0.2421875,
+					edgeRepeatY,
+				},
+			}
+
+			for tex, entry in pairs(sliceTexCoords) do
+				tex:SetTexture(path, "REPEAT", "REPEAT")
+				tex:SetTexCoord(entry[1], entry[2], entry[3], entry[4], entry[5], entry[6], entry[7], entry[8])
+				tex:Show()
+			end
+		end
+	end
 end
 
 function TargetedSpellsMixin:SetId(id)
@@ -61,9 +239,11 @@ function TargetedSpellsMixin:SetInterrupted(name, color)
 	local renderInterruptSourceName = false
 
 	if self.kind == Private.Enum.FrameKind.Self then
-		renderInterruptSourceName = TargetedSpellsSaved.Settings.Self.RenderInterruptSourceName
+		renderInterruptSourceName =
+			TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.RenderInterruptSourceName]
 	else
-		renderInterruptSourceName = TargetedSpellsSaved.Settings.Party.RenderInterruptSourceName
+		renderInterruptSourceName =
+			TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.RenderInterruptSourceName]
 	end
 
 	if renderInterruptSourceName then
@@ -89,43 +269,87 @@ function TargetedSpellsMixin:CanBeHidden(id)
 	return id == self:GetId()
 end
 
-function TargetedSpellsMixin:OnUpdate(elapsed)
-	self.elapsed = self.elapsed + elapsed
+do
+	local formatter = nil
 
-	if self.elapsed < 0.1 then
-		return
+	function TargetedSpellsMixin:OnUpdate(elapsed)
+		self.elapsed = self.elapsed + elapsed
+
+		if self.elapsed < 0.1 then
+			return
+		end
+
+		self.elapsed = self.elapsed - 0.1
+
+		if self.duration == nil then
+			return
+		end
+
+		if C_StringUtil.CreateNumericRuleFormatter == nil then
+			self.Cooldown.DurationText:SetFormattedText("%.1f", self.duration:GetRemainingDuration())
+		else
+			if formatter == nil then
+				formatter = C_StringUtil.CreateNumericRuleFormatter()
+
+				local breakpoints = {
+					{
+						threshold = 0,
+						rounding = Enum.NumericRuleFormatRounding.Nearest,
+						format = "%.1f",
+						step = 0.1,
+					},
+					{
+						threshold = 3,
+						rounding = Enum.NumericRuleFormatRounding.Nearest,
+						format = "%d",
+					},
+					{
+						threshold = 60,
+						rounding = Enum.NumericRuleFormatRounding.Nearest,
+						format = "%d:%02d",
+						components = {
+							{
+								div = 60,
+							},
+							{
+								mod = 60,
+							},
+						},
+					},
+					{
+						threshold = 300,
+						rounding = Enum.NumericRuleFormatRounding.Up,
+						format = "%dm",
+						components = {
+							{
+								div = 60,
+							},
+						},
+					},
+				}
+
+				formatter:SetBreakpoints(breakpoints)
+			end
+
+			self.Cooldown.DurationText:SetText(self.duration:FormatRemainingDuration(formatter))
+		end
 	end
-
-	self.elapsed = self.elapsed - 0.1
-
-	if self.duration == nil then
-		return
-	end
-
-	local remainingDuration = type(self.duration) == "number" and self.startTime + self.duration - GetTime()
-		or self.duration:GetRemainingDuration()
-
-	self.DurationText:SetFormattedText("%.1f", remainingDuration)
 end
 
 function TargetedSpellsMixin:SetShowDuration(showDuration, showFractions)
 	self.Cooldown:SetHideCountdownNumbers(not showDuration or showFractions)
-	self.DurationText:SetShown(showDuration and showFractions)
+	self.Cooldown.DurationText:SetShown(showDuration and showFractions)
 	self:SetScript("OnUpdate", showDuration and showFractions and self.OnUpdate or nil)
 end
 
-function TargetedSpellsMixin:SetShowBorder(bool)
-	if bool then
-		self.Border:Show()
-	else
-		self.Border:Hide()
-	end
-end
-
 --- shamelessly ~~stolen~~ repurposed from WeakAuras2
----@param width number
----@param height number
-function TargetedSpellsMixin:OnSizeChanged(width, height)
+function TargetedSpellsMixin:OnSizeChanged()
+	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+	local width = tableRef.Width
+	local height = tableRef.Height
+	local zoom = tableRef.IconZoom
+
 	local coordinates = { 0, 0, 0, 1, 1, 0, 1, 1 }
 	local aspectRatio = width / height
 
@@ -136,9 +360,9 @@ function TargetedSpellsMixin:OnSizeChanged(width, height)
 		local coordinate = coordinates[i]
 
 		if i % 2 == 1 then
-			coordinates[i] = (coordinate - 0.5) * xRatio + 0.5
+			coordinates[i] = (coordinate - 0.5) * (xRatio / zoom) + 0.5
 		else
-			coordinates[i] = (coordinate - 0.5) * yRatio + 0.5
+			coordinates[i] = (coordinate - 0.5) * (yRatio / zoom) + 0.5
 		end
 	end
 
@@ -166,83 +390,107 @@ function TargetedSpellsMixin:OnSizeChanged(width, height)
 	end
 end
 
-function TargetedSpellsMixin:OnSettingChanged(key, value)
+function TargetedSpellsMixin:OnSettingChanged(key, flagIdOrValue, newBool)
 	if self.kind == Private.Enum.FrameKind.Self then
 		if key == Private.Settings.Keys.Self.Width then
-			PixelUtil.SetSize(self, value, TargetedSpellsSaved.Settings.Self.Height)
+			PixelUtil.SetSize(self, flagIdOrValue, TargetedSpellsSaved.Settings.Self.Height)
 		elseif key == Private.Settings.Keys.Self.Height then
-			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Self.Width, value)
-		elseif key == Private.Settings.Keys.Self.ShowDuration then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowDuration(value, TargetedSpellsSaved.Settings.Self.ShowDurationFractions)
+			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Self.Width, flagIdOrValue)
 		elseif key == Private.Settings.Keys.Self.FontSize then
 			self:SetFontSize()
 		elseif key == Private.Settings.Keys.Self.Font or key == Private.Settings.Keys.Self.FontFlags then
 			self:SetFont()
 		elseif key == Private.Settings.Keys.Self.Opacity then
-			self:SetAlpha(value)
-		elseif key == Private.Settings.Keys.Self.ShowBorder then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowBorder(value)
+			self:SetAlpha(flagIdOrValue)
+		elseif key == Private.Settings.Keys.Self.IconZoom then
+			self:OnSizeChanged()
 		elseif key == Private.Settings.Keys.Self.GlowType then
 			self:HideGlow()
 
-			if TargetedSpellsSaved.Settings.Self.GlowImportant then
+			if TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
 			end
-		elseif key == Private.Settings.Keys.Self.ShowDurationFractions then
-			self:SetScript("OnUpdate", value and self.OnUpdate or nil)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetHideCountdownNumbers(value)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.DurationText:SetShown(value)
-		elseif key == Private.Settings.Keys.Self.ShowSwipe then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetDrawSwipe(value)
+		elseif key == Private.Settings.Keys.Self.BorderStyle then
+			self:ApplyBorderStyle(flagIdOrValue)
+		elseif key == Private.Settings.Keys.Self.FeatureFlags then
+			if
+				flagIdOrValue == Private.Enum.FeatureFlag.ShowDuration
+				or flagIdOrValue == Private.Enum.FeatureFlag.ShowDurationFractions
+			then
+				self:SetShowDuration(
+					TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+					TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+				)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowSwipe then
+				self.Cooldown:SetDrawSwipe(newBool)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.GlowImportant then
+				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.OnlyImportant then
+				self:SetAlphaFromBoolean(not newBool or self:IsSpellImportant())
+			end
 		end
 	else
 		if key == Private.Settings.Keys.Party.Width then
-			PixelUtil.SetSize(self, value, TargetedSpellsSaved.Settings.Party.Height)
+			PixelUtil.SetSize(self, flagIdOrValue, TargetedSpellsSaved.Settings.Party.Height)
 		elseif key == Private.Settings.Keys.Party.Height then
-			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Party.Width, value)
-		elseif key == Private.Settings.Keys.Party.ShowDuration then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowDuration(value, TargetedSpellsSaved.Settings.Party.ShowDurationFractions)
+			PixelUtil.SetSize(self, TargetedSpellsSaved.Settings.Party.Width, flagIdOrValue)
 		elseif key == Private.Settings.Keys.Party.FontSize then
 			self:SetFontSize()
 		elseif key == Private.Settings.Keys.Party.Font or key == Private.Settings.Keys.Party.FontFlags then
 			self:SetFont()
 		elseif key == Private.Settings.Keys.Party.Opacity then
-			self:SetAlpha(value)
-		elseif key == Private.Settings.Keys.Party.ShowBorder then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self:SetShowBorder(value)
+			self:SetAlpha(flagIdOrValue)
+		elseif key == Private.Settings.Keys.Party.IconZoom then
+			self:OnSizeChanged()
 		elseif key == Private.Settings.Keys.Party.GlowType then
 			self:HideGlow()
 
-			if TargetedSpellsSaved.Settings.Party.GlowImportant then
+			if TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
 			end
-		elseif key == Private.Settings.Keys.Party.ShowDurationFractions then
-			self:SetScript("OnUpdate", value and self.OnUpdate or nil)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetHideCountdownNumbers(value)
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.DurationText:SetShown(value)
-		elseif key == Private.Settings.Keys.Party.ShowSwipe then
-			---@diagnostic disable-next-line: param-type-mismatch
-			self.Cooldown:SetDrawSwipe(value)
+		elseif key == Private.Settings.Keys.Party.BorderStyle then
+			self:ApplyBorderStyle(flagIdOrValue)
+		elseif key == Private.Settings.Keys.Party.FeatureFlags then
+			if
+				flagIdOrValue == Private.Enum.FeatureFlag.ShowDuration
+				or flagIdOrValue == Private.Enum.FeatureFlag.ShowDurationFractions
+			then
+				self:SetShowDuration(
+					TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+					TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+				)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.ShowSwipe then
+				self.Cooldown:SetDrawSwipe(newBool)
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.GlowImportant then
+				self:ShowGlow(self:IsSpellImportant(LibEditMode:IsInEditMode() and Private.Utils.RollDice()))
+			elseif flagIdOrValue == Private.Enum.FeatureFlag.OnlyImportant then
+				self:SetAlphaFromBoolean(not newBool or self:IsSpellImportant())
+			end
 		end
 	end
 end
 
-function TargetedSpellsMixin:SetDuration(duration)
-	self.duration = duration
+do
+	-- todo: remove in 12.0.5
+	local IsLongCastCurve = C_CurveUtil.CreateCurve()
+	IsLongCastCurve:SetType(Enum.LuaCurveType.Linear)
+	IsLongCastCurve:AddPoint(0, 1)
+	IsLongCastCurve:AddPoint(60, 1)
+	IsLongCastCurve:AddPoint(60.001, 0)
 
-	if type(duration) == "number" then
-		self.Cooldown:SetCooldown(self.startTime, duration)
-	else
+	function TargetedSpellsMixin:SetDuration(duration)
+		self.duration = duration
 		self.Cooldown:SetCooldownFromDurationObject(duration)
+
+		local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+			or TargetedSpellsSaved.Settings.Party
+
+		if
+			tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+			and duration.FormatRemainingDuration == nil
+		then
+			self.Cooldown.DurationText:SetAlpha(duration:EvaluateRemainingDuration(IsLongCastCurve))
+		end
 	end
 end
 
@@ -259,8 +507,9 @@ function TargetedSpellsMixin:GetStartTime()
 end
 
 ---@param parent Frame
-local function CreateStar4Glow(parent)
-	local width, height = parent:GetSize()
+---@param width number
+---@param height number
+local function CreateStar4Glow(parent, width, height)
 	local innerFactor = 1.9
 	local outerFactor = 2.2
 
@@ -301,12 +550,13 @@ local function CreateStar4Glow(parent)
 end
 
 function TargetedSpellsMixin:ShowGlow(isImportant)
-	local glowType = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self.GlowType
-		or TargetedSpellsSaved.Settings.Party.GlowType
+	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+	local glowType = tableRef.GlowType
 
 	if glowType == Private.Enum.GlowType.Star4 then
 		if self._Star4 == nil then
-			self._Star4 = CreateStar4Glow(self)
+			self._Star4 = CreateStar4Glow(self, tableRef.Width, tableRef.Height)
 		end
 
 		self._Star4:Show()
@@ -316,32 +566,15 @@ function TargetedSpellsMixin:ShowGlow(isImportant)
 
 		self._Star4:SetAlphaFromBoolean(isImportant)
 	elseif glowType == Private.Enum.GlowType.PixelGlow then
-		LibCustomGlow.PixelGlow_Start(self)
+		Private.Glows.PixelGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._PixelGlow:SetAlphaFromBoolean(isImportant)
 	elseif glowType == Private.Enum.GlowType.AutoCastGlow then
-		LibCustomGlow.AutoCastGlow_Start(self)
+		Private.Glows.AutoCastGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._AutoCastGlow:SetAlphaFromBoolean(isImportant)
-	elseif glowType == Private.Enum.GlowType.ButtonGlow then
-		LibCustomGlow.ButtonGlow_Start(self)
-
-		self._ButtonGlow:SetAlphaFromBoolean(isImportant)
-
-		for _, region in pairs({ self._ButtonGlow:GetRegions() }) do
-			region:SetAlphaFromBoolean(isImportant)
-		end
-
-		if self._ButtonGlow.animIn:IsPlaying() then
-			local orig = self._ButtonGlow.animIn:GetScript("OnFinished")
-			self._ButtonGlow.animIn:SetScript("OnFinished", function(anim)
-				orig(anim)
-				anim:GetParent().ants:SetAlphaFromBoolean(isImportant)
-				anim:SetScript("OnFinished", orig)
-			end)
-		end
 	elseif glowType == Private.Enum.GlowType.ProcGlow then
-		LibCustomGlow.ProcGlow_Start(self)
+		Private.Glows.ProcGlow_Start(self, tableRef.Width, tableRef.Height)
 
 		self._ProcGlow:SetAlphaFromBoolean(isImportant)
 	end
@@ -355,10 +588,9 @@ function TargetedSpellsMixin:HideGlow()
 		self._Star4.Animation:Stop()
 	end
 
-	LibCustomGlow.PixelGlow_Stop(self)
-	LibCustomGlow.AutoCastGlow_Stop(self)
-	LibCustomGlow.ButtonGlow_Stop(self)
-	LibCustomGlow.ProcGlow_Stop(self)
+	Private.Glows.PixelGlow_Stop(self)
+	Private.Glows.AutoCastGlow_Stop(self)
+	Private.Glows.ProcGlow_Stop(self)
 end
 
 function TargetedSpellsMixin:IsSpellImportant(boolOverride)
@@ -378,14 +610,23 @@ function TargetedSpellsMixin:SetSpellId(spellId)
 	local texture = spellId and C_Spell.GetSpellTexture(spellId) or GetRandomIcon()
 	self.Icon:SetTexture(texture)
 
-	if
-		spellId ~= nil
-		and (
-			(self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self.GlowImportant)
-			or (self.kind == Private.Enum.FrameKind.Party and TargetedSpellsSaved.Settings.Party.GlowImportant)
-		)
-	then
-		self:ShowGlow(self:IsSpellImportant())
+	if spellId == nil then
+		return
+	end
+
+	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+
+	if not tableRef.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
+		return
+	end
+
+	local isImportant = self:IsSpellImportant()
+
+	self:ShowGlow(isImportant)
+
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.OnlyImportant] then
+		self:SetAlphaFromBoolean(isImportant, 1, 0)
 	end
 end
 
@@ -395,14 +636,6 @@ end
 
 function TargetedSpellsMixin:ClearStartTime()
 	self.startTime = nil
-end
-
-function TargetedSpellsMixin:Reposition(point, relativeTo, relativePoint, offsetX, offsetY)
-	self:SetParent(relativeTo)
-	self:ClearAllPoints()
-	self:SetFrameLevel(relativeTo:GetFrameLevel() + 10)
-	PixelUtil.SetPoint(self, point, relativeTo, relativePoint, offsetX, offsetY)
-	self:Show()
 end
 
 function TargetedSpellsMixin:SetUnit(unit)
@@ -423,10 +656,13 @@ function TargetedSpellsMixin:SetKind(kind)
 	self:SetFontSize()
 	self:SetFont()
 	self:HideGlow()
-	self:SetShowBorder(tableRef.ShowBorder)
+	self:ApplyBorderStyle(tableRef.BorderStyle)
 	self:SetAlpha(tableRef.Opacity)
-	self:SetShowDuration(tableRef.ShowDuration, tableRef.ShowDurationFractions)
-	self.Cooldown:SetDrawSwipe(tableRef.ShowSwipe)
+	self:SetShowDuration(
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+	)
+	self.Cooldown:SetDrawSwipe(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowSwipe])
 end
 
 function TargetedSpellsMixin:GetKind()
@@ -441,22 +677,26 @@ function TargetedSpellsMixin:PostCreate(unit, kind, castingUnit)
 	self:SetUnit(unit)
 	self:SetKind(kind)
 
-	if castingUnit == nil then
-		return
+	if castingUnit ~= nil then
+		if kind == Private.Enum.FrameKind.Self then
+			self:SetAlphaFromBoolean(PlayerIsSpellTarget(castingUnit, unit))
+		else
+			self:SetAlphaFromBoolean(UnitIsUnit(string.format("%starget", castingUnit), unit))
+		end
 	end
 
-	if kind == Private.Enum.FrameKind.Self then
-		self:SetAlphaFromBoolean(PlayerIsSpellTarget(castingUnit, unit))
-	else
-		self:SetAlphaFromBoolean(UnitIsUnit(string.format("%starget", castingUnit), unit))
-	end
+	self.Bar:SetValue(self:GetAlpha())
 end
 
 function TargetedSpellsMixin:Reset()
+	self:SetParent(UIParent)
+	self.Bar:ClearAllPoints()
+	self.Bar:SetParent(self)
 	self:ClearStartTime()
 	self.spellId = nil
 	self.Cooldown:Clear()
 	self.duration = nil
+	self.Cooldown.DurationText:SetAlpha(1)
 	self:ClearAllPoints()
 	self.wasInterrupted = false
 	self.doNotHideBefore = nil
@@ -466,11 +706,12 @@ function TargetedSpellsMixin:Reset()
 	self.InterruptSource:SetText()
 	self.InterruptSource:Hide()
 	self.InterruptSource:SetTextColor(1, 1, 1)
+	self.Cooldown:SetScript("OnCooldownDone", nil)
 
 	local tableRef = self.kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 		or TargetedSpellsSaved.Settings.Party
 
-	if tableRef.GlowImportant then
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.GlowImportant] then
 		local glowType = tableRef.GlowType
 
 		if glowType == Private.Enum.GlowType.PixelGlow then
@@ -481,14 +722,6 @@ function TargetedSpellsMixin:Reset()
 			if self._AutoCastGlow ~= nil then
 				self._AutoCastGlow:SetAlpha(1)
 			end
-		elseif glowType == Private.Enum.GlowType.ButtonGlow then
-			if self._ButtonGlow ~= nil then
-				self._ButtonGlow:SetAlpha(1)
-
-				for _, region in pairs({ self._ButtonGlow:GetRegions() }) do
-					region:SetAlpha(1)
-				end
-			end
 		elseif glowType == Private.Enum.GlowType.ProcGlow then
 			if self._ProcGlow ~= nil then
 				self._ProcGlow:SetAlpha(1)
@@ -498,8 +731,12 @@ function TargetedSpellsMixin:Reset()
 
 	self:HideGlow()
 
-	self:SetShowDuration(tableRef.ShowDuration, tableRef.ShowDurationFractions)
-	self.Cooldown:SetDrawSwipe(tableRef.ShowSwipe)
+	self:SetShowDuration(
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDuration],
+		tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions]
+	)
+	self.Cooldown:SetDrawSwipe(tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowSwipe])
+
 	-- important to come last - the cooldown swipe ignores display status of its parent
 	self:Hide()
 end
@@ -510,8 +747,8 @@ function TargetedSpellsMixin:SetFontSize()
 
 	local fontString = nil
 
-	if tableRef.ShowDurationFractions then
-		fontString = self.DurationText
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions] then
+		fontString = self.Cooldown.DurationText
 	else
 		fontString = self.Cooldown:GetCountdownFontString()
 	end
@@ -531,8 +768,8 @@ function TargetedSpellsMixin:SetFont()
 
 	local fontString = nil
 
-	if tableRef.ShowDurationFractions then
-		fontString = self.DurationText
+	if tableRef.FeatureFlags[Private.Enum.FeatureFlag.ShowDurationFractions] then
+		fontString = self.Cooldown.DurationText
 	else
 		fontString = self.Cooldown:GetCountdownFontString()
 	end
@@ -549,4 +786,8 @@ function TargetedSpellsMixin:SetFont()
 	else
 		fontString:SetShadowOffset(0, 0)
 	end
+end
+
+function TargetedSpellsMixin:SetOnCooldownDone(callback)
+	self.Cooldown:SetScript("OnCooldownDone", callback)
 end

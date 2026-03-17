@@ -24,6 +24,12 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
+L.Functionality.V2DeprecationWarning = string.format(
+	"%s\n\nAufgrund der Änderungeon von v2 wurden die folgenden Einstellungen zurückgesetzt:\n\n%s\n\nZusätzlich raten wir die Positionierung zu überprüfen da es auch dort ggf. zu Anpassungen gekommen sein kann.",
+	addonNameWithIcon,
+	"%s"
+)
+
 L.Settings.EnabledLabel = "Aktiviert"
 L.Settings.EnabledTooltip = nil
 L.Settings.DisabledLabel = "Deaktiviert"
@@ -54,6 +60,11 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "Panzer",
 	[Private.Enum.Role.Damager] = "Schadensverursacher",
 }
+
+L.Settings.RoleFilterLabel = "Rollenfilter"
+L.Settings.RoleFilterTooltip =
+	"Erlaubt Zauber die auf bestimmte Rollen zielen nicht anzuzeigen. Nutzung auf eigene Gefahr."
+L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "Breite"
 L.Settings.FrameWidthTooltip = nil
@@ -87,7 +98,6 @@ L.Settings.FrameSortOrderDescending = "Absteigend"
 L.Settings.FrameGrowLabel = "Wachstumsrichtung"
 L.Settings.FrameGrowTooltip = nil
 L.Settings.FrameGrowLabels = {
-	[Private.Enum.Grow.Center] = "Zentriert",
 	[Private.Enum.Grow.Start] = "Anfang",
 	[Private.Enum.Grow.End] = "Ende",
 }
@@ -96,12 +106,14 @@ L.Settings.GlowImportantLabel = "Wichtige Zauber hervorheben"
 L.Settings.GlowImportantTooltip =
 	"Was wichtig und was nicht wichtig ist wird ausschließlich vom Spiel selbst kommuniziert."
 
+L.Settings.OnlyImportantLabel = "Nur wichtige Zauber anzeigen"
+L.Settings.OnlyImportantTooltip = "Beachte dass nur das Spiel festlegen kann was wichtig ist - mit Vorsicht genießen."
+
 L.Settings.GlowTypeLabel = "Hervorhebungsanimation"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "Pixel Glow",
 	[Private.Enum.GlowType.AutoCastGlow] = "Auto Cast Glow",
-	[Private.Enum.GlowType.ButtonGlow] = "Button Glow",
 	[Private.Enum.GlowType.ProcGlow] = "Proc Glow",
 	[Private.Enum.GlowType.Star4] = "Star 4",
 }
@@ -121,9 +133,6 @@ L.Settings.RenderInterruptSourceNameTooltip = nil
 
 L.Settings.ShowSwipeLabel = "Abklingzeitsanimation anzeigen"
 L.Settings.ShowSwipeTooltip = nil
-
-L.Settings.ShowBorderLabel = "Rahmen"
-L.Settings.ShowBorderTooltip = nil
 
 L.Settings.OpacityLabel = "Deckkraft"
 L.Settings.OpacityTooltip = nil
@@ -151,3 +160,23 @@ L.Settings.Export = "Exportieren"
 
 L.Settings.FontLabel = "Schriftart"
 L.Settings.FontTooltip = nil
+
+L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsTooltip = nil
+
+L.Settings.FeatureFlagLabels = {
+	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
+	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
+	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
+	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
+	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
+	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+}
+
+L.Settings.FeatureFlagSettingTitles = {
+	[Private.Enum.FeatureFlag.GlowImportant] = "Anzeige",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Unterbrechungseinstellungen",
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Gruppeneinstellungen",
+}

@@ -16,25 +16,22 @@ Private.Settings.Keys = {
 		Gap = "FRAME_GAP_SELF",
 		Direction = "GROW_DIRECTION_SELF",
 		SortOrder = "FRAME_SORT_ORDER_SELF",
-		GlowImportant = "GLOW_IMPORTANT_SELF",
 		GlowType = "GLOW_TYPE_SELF",
 		Grow = "FRAME_GROW_SELF",
-		ShowDuration = "SHOW_DURATION_SELF",
-		ShowDurationFractions = "SHOW_DURATION_FRACTIONS_SELF",
 		Opacity = "OPACITY_SELF",
-		ShowBorder = "BORDER_SELF",
-		IndicateInterrupts = "INDICATE_INTERRUPTS_SELF",
+		IconZoom = "ICON_ZOOM_SELF",
 		Import = "IMPORT_SELF",
 		Export = "EXPORT_SELF",
-		ShowSwipe = "SWIPE_SELF",
 		Font = "FONT_SELF",
 		FontFlags = "FONT_FLAGS_SELF",
-		RenderInterruptSourceName = "RENDER_INTERRUPT_SOURCE_NAME_SELF",
+		FeatureFlags = "FEATURE_FLAGS_SELF",
+		BorderStyle = "BORDER_STYLE_SELF",
 	},
 	Party = {
 		Enabled = "ENABLED_PARTY",
 		LoadConditionContentType = "LOAD_CONDITION_CONTENT_TYPE_PARTY",
 		LoadConditionRole = "LOAD_CONDITION_ROLE_PARTY",
+		RoleFilter = "ROLE_EXCLUSION_PARTY",
 		Width = "FRAME_WIDTH_PARTY",
 		Height = "FRAME_HEIGHT_PARTY",
 		FontSize = "FONT_SIZE_PARTY",
@@ -46,20 +43,15 @@ Private.Settings.Keys = {
 		TargetAnchor = "FRAME_TARGET_ANCHOR_PARTY",
 		SortOrder = "FRAME_SORT_ORDER_PARTY",
 		Grow = "FRAME_GROW_PARTY",
-		GlowImportant = "GLOW_IMPORTANT_PARTY",
 		GlowType = "GLOW_TYPE_PARTY",
-		IncludeSelfInParty = "INCLUDE_SELF_IN_PARTY_PARTY",
-		ShowDuration = "SHOW_DURATION_PARTY",
-		ShowDurationFractions = "SHOW_DURATION_FRACTIONS_PARTY",
 		Opacity = "OPACITY_PARTY",
-		ShowBorder = "BORDER_PARTY",
-		IndicateInterrupts = "INDICATE_INTERRUPTS_PARTY",
+		IconZoom = "ICON_ZOOM_PARTY",
 		Import = "IMPORT_PARTY",
 		Export = "EXPORT_PARTY",
-		ShowSwipe = "SWIPE_PARTY",
 		Font = "FONT_PARTY",
 		FontFlags = "FONT_FLAGS_PARTY",
-		RenderInterruptSourceName = "RENDER_INTERRUPT_SOURCE_NAME_PARTY",
+		FeatureFlags = "FEATURE_FLAGS_PARTY",
+		BorderStyle = "BORDER_STYLE_PARTY",
 	},
 }
 
@@ -75,18 +67,14 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 			Private.Settings.Keys.Self.Direction,
 			Private.Settings.Keys.Self.SortOrder,
 			Private.Settings.Keys.Self.Grow,
-			Private.Settings.Keys.Self.GlowImportant,
 			Private.Settings.Keys.Self.GlowType,
-			Private.Settings.Keys.Self.ShowDuration,
-			Private.Settings.Keys.Self.ShowDurationFractions,
+			Private.Settings.Keys.Self.FeatureFlags,
+			Private.Settings.Keys.Self.BorderStyle,
 			Private.Settings.Keys.Self.Font,
 			Private.Settings.Keys.Self.FontSize,
 			Private.Settings.Keys.Self.FontFlags,
-			Private.Settings.Keys.Self.ShowBorder,
-			Private.Settings.Keys.Self.ShowSwipe,
-			Private.Settings.Keys.Self.IndicateInterrupts,
-			Private.Settings.Keys.Self.RenderInterruptSourceName,
 			Private.Settings.Keys.Self.Opacity,
+			Private.Settings.Keys.Self.IconZoom,
 		}
 	end
 
@@ -94,7 +82,7 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.Enabled,
 		Private.Settings.Keys.Party.LoadConditionContentType,
 		Private.Settings.Keys.Party.LoadConditionRole,
-		Private.Settings.Keys.Party.IncludeSelfInParty,
+		Private.Settings.Keys.Party.RoleFilter,
 		Private.Settings.Keys.Party.Width,
 		Private.Settings.Keys.Party.Height,
 		Private.Settings.Keys.Party.Gap,
@@ -105,18 +93,39 @@ function Private.Settings.GetSettingsDisplayOrder(kind)
 		Private.Settings.Keys.Party.OffsetX,
 		Private.Settings.Keys.Party.OffsetY,
 		Private.Settings.Keys.Party.SortOrder,
-		Private.Settings.Keys.Party.GlowImportant,
 		Private.Settings.Keys.Party.GlowType,
-		Private.Settings.Keys.Party.ShowDuration,
-		Private.Settings.Keys.Party.ShowDurationFractions,
+		Private.Settings.Keys.Party.FeatureFlags,
+		Private.Settings.Keys.Party.BorderStyle,
 		Private.Settings.Keys.Party.Font,
 		Private.Settings.Keys.Party.FontSize,
 		Private.Settings.Keys.Party.FontFlags,
-		Private.Settings.Keys.Party.ShowBorder,
-		Private.Settings.Keys.Party.ShowSwipe,
-		Private.Settings.Keys.Party.IndicateInterrupts,
-		Private.Settings.Keys.Party.RenderInterruptSourceName,
 		Private.Settings.Keys.Party.Opacity,
+		Private.Settings.Keys.Party.IconZoom,
+	}
+end
+
+function Private.Settings.GetFeatureFlagsForKind(kind)
+	if kind == Private.Enum.FrameKind.Self then
+		return {
+			Private.Enum.FeatureFlag.GlowImportant,
+			Private.Enum.FeatureFlag.OnlyImportant,
+			Private.Enum.FeatureFlag.ShowDuration,
+			Private.Enum.FeatureFlag.ShowDurationFractions,
+			Private.Enum.FeatureFlag.ShowSwipe,
+			Private.Enum.FeatureFlag.IndicateInterrupts,
+			Private.Enum.FeatureFlag.RenderInterruptSourceName,
+		}
+	end
+
+	return {
+		Private.Enum.FeatureFlag.IncludeSelfInParty,
+		Private.Enum.FeatureFlag.GlowImportant,
+		Private.Enum.FeatureFlag.OnlyImportant,
+		Private.Enum.FeatureFlag.ShowDuration,
+		Private.Enum.FeatureFlag.ShowDurationFractions,
+		Private.Enum.FeatureFlag.ShowSwipe,
+		Private.Enum.FeatureFlag.IndicateInterrupts,
+		Private.Enum.FeatureFlag.RenderInterruptSourceName,
 	}
 end
 
@@ -129,6 +138,14 @@ function Private.Settings.GetSliderSettingsForOption(key)
 		return {
 			min = 0.2,
 			max = 1,
+			step = 0.01,
+		}
+	end
+
+	if key == Private.Settings.Keys.Self.IconZoom or key == Private.Settings.Keys.Party.IconZoom then
+		return {
+			min = 1,
+			max = 2,
 			step = 0.01,
 		}
 	end
@@ -211,23 +228,27 @@ function Private.Settings.GetSelfDefaultSettings()
 			[Private.Enum.Role.Damager] = true,
 		},
 		SortOrder = Private.Enum.SortOrder.Ascending,
-		Grow = Private.Enum.Grow.Center,
-		ShowDuration = true,
-		ShowDurationFractions = true,
+		Grow = Private.Enum.Grow.Start,
 		FontSize = 20,
 		Position = Private.Settings.GetDefaultEditModeFramePosition(),
 		Opacity = 1,
-		ShowBorder = true,
-		GlowImportant = true,
+		IconZoom = 1,
 		GlowType = Private.Enum.GlowType.PixelGlow,
-		IndicateInterrupts = false,
-		RenderInterruptSourceName = false,
-		ShowSwipe = true,
 		Font = "Fonts\\FRIZQT__.TTF",
 		FontFlags = {
 			[Private.Enum.FontFlags.OUTLINE] = true,
 			[Private.Enum.FontFlags.SHADOW] = false,
 		},
+		FeatureFlags = {
+			[Private.Enum.FeatureFlag.GlowImportant] = true,
+			[Private.Enum.FeatureFlag.OnlyImportant] = false,
+			[Private.Enum.FeatureFlag.ShowDuration] = true,
+			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
+			[Private.Enum.FeatureFlag.ShowSwipe] = true,
+			[Private.Enum.FeatureFlag.IndicateInterrupts] = false,
+			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = false,
+		},
+		BorderStyle = "Blizzard Tooltip Border",
 	}
 end
 
@@ -253,27 +274,36 @@ function Private.Settings.GetPartyDefaultSettings()
 			[Private.Enum.Role.Tank] = true,
 			[Private.Enum.Role.Damager] = true,
 		},
-		OffsetX = 74,
-		OffsetY = 10,
+		RoleFilter = {
+			[Private.Enum.Role.Healer] = true,
+			[Private.Enum.Role.Tank] = true,
+			[Private.Enum.Role.Damager] = true,
+		},
+		OffsetX = 2,
+		OffsetY = 15,
 		SourceAnchor = Private.Enum.Anchor.Left,
 		TargetAnchor = Private.Enum.Anchor.Right,
 		SortOrder = Private.Enum.SortOrder.Ascending,
 		Grow = Private.Enum.Grow.Start,
-		IncludeSelfInParty = true,
-		ShowDuration = true,
-		ShowDurationFractions = true,
 		Opacity = 1,
-		ShowBorder = true,
-		GlowImportant = true,
+		IconZoom = 1,
 		GlowType = Private.Enum.GlowType.PixelGlow,
-		IndicateInterrupts = true,
-		RenderInterruptSourceName = true,
-		ShowSwipe = true,
 		Font = "Fonts\\FRIZQT__.TTF",
 		FontFlags = {
 			[Private.Enum.FontFlags.OUTLINE] = true,
 			[Private.Enum.FontFlags.SHADOW] = false,
 		},
+		FeatureFlags = {
+			[Private.Enum.FeatureFlag.GlowImportant] = true,
+			[Private.Enum.FeatureFlag.OnlyImportant] = false,
+			[Private.Enum.FeatureFlag.ShowDuration] = true,
+			[Private.Enum.FeatureFlag.ShowDurationFractions] = true,
+			[Private.Enum.FeatureFlag.ShowSwipe] = true,
+			[Private.Enum.FeatureFlag.IndicateInterrupts] = true,
+			[Private.Enum.FeatureFlag.RenderInterruptSourceName] = true,
+			[Private.Enum.FeatureFlag.IncludeSelfInParty] = true,
+		},
+		BorderStyle = "Blizzard Tooltip Border",
 	}
 end
 
@@ -288,6 +318,20 @@ function Private.Settings.GetFontOptions()
 	}
 end
 
+function Private.Settings.GetBorderOptions()
+	local borders = {
+		"Solid",
+	}
+
+	for _, border in pairs(CopyTable(LibSharedMedia:List(LibSharedMedia.MediaType.BORDER))) do
+		table.insert(borders, border)
+	end
+
+	table.sort(borders)
+
+	return borders
+end
+
 function Private.Settings.IsContentTypeAvailableForKind(kind, contentTypeId)
 	if kind == Private.Enum.FrameKind.Self then
 		return true
@@ -300,7 +344,20 @@ function Private.Settings.IsContentTypeAvailableForKind(kind, contentTypeId)
 	return true
 end
 
+function Private.Settings.IsAnyRoleFilterActive()
+	return not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Healer]
+		or not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Tank]
+		or not TargetedSpellsSaved.Settings.Party.RoleFilter[Private.Enum.Role.Damager]
+		or false
+end
+
 table.insert(Private.LoginFnQueue, function()
+	LibSharedMedia:Register(
+		LibSharedMedia.MediaType.BORDER,
+		"Blizzard Tooltip Border",
+		"Interface\\Tooltips\\UI-Tooltip-Border"
+	)
+
 	local L = Private.L
 	local settingsName = C_AddOns.GetAddOnMetadata(addonName, "Title")
 	local category, layout = Settings.RegisterVerticalLayoutCategory(settingsName)
@@ -406,9 +463,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Font = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.Font then
+					tableRef.Font = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -440,30 +498,41 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.ShowSwipe or key == Private.Settings.Keys.Party.ShowSwipe then
-			local tableRef = key == Private.Settings.Keys.Self.ShowSwipe and TargetedSpellsSaved.Settings.Self
+		if key == Private.Settings.Keys.Self.BorderStyle or key == Private.Settings.Keys.Party.BorderStyle then
+			local tableRef = key == Private.Settings.Keys.Self.BorderStyle and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
 
 			local function GetValue()
-				return tableRef.ShowSwipe
+				return tableRef.BorderStyle
 			end
 
 			local function SetValue(value)
-				tableRef.ShowSwipe = not tableRef.ShowSwipe
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowSwipe)
+				if value ~= tableRef.BorderStyle then
+					tableRef.BorderStyle = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
+			end
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for _, label in ipairs(Private.Settings.GetBorderOptions()) do
+					container:Add(label, label)
+				end
+
+				return container:GetData()
 			end
 
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowSwipeLabel,
-				defaults.ShowSwipe,
+				Settings.VarType.String,
+				L.Settings.BorderStyleLabel,
+				defaults.BorderStyle,
 				GetValue,
 				SetValue
 			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowSwipeTooltip)
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.BorderStyleTooltip)
 
 			return {
 				initializer = initializer,
@@ -472,121 +541,58 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if
-			key == Private.Settings.Keys.Self.IndicateInterrupts
-			or key == Private.Settings.Keys.Party.IndicateInterrupts
-		then
-			local tableRef = key == Private.Settings.Keys.Self.IndicateInterrupts and TargetedSpellsSaved.Settings.Self
+		if key == Private.Settings.Keys.Self.FeatureFlags or key == Private.Settings.Keys.Party.FeatureFlags then
+			local kind = key == Private.Settings.Keys.Self.FeatureFlags and Private.Enum.FrameKind.Self
+				or Private.Enum.FrameKind.Party
+			local kindTableRef = kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
+			local applicableFlags = Private.Settings.GetFeatureFlagsForKind(kind)
+
+			local defaultValue = GetMask(applicableFlags, function(id)
+				return defaults.FeatureFlags[id]
+			end)
 
 			local function GetValue()
-				return tableRef.IndicateInterrupts
+				return GetMask(applicableFlags, function(id)
+					return kindTableRef.FeatureFlags[id]
+				end)
 			end
 
-			local function SetValue(value)
-				tableRef.IndicateInterrupts = not tableRef.IndicateInterrupts
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					tableRef.IndicateInterrupts
-				)
+			local function SetValue(mask)
+				for _, id in ipairs(applicableFlags) do
+					local enabled = DecodeBitToBool(mask, id)
+					if enabled ~= kindTableRef.FeatureFlags[id] then
+						kindTableRef.FeatureFlags[id] = enabled
+						Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, id, enabled)
+					end
+				end
+			end
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for _, id in ipairs(applicableFlags) do
+					container:AddCheckbox(id, L.Settings.FeatureFlagLabels[id], L.Settings.FeatureFlagsTooltip)
+				end
+
+				return container:GetData()
 			end
 
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Boolean,
-				L.Settings.IndicateInterruptsLabel,
-				defaults.IndicateInterrupts,
+				Settings.VarType.Number,
+				L.Settings.FeatureFlagsLabel,
+				defaultValue,
 				GetValue,
 				SetValue
 			)
 
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.IndicateInterruptsTooltip)
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.FeatureFlagsTooltip)
 
 			return {
 				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if
-			key == Private.Settings.Keys.Self.RenderInterruptSourceName
-			or key == Private.Settings.Keys.Party.RenderInterruptSourceName
-		then
-			local tableRef = key == Private.Settings.Keys.Self.RenderInterruptSourceName
-					and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.RenderInterruptSourceName
-			end
-
-			local function SetValue(value)
-				tableRef.RenderInterruptSourceName = not tableRef.RenderInterruptSourceName
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					tableRef.RenderInterruptSourceName
-				)
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.RenderInterruptSourceNameLabel,
-				defaults.RenderInterruptSourceName,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.RenderInterruptSourceNameTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if
-			key == Private.Settings.Keys.Self.ShowDurationFractions
-			or key == Private.Settings.Keys.Party.ShowDurationFractions
-		then
-			local tableRef = key == Private.Settings.Keys.Self.ShowDurationFractions
-					and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.ShowDurationFractions
-			end
-
-			local function SetValue(value)
-				tableRef.ShowDurationFractions = not tableRef.ShowDurationFractions
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					tableRef.ShowDurationFractions
-				)
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowDurationFractionsLabel,
-				defaults.ShowDurationFractions,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowDurationFractionsTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
+				hideSteppers = true,
 				IsSectionEnabled = nil,
 			}
 		end
@@ -600,8 +606,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Enabled = not tableRef.Enabled
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.Enabled)
+				if value ~= tableRef.Enabled then
+					tableRef.Enabled = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.Enabled)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
@@ -623,49 +631,16 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Party.IncludeSelfInParty then
-			local function GetValue()
-				return TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-			end
-
-			local function SetValue(value)
-				TargetedSpellsSaved.Settings.Party.IncludeSelfInParty =
-					not TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-				Private.EventRegistry:TriggerEvent(
-					Private.Enum.Events.SETTING_CHANGED,
-					key,
-					TargetedSpellsSaved.Settings.Party.IncludeSelfInParty
-				)
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.IncludeSelfInPartyLabel,
-				Settings.Default.True,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.IncludeSelfInPartyTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
 		if key == Private.Settings.Keys.Party.TargetAnchor then
 			local function GetValue()
 				return TargetedSpellsSaved.Settings.Party.TargetAnchor
 			end
 
 			local function SetValue(value)
-				TargetedSpellsSaved.Settings.Party.TargetAnchor = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= TargetedSpellsSaved.Settings.Party.TargetAnchor then
+					TargetedSpellsSaved.Settings.Party.TargetAnchor = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -703,9 +678,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				TargetedSpellsSaved.Settings.Party.SourceAnchor = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= TargetedSpellsSaved.Settings.Party.SourceAnchor then
+					TargetedSpellsSaved.Settings.Party.SourceAnchor = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -846,62 +822,36 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.ShowBorder or key == Private.Settings.Keys.Party.ShowBorder then
-			local tableRef = key == Private.Settings.Keys.Self.ShowBorder and TargetedSpellsSaved.Settings.Self
+		if key == Private.Settings.Keys.Self.IconZoom or key == Private.Settings.Keys.Party.IconZoom then
+			local tableRef = key == Private.Settings.Keys.Self.IconZoom and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
+			local sliderSettings = Private.Settings.GetSliderSettingsForOption(key)
 
 			local function GetValue()
-				return tableRef.ShowBorder
+				return tableRef.IconZoom
 			end
 
 			local function SetValue(value)
-				tableRef.ShowBorder = not tableRef.ShowBorder
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowBorder)
+				if value ~= tableRef.IconZoom then
+					tableRef.IconZoom = value
+
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local setting = Settings.RegisterProxySetting(
 				category,
 				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowBorderLabel,
-				defaults.ShowBorder,
+				Settings.VarType.Number,
+				L.Settings.IconZoomLabel,
+				defaults.IconZoom,
 				GetValue,
 				SetValue
 			)
+			local options = Settings.CreateSliderOptions(sliderSettings.min, sliderSettings.max, sliderSettings.step)
+			options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, FormatPercentage)
 
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowBorderTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
-		if key == Private.Settings.Keys.Self.ShowDuration or key == Private.Settings.Keys.Party.ShowDuration then
-			local tableRef = key == Private.Settings.Keys.Self.ShowDuration and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.ShowDuration
-			end
-
-			local function SetValue(value)
-				tableRef.ShowDuration = not tableRef.ShowDuration
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.ShowDuration)
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.ShowDurationLabel,
-				defaults.ShowDuration,
-				GetValue,
-				SetValue
-			)
-
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.ShowDurationTooltip)
+			local initializer = Settings.CreateSlider(category, setting, options, L.Settings.IconZoomTooltip)
 
 			return {
 				initializer = initializer,
@@ -919,9 +869,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.GlowType = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.GlowType then
+					tableRef.GlowType = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -954,37 +905,6 @@ table.insert(Private.LoginFnQueue, function()
 			}
 		end
 
-		if key == Private.Settings.Keys.Self.GlowImportant or key == Private.Settings.Keys.Party.GlowImportant then
-			local tableRef = key == Private.Settings.Keys.Self.GlowImportant and TargetedSpellsSaved.Settings.Self
-				or TargetedSpellsSaved.Settings.Party
-
-			local function GetValue()
-				return tableRef.GlowImportant
-			end
-
-			local function SetValue(value)
-				tableRef.GlowImportant = not tableRef.GlowImportant
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, tableRef.GlowImportant)
-			end
-
-			local setting = Settings.RegisterProxySetting(
-				category,
-				key,
-				Settings.VarType.Boolean,
-				L.Settings.GlowImportantLabel,
-				defaults.GlowImportant,
-				GetValue,
-				SetValue
-			)
-			local initializer = Settings.CreateCheckbox(category, setting, L.Settings.GlowImportantTooltip)
-
-			return {
-				initializer = initializer,
-				hideSteppers = false,
-				IsSectionEnabled = nil,
-			}
-		end
-
 		if key == Private.Settings.Keys.Self.Grow or key == Private.Settings.Keys.Party.Grow then
 			local tableRef = key == Private.Settings.Keys.Self.Grow and TargetedSpellsSaved.Settings.Self
 				or TargetedSpellsSaved.Settings.Party
@@ -994,9 +914,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Grow = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.Grow then
+					tableRef.Grow = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -1037,8 +958,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.SortOrder = value
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.SortOrder then
+					tableRef.SortOrder = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -1080,9 +1003,10 @@ table.insert(Private.LoginFnQueue, function()
 			end
 
 			local function SetValue(value)
-				tableRef.Direction = value
-
-				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				if value ~= tableRef.Direction then
+					tableRef.Direction = value
+					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
+				end
 			end
 
 			local function GetOptions()
@@ -1127,7 +1051,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if value ~= tableRef.Gap then
 					tableRef.Gap = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1165,7 +1088,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if value ~= tableRef.FontSize then
 					tableRef.FontSize = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1203,7 +1125,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if tableRef.Height ~= value then
 					tableRef.Height = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1241,7 +1162,6 @@ table.insert(Private.LoginFnQueue, function()
 			local function SetValue(value)
 				if value ~= tableRef.Width then
 					tableRef.Width = value
-
 					Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, key, value)
 				end
 			end
@@ -1345,6 +1265,69 @@ table.insert(Private.LoginFnQueue, function()
 
 			local initializer =
 				Settings.CreateDropdown(category, setting, GetOptions, L.Settings.LoadConditionRoleTooltip)
+
+			return {
+				initializer = initializer,
+				hideSteppers = true,
+				IsSectionEnabled = nil,
+			}
+		end
+
+		if key == Private.Settings.Keys.Party.RoleFilter then
+			local defaultValue = GetMask(Private.Enum.Role, function(id)
+				return defaults.RoleFilter[id]
+			end)
+
+			local function GetValue()
+				return GetMask(Private.Enum.Role, function(id)
+					return TargetedSpellsSaved.Settings.Party.RoleFilter[id]
+				end)
+			end
+
+			local function SetValue(mask)
+				local hasChanges = false
+
+				for label, id in pairs(Private.Enum.Role) do
+					local enabled = DecodeBitToBool(mask, id)
+
+					if enabled ~= TargetedSpellsSaved.Settings.Party.RoleFilter[id] then
+						TargetedSpellsSaved.Settings.Party.RoleFilter[id] = enabled
+						hasChanges = true
+					end
+				end
+
+				if hasChanges then
+					Private.EventRegistry:TriggerEvent(
+						Private.Enum.Events.SETTING_CHANGED,
+						key,
+						TargetedSpellsSaved.Settings.Party.RoleFilter
+					)
+				end
+			end
+
+			local setting = Settings.RegisterProxySetting(
+				category,
+				key,
+				Settings.VarType.Number,
+				L.Settings.RoleFilterLabel,
+				defaultValue,
+				GetValue,
+				SetValue
+			)
+
+			local function GetOptions()
+				local container = Settings.CreateControlTextContainer()
+
+				for label, id in pairs(Private.Enum.Role) do
+					local translated = L.Settings.RoleFilterLabels[id]
+
+					container:AddCheckbox(id, translated, L.Settings.RoleFilterTooltip)
+				end
+
+				return container:GetData()
+			end
+
+			local initializer = Settings.CreateDropdown(category, setting, GetOptions, L.Settings.RoleFilterTooltip)
 
 			return {
 				initializer = initializer,

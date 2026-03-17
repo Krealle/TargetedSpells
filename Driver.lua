@@ -5,11 +5,11 @@ local addonName, Private = ...
 local TargetedSpellsDriver = {}
 
 function TargetedSpellsDriver:Init()
-	self.framePool = CreateFramePool("Frame", UIParent, "TargetedSpellsFrameTemplate")
 	self.delay = 0.2
 	self.frames = {}
 	self.role = Private.Enum.Role.Damager
 	self.contentType = Private.Enum.ContentType.OpenWorld
+	self.anyRoleFilterActive = Private.Settings.IsAnyRoleFilterActive()
 
 	Private.EventRegistry:RegisterCallback(Private.Enum.Events.SETTING_CHANGED, self.OnSettingsChanged, self)
 
@@ -40,12 +40,10 @@ function TargetedSpellsDriver:PositionSelfFrame()
 		local GrowTarget = {
 			[Private.Enum.Direction.Horizontal] = {
 				[Private.Enum.Grow.Start] = { x = -1, y = 0 },
-				[Private.Enum.Grow.Center] = { x = 0, y = 0 },
 				[Private.Enum.Grow.End] = { x = 1, y = 0 },
 			},
 			[Private.Enum.Direction.Vertical] = {
 				[Private.Enum.Grow.Start] = { x = 0, y = -1 },
-				[Private.Enum.Grow.Center] = { x = 0, y = 0 },
 				[Private.Enum.Grow.End] = { x = 0, y = 1 },
 			},
 		}
@@ -124,8 +122,7 @@ do
 			TargetedSpellsSaved.Settings.Self.Enabled
 			and not self:LoadConditionsProhibitExecution(Private.Enum.FrameKind.Self)
 		then
-			local selfTargetingFrame = self.framePool:Acquire()
-			selfTargetingFrame:SetParent(self.frame)
+			local selfTargetingFrame = Private.Utils.Pool:Acquire()
 			selfTargetingFrame:PostCreate("player", Private.Enum.FrameKind.Self, castingUnit)
 			table.insert(frames, selfTargetingFrame)
 		end
@@ -140,8 +137,13 @@ do
 			for i = 1, partyMemberCount do
 				local unit = i == partyMemberCount and "player" or "party" .. i
 
-				if (unit == "player" and TargetedSpellsSaved.Settings.Party.IncludeSelfInParty) or unit ~= "player" then
-					local frame = self.framePool:Acquire()
+				if
+					(
+						unit == "player"
+						and TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IncludeSelfInParty]
+					) or unit ~= "player"
+				then
+					local frame = Private.Utils.Pool:Acquire()
 					frame:PostCreate(unit, Private.Enum.FrameKind.Party, castingUnit)
 					table.insert(frames, frame)
 				end
@@ -152,12 +154,6 @@ do
 	end
 end
 
-function TargetedSpellsDriver:ReleaseFrame(frame)
-	frame:Reset()
-	self.framePool:Release(frame)
-end
-
--- this is where 3rd party unit frames would need addition
 ---@param unit string
 ---@return Frame?
 local function FindParentFrameForPartyMember(unit)
@@ -229,66 +225,46 @@ function TargetedSpellsDriver:RepositionFrames()
 		end
 	end
 
+	local selfTableRef = TargetedSpellsSaved.Settings.Self
+	local partyTableRef = TargetedSpellsSaved.Settings.Party
+
 	for targetUnit, frames in pairs(activeFrames) do
 		-- may not use "player" here as the unit token in party for the player is identical
 		if targetUnit == Private.Enum.FrameKind.Self then
-			local tableRef = TargetedSpellsSaved.Settings.Self
-			local width, height, gap, sortOrder, direction, grow =
-				tableRef.Width, tableRef.Height, tableRef.Gap, tableRef.SortOrder, tableRef.Direction, tableRef.Grow
-			local isHorizontal = direction == Private.Enum.Direction.Horizontal
-			local point = grow == Private.Enum.Grow.Center and "CENTER" or isHorizontal and "LEFT" or "BOTTOM"
-			local total = (#frames * (isHorizontal and width or height)) + (#frames - 1) * gap
-			local parentDimension = isHorizontal and self.frame:GetWidth() or self.frame:GetHeight()
+			Private.Utils.SortFrames(frames, selfTableRef.SortOrder)
 
-			Private.Utils.SortFrames(frames, sortOrder)
+			local layouting = Private.Utils.CollectLayoutingArguments(
+				selfTableRef.Direction,
+				selfTableRef.Grow,
+				selfTableRef.Width,
+				selfTableRef.Height,
+				selfTableRef.Gap
+			)
 
-			for i, frame in ipairs(frames) do
-				local x = 0
-				local y = 0
-
-				if isHorizontal then
-					x = Private.Utils.CalculateCoordinate(i, width, gap, parentDimension, total, 0, grow)
-				else
-					y = Private.Utils.CalculateCoordinate(i, height, gap, parentDimension, total, 0, grow)
-				end
-
-				frame:Reposition(point, self.frame, "CENTER", x, y)
-			end
+			Private.Utils.AdjustLayout(frames, layouting, self.frame, "CENTER", 0, 0, false)
 		else
 			local parentFrame = FindParentFrameForPartyMember(targetUnit)
 
 			if parentFrame ~= nil then
-				local tableRef = TargetedSpellsSaved.Settings.Party
-				local width, height, gap, sortOrder, sourceAnchor, targetAnchor, direction, grow, offsetX, offsetY =
-					tableRef.Width,
-					tableRef.Height,
-					tableRef.Gap,
-					tableRef.SortOrder,
-					tableRef.SourceAnchor,
-					tableRef.TargetAnchor,
-					tableRef.Direction,
-					tableRef.Grow,
-					tableRef.OffsetX,
-					tableRef.OffsetY
+				Private.Utils.SortFrames(frames, partyTableRef.SortOrder)
 
-				Private.Utils.SortFrames(frames, sortOrder)
+				local layouting = Private.Utils.CollectLayoutingArguments(
+					partyTableRef.Direction,
+					partyTableRef.Grow,
+					partyTableRef.Width,
+					partyTableRef.Height,
+					partyTableRef.Gap
+				)
 
-				local isHorizontal = direction == Private.Enum.Direction.Horizontal
-				local total = (#frames * (isHorizontal and width or height)) + (#frames - 1) * gap
-				local parentDimension = isHorizontal and parentFrame:GetWidth() or parentFrame:GetHeight()
-
-				for j, frame in ipairs(frames) do
-					local x = offsetX
-					local y = offsetY
-
-					if isHorizontal then
-						x = Private.Utils.CalculateCoordinate(j, width, gap, parentDimension, total, offsetX, grow)
-					else
-						y = Private.Utils.CalculateCoordinate(j, width, gap, parentDimension, total, offsetY, grow)
-					end
-
-					frame:Reposition(sourceAnchor, parentFrame, targetAnchor, x, y)
-				end
+				Private.Utils.AdjustLayout(
+					frames,
+					layouting,
+					parentFrame,
+					partyTableRef.TargetAnchor,
+					partyTableRef.OffsetX,
+					partyTableRef.OffsetY,
+					false
+				)
 			end
 		end
 	end
@@ -304,13 +280,17 @@ function TargetedSpellsDriver:ReleaseFrameForUnit(unit, removeUnit, id)
 	local cleanedSomethingUp = false
 	local cleanedEverythingUp = true
 
-	for i, frame in pairs(frames) do
-		if frame:CanBeHidden(id) then
-			self:ReleaseFrame(frame)
-			frames[i] = nil
-			cleanedSomethingUp = true
-		else
-			cleanedEverythingUp = false
+	for i = #frames, 1, -1 do
+		local frame = frames[i]
+
+		if frame then
+			if frame:CanBeHidden(id) then
+				Private.Utils.Pool:Release(frame)
+				table.remove(frames, i)
+				cleanedSomethingUp = true
+			else
+				cleanedEverythingUp = false
+			end
 		end
 	end
 
@@ -340,6 +320,30 @@ function TargetedSpellsDriver:LoadConditionsProhibitExecution(kind)
 	end
 
 	return false
+end
+
+function TargetedSpellsDriver:RoleFilterPreventsExecution(unit)
+	if not self.anyRoleFilterActive then
+		return false
+	end
+
+	if not IsInGroup() then
+		return false
+	end
+
+	local target = string.format("%starget", unit)
+
+	if not UnitExists(target) or not UnitInParty(target) or UnitCanAttack("player", target) then
+		return false
+	end
+
+	local role = UnitGroupRolesAssigned(target)
+
+	local roleKey = role == "TANK" and Private.Enum.Role.Tank
+		or role == "HEALER" and Private.Enum.Role.Healer
+		or Private.Enum.Role.Damager
+
+	return not TargetedSpellsSaved.Settings.Party.RoleFilter[roleKey]
 end
 
 function TargetedSpellsDriver:UnitIsIrrelevant(unit, skipTargetCheck)
@@ -478,13 +482,20 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 		end
 
 		local startTime = GetTime() -- todo: this is wrong, but we can't do better yet
+		local OnCooldownDone = GenerateClosure(self.OnCooldownDone, self, {
+			unit = unit,
+			spellId = spellId,
+			startTime = startTime,
+			id = id,
+		})
 
 		for i, frame in ipairs(frames) do
 			table.insert(self.frames[unit], frame)
 			frame:SetSpellId(spellId)
 			frame:SetStartTime(startTime)
-			frame:SetDuration(duration)
 			frame:SetId(id)
+			frame:SetDuration(duration)
+			frame:SetOnCooldownDone(OnCooldownDone)
 		end
 
 		self:RepositionFrames()
@@ -556,9 +567,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			id = select(4, ...)
 		end
 
-		if self:MaybeMarkAsInterruptedAndDelay(unit, id, interruptedBy) then
-			return
-		end
+		self:MaybeMarkAsInterruptedAndDelay(unit, id, interruptedBy)
 
 		if self:ReleaseFrameForUnit(unit, true, id) then
 			self:RepositionFrames()
@@ -578,6 +587,10 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			return
 		end
 
+		if self:RoleFilterPreventsExecution(info.unit) then
+			return
+		end
+
 		local frames = self:AcquireFrames(info.unit)
 
 		if #frames == 0 then
@@ -594,13 +607,15 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			self:ReleaseFrameForUnit(info.unit, false, info.id)
 		end
 
-		---@type DurationObjectDummy|number|nil
 		local duration = UnitCastingDuration(info.unit) or UnitChannelDuration(info.unit)
 
 		-- without `nameplateShowOffscreen` active, castTime may stay nil
+
 		if duration == nil then
 			return
 		end
+
+		local OnCooldownDone = GenerateClosure(self.OnCooldownDone, self, info)
 
 		for i, frame in ipairs(frames) do
 			table.insert(self.frames[info.unit], frame)
@@ -608,6 +623,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 			frame:SetStartTime(info.startTime)
 			frame:SetId(info.id)
 			frame:SetDuration(duration)
+			frame:SetOnCooldownDone(OnCooldownDone)
 		end
 
 		self:RepositionFrames()
@@ -625,7 +641,7 @@ function TargetedSpellsDriver:OnFrameEvent(_, event, ...)
 
 		for i, frame in pairs(frames) do
 			if delayInfo.kinds[frame:GetKind()] and frame:GetId() == delayInfo.id then
-				self:ReleaseFrame(frame)
+				Private.Utils.Pool:Release(frame)
 				frames[i] = nil
 				cleanedSomethingUp = true
 			end
@@ -735,25 +751,27 @@ function TargetedSpellsDriver:OnSettingsChanged(key, value)
 		or key == Private.Settings.Keys.Self.Gap
 	then
 		self:PositionSelfFrame()
+	elseif key == Private.Settings.Keys.Party.RoleFilter then
+		self.anyRoleFilterActive = Private.Settings.IsAnyRoleFilterActive()
 	end
 end
 
 function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interruptedBy)
 	if
-		not TargetedSpellsSaved.Settings.Self.IndicateInterrupts
-		and not TargetedSpellsSaved.Settings.Party.IndicateInterrupts
+		not TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
+		and not TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 	then
-		return false
+		return
 	end
 
 	-- either via events that don't communicate interruptedBy, or via interrupt events briefly before deaths, e.g. on totems that cast something like Cinderbrew Meadery barrels
 	if interruptedBy == nil then
-		return false
+		return
 	end
 
 	-- event gets sent when unit dies mid-cast, incorrectly implying it was interrupted
 	if not UnitExists(unit) then
-		return false
+		return
 	end
 
 	local interruptName = UnitNameFromGUID(interruptedBy)
@@ -776,9 +794,11 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 		local indicateInterrupts = false
 
 		if frame:GetKind() == Private.Enum.FrameKind.Self then
-			indicateInterrupts = TargetedSpellsSaved.Settings.Self.IndicateInterrupts
+			indicateInterrupts =
+				TargetedSpellsSaved.Settings.Self.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 		else
-			indicateInterrupts = TargetedSpellsSaved.Settings.Party.IndicateInterrupts
+			indicateInterrupts =
+				TargetedSpellsSaved.Settings.Party.FeatureFlags[Private.Enum.FeatureFlag.IndicateInterrupts]
 		end
 
 		if indicateInterrupts then
@@ -789,7 +809,7 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 	end
 
 	if not kindsToDelay[Private.Enum.FrameKind.Self] and not kindsToDelay[Private.Enum.FrameKind.Party] then
-		return false
+		return
 	end
 
 	---@type DelayInfo
@@ -803,8 +823,12 @@ function TargetedSpellsDriver:MaybeMarkAsInterruptedAndDelay(unit, id, interrupt
 		1,
 		GenerateClosure(self.OnFrameEvent, self, self.frame, Private.Enum.Events.DELAYED_FRAME_CLEANUP, delayInfo)
 	)
+end
 
-	return true
+function TargetedSpellsDriver:OnCooldownDone(info)
+	if self:ReleaseFrameForUnit(info.unit, true, info.id) then
+		self:RepositionFrames()
+	end
 end
 
 table.insert(Private.LoginFnQueue, GenerateClosure(TargetedSpellsDriver.Init, TargetedSpellsDriver))

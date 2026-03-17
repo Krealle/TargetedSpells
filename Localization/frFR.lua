@@ -28,6 +28,12 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
+L.Functionality.V2DeprecationWarning = string.format(
+	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
+	addonNameWithIcon,
+	"%s"
+)
+
 L.Settings.EnabledLabel = "Activé"
 L.Settings.EnabledTooltip = nil
 L.Settings.DisabledLabel = "Désactivé"
@@ -57,6 +63,10 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "Tank",
 	[Private.Enum.Role.Damager] = "DPS",
 }
+
+L.Settings.RoleFilterLabel = "Role Filter"
+L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
+L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "Largeur"
 L.Settings.FrameWidthTooltip = nil
@@ -90,7 +100,6 @@ L.Settings.FrameSortOrderDescending = "Descending"
 L.Settings.FrameGrowLabel = "Grow"
 L.Settings.FrameGrowTooltip = nil
 L.Settings.FrameGrowLabels = {
-	[Private.Enum.Grow.Center] = "Center",
 	[Private.Enum.Grow.Start] = "Start",
 	[Private.Enum.Grow.End] = "End",
 }
@@ -98,12 +107,14 @@ L.Settings.FrameGrowLabels = {
 L.Settings.GlowImportantLabel = "Faire briller les sorts important"
 L.Settings.GlowImportantTooltip = "Ce qui est important ou non est déclaré par le jeu."
 
+L.Settings.OnlyImportantLabel = "Only Show Important Spells"
+L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+
 L.Settings.GlowTypeLabel = "Glow Type"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "Pixel Glow",
 	[Private.Enum.GlowType.AutoCastGlow] = "Auto Cast Glow",
-	[Private.Enum.GlowType.ButtonGlow] = "Button Glow",
 	[Private.Enum.GlowType.ProcGlow] = "Proc Glow",
 	[Private.Enum.GlowType.Star4] = "Star 4",
 }
@@ -123,9 +134,6 @@ L.Settings.RenderInterruptSourceNameTooltip = nil
 
 L.Settings.ShowSwipeLabel = "Show Swipe"
 L.Settings.ShowSwipeTooltip = nil
-
-L.Settings.ShowBorderLabel = "Montrer les contours"
-L.Settings.ShowBorderTooltip = nil
 
 L.Settings.OpacityLabel = "Opacité"
 L.Settings.OpacityTooltip = nil
@@ -152,3 +160,23 @@ L.Settings.Export = "Exporter"
 
 L.Settings.FontLabel = "Police"
 L.Settings.FontTooltip = nil
+
+L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsTooltip = nil
+
+L.Settings.FeatureFlagLabels = {
+	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
+	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
+	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
+	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
+	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
+	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+}
+
+L.Settings.FeatureFlagSettingTitles = {
+	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
+}

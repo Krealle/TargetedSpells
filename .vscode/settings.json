@@ -12,7 +12,7 @@
     "utf8": "disable"
   },
   "Lua.workspace.library": [
-    "~\\.vscode\\extensions\\ketho.wow-api-0.22.2\\Annotations\\Core"
+    "~\\.vscode\\extensions\\ketho.wow-api-0.22.3\\Annotations\\Core"
   ],
   "Lua.diagnostics.globals": [
     "StaticPopupDialogs",
@@ -58,7 +58,23 @@
     "assertsafe",
     "PixelUtil",
     "GameFontHighlightHugeOutline",
-    "ACCEPT"
+    "ACCEPT",
+    "PlayerUtil",
+    "Pool_HideAndClearAnchors",
+    "ProxyUtil",
+    "ProxyConvertableMixin",
+    "SecureTypes",
+    "NO",
+    "OTHER",
+    "FROM",
+    "USE",
+    "GenerateClosure",
+    "OKAY",
+    "MultiBarBottomLeft",
+    "SpellActivationOverlayFrame",
+    "NineSliceUtil",
+    "UIParent",
+    "RunNextFrame"
   ],
   "stylua.targetReleaseVersion": "latest",
   "Lua.diagnostics.disable": ["assign-type-mismatch"],

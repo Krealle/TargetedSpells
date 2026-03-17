@@ -28,6 +28,12 @@ L.Functionality.CVarWarning = string.format(
 	ENABLE
 )
 
+L.Functionality.V2DeprecationWarning = string.format(
+	"%s\n\nDue to the changes in v2, the following settings were reset for you:\n\n%s\n\nAdditionally, we suggest verifying your layouting as it may also be impacted.",
+	addonNameWithIcon,
+	"%s"
+)
+
 L.Settings.EnabledLabel = "启用"
 L.Settings.EnabledTooltip = nil
 L.Settings.DisabledLabel = "禁用"
@@ -57,6 +63,10 @@ L.Settings.LoadConditionRoleLabels = {
 	[Private.Enum.Role.Tank] = "坦克",
 	[Private.Enum.Role.Damager] = "输出",
 }
+
+L.Settings.RoleFilterLabel = "Role Filter"
+L.Settings.RoleFilterTooltip = "Allows you to ignore certain roles from being shown. Use at your own risk."
+L.Settings.RoleFilterLabels = L.Settings.LoadConditionRoleLabels
 
 L.Settings.FrameWidthLabel = "宽度"
 L.Settings.FrameWidthTooltip = nil
@@ -90,7 +100,6 @@ L.Settings.FrameSortOrderDescending = "降序"
 L.Settings.FrameGrowLabel = "增长方向"
 L.Settings.FrameGrowTooltip = nil
 L.Settings.FrameGrowLabels = {
-	[Private.Enum.Grow.Center] = "居中",
 	[Private.Enum.Grow.Start] = "起始",
 	[Private.Enum.Grow.End] = "末端",
 }
@@ -98,12 +107,14 @@ L.Settings.FrameGrowLabels = {
 L.Settings.GlowImportantLabel = "高亮重要法术"
 L.Settings.GlowImportantTooltip = "重要与否完全由游戏本身决定。"
 
+L.Settings.OnlyImportantLabel = "Only Show Important Spells"
+L.Settings.OnlyImportantTooltip = "Note that you're relying on what the game considers important, use at your own risk."
+
 L.Settings.GlowTypeLabel = "高亮类型"
 L.Settings.GlowTypeTooltip = nil
 L.Settings.GlowTypeLabels = {
 	[Private.Enum.GlowType.PixelGlow] = "像素发光",
 	[Private.Enum.GlowType.AutoCastGlow] = "自动施法发光",
-	[Private.Enum.GlowType.ButtonGlow] = "快捷键发光",
 	[Private.Enum.GlowType.ProcGlow] = "脉冲发光",
 	[Private.Enum.GlowType.Star4] = "四星发光",
 }
@@ -123,9 +134,6 @@ L.Settings.RenderInterruptSourceNameTooltip = nil
 
 L.Settings.ShowSwipeLabel = "显示滑动"
 L.Settings.ShowSwipeTooltip = nil
-
-L.Settings.ShowBorderLabel = "显示边框"
-L.Settings.ShowBorderTooltip = nil
 
 L.Settings.OpacityLabel = "不透明度"
 L.Settings.OpacityTooltip = nil
@@ -152,3 +160,23 @@ L.Settings.Export = "导出"
 
 L.Settings.FontLabel = "字体"
 L.Settings.FontTooltip = nil
+
+L.Settings.FeatureFlagsLabel = "Features"
+L.Settings.FeatureFlagsTooltip = nil
+
+L.Settings.FeatureFlagLabels = {
+	[Private.Enum.FeatureFlag.GlowImportant] = L.Settings.GlowImportantLabel,
+	[Private.Enum.FeatureFlag.OnlyImportant] = L.Settings.OnlyImportantLabel,
+	[Private.Enum.FeatureFlag.ShowDuration] = L.Settings.ShowDurationLabel,
+	[Private.Enum.FeatureFlag.ShowDurationFractions] = L.Settings.ShowDurationFractionsLabel,
+	[Private.Enum.FeatureFlag.ShowSwipe] = L.Settings.ShowSwipeLabel,
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = L.Settings.IndicateInterruptsLabel,
+	[Private.Enum.FeatureFlag.RenderInterruptSourceName] = L.Settings.RenderInterruptSourceNameLabel,
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = L.Settings.IncludeSelfInPartyLabel,
+}
+
+L.Settings.FeatureFlagSettingTitles = {
+	[Private.Enum.FeatureFlag.GlowImportant] = "Display",
+	[Private.Enum.FeatureFlag.IndicateInterrupts] = "Interrupt Settings",
+	[Private.Enum.FeatureFlag.IncludeSelfInParty] = "Party Settings",
+}

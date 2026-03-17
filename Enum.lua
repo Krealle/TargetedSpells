@@ -63,7 +63,7 @@ Private.Enum.SortOrder = {
 
 ---@enum Grow
 Private.Enum.Grow = {
-	Center = 1,
+	-- Center = 1, -- deprecated
 	Start = 2,
 	End = 3,
 }
@@ -72,7 +72,7 @@ Private.Enum.Grow = {
 Private.Enum.GlowType = {
 	PixelGlow = 1,
 	AutoCastGlow = 2,
-	ButtonGlow = 3,
+	-- ButtonGlow = 3, -- deprecated
 	ProcGlow = 4,
 	Star4 = 5,
 }
@@ -81,4 +81,17 @@ Private.Enum.GlowType = {
 Private.Enum.FontFlags = {
 	OUTLINE = 1,
 	SHADOW = 2,
+}
+
+---@enum FeatureFlag
+Private.Enum.FeatureFlag = {
+	GlowImportant = 1,
+	OnlyImportant = 2,
+	ShowDuration = 3,
+	ShowDurationFractions = 4,
+	-- ShowBorder = 5, -- deprecated
+	ShowSwipe = 6,
+	IndicateInterrupts = 7,
+	RenderInterruptSourceName = 8,
+	IncludeSelfInParty = 9,
 }

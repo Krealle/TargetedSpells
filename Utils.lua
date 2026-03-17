@@ -4,19 +4,16 @@ local addonName, Private = ...
 ---@class TargetedSpellsUtils
 Private.Utils = {}
 
-function Private.Utils.CalculateCoordinate(index, dimension, gap, parentDimension, total, offset, grow)
-	local step = dimension + gap
-
-	if grow == Private.Enum.Grow.Start then
-		return (index - 1) * step - parentDimension / 2 + offset
-	elseif grow == Private.Enum.Grow.Center then
-		return (index - 1) * step - total / 2 + dimension / 2 + offset
-	elseif grow == Private.Enum.Grow.End then
-		return parentDimension / 2 - index * step + offset
+Private.Utils.Pool = CreateFramePool(
+	"Frame",
+	UIParent,
+	"TargetedSpellsFrameTemplate",
+	---@param pool FramePool<TargetedSpellsMixin>
+	---@param frame TargetedSpellsMixin
+	function(pool, frame)
+		frame:Reset()
 	end
-
-	return 0
-end
+)
 
 do
 	local function sortAsc(a, b)
@@ -36,6 +33,113 @@ end
 
 function Private.Utils.RollDice()
 	return math.random(1, 6) == 6
+end
+
+function Private.Utils.CollectLayoutingArguments(direction, grow, width, height, gap)
+	local isHorizontal = direction == Private.Enum.Direction.Horizontal
+	local isGrowEnd = grow == Private.Enum.Grow.End
+
+	return {
+		isHorizontal = isHorizontal,
+		isGrowEnd = isGrowEnd,
+		orientation = isHorizontal and "HORIZONTAL" or "VERTICAL",
+		x = (isHorizontal and width or height) + gap,
+		y = isHorizontal and height or width,
+		originPoint = isHorizontal and (isGrowEnd and "RIGHT" or "LEFT") or (isGrowEnd and "TOP" or "BOTTOM"),
+		relativePoint = isHorizontal and (isGrowEnd and "LEFT" or "RIGHT") or (isGrowEnd and "BOTTOM" or "TOP"),
+	}
+end
+
+function Private.Utils.ShowMigrationPopup(resetKeys, kind)
+	local text = string.format(Private.L.Functionality.V2DeprecationWarning, table.concat(resetKeys, "\n"))
+	if kind == "import" then
+		-- cannot show StaticPopup while in Edit Mode apparently
+		print(text)
+	elseif kind == "login" then
+		EventRegistry:RegisterFrameEventAndCallback("FIRST_FRAME_RENDERED", function(ownerId)
+			EventRegistry:UnregisterFrameEventAndCallback("FIRST_FRAME_RENDERED", ownerId)
+
+			C_Timer.After(3, function()
+				Private.Utils.ShowStaticPopup({
+					whileDead = true,
+					button1 = OKAY,
+					text = text,
+				})
+			end)
+		end)
+	end
+end
+
+function Private.Utils.ApplyMigration(key, kind, defaults)
+	local tableRef = kind == Private.Enum.FrameKind.Self and TargetedSpellsSaved.Settings.Self
+		or TargetedSpellsSaved.Settings.Party
+	local prefix = kind == Private.Enum.FrameKind.Self and Private.L.EditMode.TargetedSpellsSelfLabel
+		or Private.L.EditMode.TargetedSpellsPartyLabel
+
+	if key == "Grow" and tableRef[key] == 1 then
+		tableRef[key] = Private.Enum.Grow.Start
+		return prefix .. ": " .. Private.L.Settings.FrameGrowLabel
+	end
+
+	if key == "GlowType" and tableRef[key] == 3 then
+		tableRef[key] = Private.Enum.GlowType.PixelGlow
+		return prefix .. ": " .. Private.L.Settings.GlowTypeLabel
+	end
+
+	if key == "ShowBorder" then
+		local shown = tableRef[key]
+		tableRef[key] = nil
+		tableRef.BorderStyle = shown and defaults.BorderStyle or "None"
+		return prefix .. ": " .. Private.L.Settings.BorderStyleLabel
+	end
+
+	return nil
+end
+
+function Private.Utils.AdjustLayout(
+	frames,
+	layouting,
+	barParent,
+	firstAnchorPoint,
+	firstOffsetX,
+	firstOffsetY,
+	isEditMode
+)
+	---@type Texture?
+	local prevStatusBarTexture = nil
+
+	for _, frame in ipairs(frames) do
+		if layouting.isHorizontal then
+			frame.Bar:SetSize(layouting.x, layouting.y)
+		else
+			frame.Bar:SetSize(layouting.y, layouting.x)
+		end
+
+		local texture = frame.Bar:GetStatusBarTexture()
+		frame:ClearAllPoints()
+		frame:SetPoint(layouting.originPoint, texture, layouting.originPoint)
+
+		frame.Bar:SetOrientation(layouting.orientation)
+		frame.Bar:SetReverseFill(layouting.isGrowEnd)
+		frame.Bar:SetParent(barParent)
+		frame:SetParent(frame.Bar)
+		frame:SetFrameLevel(frame.Bar:GetFrameLevel() + 10)
+		frame.Bar:ClearAllPoints()
+
+		if isEditMode then
+			frame.Bar:SetValue(frame:GetAlpha())
+		end
+
+		if prevStatusBarTexture == nil then
+			frame.Bar:SetPoint(layouting.originPoint, barParent, firstAnchorPoint, firstOffsetX, firstOffsetY)
+		else
+			frame.Bar:SetPoint(layouting.originPoint, prevStatusBarTexture, layouting.relativePoint, 0, 0)
+		end
+
+		frame:Show()
+
+		prevStatusBarTexture = texture
+	end
 end
 
 do
@@ -150,6 +254,54 @@ do
 			end
 		end
 
+		if QUI then
+			for i = 1, 5 do
+				local frame = _G["QUI_PartyHeaderUnitButton" .. i]
+
+				if frame and frame.unit == unit then
+					return frame
+				end
+			end
+
+			-- of course this vibecoded mess doesn't adhere to any standards so its using completely different
+			-- frames in edit mode that also don't communicate the unit they intend to resemble. clown emoji
+			local id = (unit == "player" and 5 or string.gsub(unit, "party", ""))
+			-- even worse, it uses two frames with the same name so you can't globally access them as needed.
+			-- only occurs after opening edit mode the second time tho
+			local frameName = "QUI_TestFrame" .. id
+			local frame = _G[frameName]
+
+			if frame and frame:IsShown() then
+				return frame
+			end
+
+			if QUI_GroupFramesMover and QUI_GroupFramesMover:IsShown() then
+				local relevantParent = select(7, QUI_GroupFramesMover:GetChildren())
+
+				if relevantParent then
+					local children = { relevantParent:GetChildren() }
+
+					for i = 1, #children do
+						local child = children[i]
+
+						if child and child:GetName() == frameName then
+							return child
+						end
+					end
+				end
+			end
+		end
+
+		if Cell then
+			for i = 1, 5 do
+				local frame = _G["CellPartyFrameHeaderUnitButton" .. i]
+
+				if frame and frame.unit == unit then
+					return frame
+				end
+			end
+		end
+
 		-- use these last, including e.g. ElvUI. people using multiple unit frame addons (god knows for what reason)
 		-- _likely_ prefer using the other one over oUF derivates because what else would be the point of having them.
 		if hasManualThirdPartyRegistrations then
@@ -258,6 +410,7 @@ do
 		end
 
 		local hasAnyChange = false
+		local resetKeys = {}
 
 		for kind, kindString in pairs(Private.Enum.FrameKind) do
 			local tableRef = TargetedSpellsSaved.Settings[kind]
@@ -299,10 +452,12 @@ do
 						local enumToCompareAgainst = nil
 						if key == "LoadConditionContentType" then
 							enumToCompareAgainst = Private.Enum.ContentType
-						elseif key == "LoadConditionRole" then
+						elseif key == "LoadConditionRole" or key == "RoleFilter" then
 							enumToCompareAgainst = Private.Enum.Role
 						elseif key == "FontFlags" then
 							enumToCompareAgainst = Private.Enum.FontFlags
+						elseif key == "FeatureFlags" then
+							enumToCompareAgainst = Private.Enum.FeatureFlag
 						end
 
 						-- only other case is Position but that's taken care of above
@@ -333,6 +488,13 @@ do
 
 							if hasChanges then
 								tableRef[key] = newTable
+
+								local resetKey = Private.Utils.ApplyMigration(key, kindString, defaults)
+
+								if resetKey then
+									table.insert(resetKeys, resetKey)
+								end
+
 								Private.EventRegistry:TriggerEvent(
 									Private.Enum.Events.SETTING_CHANGED,
 									eventKey,
@@ -342,6 +504,13 @@ do
 						end
 					elseif newValue ~= tableRef[key] then
 						tableRef[key] = newValue
+
+						local resetKey = Private.Utils.ApplyMigration(key, kindString, defaults)
+
+						if resetKey then
+							table.insert(resetKeys, resetKey)
+						end
+
 						hasChanges = true
 
 						if eventKey and hasChanges then
@@ -359,6 +528,10 @@ do
 				tableRef.Enabled = false
 				Private.EventRegistry:TriggerEvent(Private.Enum.Events.SETTING_CHANGED, eventKeys.Enabled, false)
 			end
+		end
+
+		if #resetKeys > 0 then
+			Private.Utils.ShowMigrationPopup(resetKeys, "import")
 		end
 
 		return hasAnyChange
